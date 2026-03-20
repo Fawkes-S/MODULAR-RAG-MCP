@@ -1,0 +1,28 @@
+﻿llm:
+  provider: openai
+  model: gpt-4o-mini
+
+embedding:
+  provider: openai
+  model: text-embedding-3-small
+
+vector_store:
+  provider: chroma
+  persist_dir: data/db/chroma
+
+retrieval:
+  top_k: 8
+  sparse_top_k: 20
+
+rerank:
+  provider: none
+  enabled: false
+  top_m: 30
+
+evaluation:
+  provider: ragas
+  enabled: false
+
+observability:
+  log_level: INFO
+  trace_file: logs/traces.jsonl

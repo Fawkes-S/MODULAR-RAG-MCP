@@ -1951,9 +1951,9 @@ dashboard:
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| A1 | 初始化目录树与最小可运行入口 | [ ] | | |
-| A2 | 引入 pytest 并建立测试目录约定 | [ ] | | |
-| A3 | 配置加载与校验（Settings） | [ ] | | |
+| A1 | 初始化目录树与最小可运行入口 | [x] | 2026-03-20 | compileall/import checks passed |
+| A2 | 引入 pytest 并建立测试目录约定 | [x] | 2026-03-20 | pytest smoke and full run passed |
+| A3 | 配置加载与校验（Settings） | [x] | 2026-03-20 | settings loader/validation + tests passed |
 
 #### 阶段 B：Libs 可插拔层
 
