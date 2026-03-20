@@ -49,12 +49,12 @@
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| B1 | LLM 抽象接口与工厂 | [ ] | | |
-| B2 | Embedding 抽象接口与工厂 | [ ] | | |
-| B3 | Splitter 抽象接口与工厂 | [ ] | | |
-| B4 | VectorStore 抽象接口与工厂 | [ ] | | |
-| B5 | Reranker 抽象接口与工厂（含 None 回退） | [ ] | | |
-| B6 | Evaluator 抽象接口与工厂 | [ ] | | |
+| B1 | LLM 抽象接口与工厂 | [x] | 2026-03-20 | BaseLLM + LLMFactory + fake-provider tests passed |
+| B2 | Embedding 抽象接口与工厂 | [x] | 2026-03-20 | BaseEmbedding + EmbeddingFactory + stable fake-vector tests passed |
+| B3 | Splitter 抽象接口与工厂 | [x] | 2026-03-20 | BaseSplitter + SplitterFactory + provider routing tests passed |
+| B4 | VectorStore 抽象接口与工厂 | [x] | 2026-03-20 | BaseVectorStore + VectorStoreFactory + contract tests passed |
+| B5 | Reranker 抽象接口与工厂（含 None 回退） | [x] | 2026-03-20 | BaseReranker + NoneReranker + RerankerFactory + tests passed |
+| B6 | Evaluator 抽象接口与工厂 | [x] | 2026-03-20 | BaseEvaluator + EvaluatorFactory + CustomEvaluator + tests passed |
 | B7.1 | OpenAI-Compatible LLM 实现 | [ ] | | |
 | B7.2 | Ollama LLM 实现 | [ ] | | |
 | B7.3 | OpenAI & Azure Embedding 实现 | [ ] | | |
@@ -1255,6 +1255,5 @@
 - **M4（完成阶段 F）**：Ingestion + Query 双链路可追踪，JSON Lines 持久化。
 - **M5（完成阶段 G）**：六页面可视化管理平台就绪（评估面板为占位），数据可浏览、可管理、链路可追踪。
 - **M6（完成阶段 H+I）**：评估体系完整 + E2E 验收通过 + 文档完善，形成"面试/教学/演示"可复现项目。
-
 
 

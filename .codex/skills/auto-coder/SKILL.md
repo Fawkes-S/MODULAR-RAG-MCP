@@ -1,4 +1,4 @@
----
+﻿---
 name: auto-coder
 description: Autonomous spec-driven development agent. Syncs DEV_SPEC.md into chapter-based reference files, identifies the next pending task from the schedule, implements code following spec architecture and patterns, runs tests with up to 3 auto-fix rounds, and persists progress with atomic commits. Use when user says "auto code", "自动开发", "自动写代码", "auto dev", "一键开发", "autopilot", or wants fully automated spec-to-code workflow.
 ---
@@ -72,6 +72,7 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
    - Architecture: `05-architecture.md`
    - Tech details: `03-tech-stack.md`
    - Testing conventions: `04-testing.md`
+   - **Reporting rule (mandatory)**: explicitly list what was read from `03-tech-stack.md` (section/topic keywords or matched lines) and explain how each item influenced the subsequent `Extract` / `Plan files` / `Code` decisions.
 
 2. **Extract** from spec: inputs/outputs, design principles (Pluggable? Config-driven? Factory?), file list, acceptance criteria.
 
@@ -82,11 +83,23 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
    - Use `config/settings.yaml` values, never hardcode
    - Match existing codebase patterns and style
 
-5. **Write tests** alongside code:
+5. **Commenting policy (mandatory)**:
+   - Write standard production-quality comments for non-obvious logic, edge cases, invariants, and failure/fallback behavior.
+   - Add **detailed learning comments** for key code paths (pipeline orchestration, core algorithms, protocol handling, config validation).
+   - Explain **why** and tradeoffs, not line-by-line restatement of obvious code.
+   - Add docstrings for new public APIs and main data contracts, and prioritize richer method summaries that explain **用途（做什么）+ 方法（怎么做）+ 关键约束** for fast onboarding.
+   - **Language rule**: write comment content in Chinese by default (including detailed learning comments and docstrings), unless the user explicitly requests English comments.
+   - Keep comments concise and accurate; update comments when code changes.
+   - **Docstring level rule**: use structured Chinese docstrings (`Args`/`Returns`/`Raises`/`Example`) only for **关键/复杂/较长** methods (e.g., orchestration, factory routing, protocol handling, validation, fallback paths). For simple helper methods, use concise Chinese docstrings/comments only.
+
+6. **Write tests** alongside code:
    - Place in `tests/unit/` or `tests/integration/` per spec
    - Mock external deps in unit tests
+   - **Test annotation rule (mandatory)**: every `test_*` method must include a Chinese docstring/comment that states **测试目标 + 场景输入 + 预期行为/验收点** so readers can quickly understand what is being validated.
 
-6. **Self-review** before running tests: verify all planned files exist and tests import correctly.
+7. **Self-review** before running tests:
+   - Verify all planned files exist and tests import correctly.
+   - Verify comment coverage on key logic is sufficient for fast onboarding/readability.
 
 ---
 
@@ -122,3 +135,9 @@ Round 3 still failing → STOP, show failure report to user
 ```
 
 On "next", loop back to step 1 and start the next task.
+
+
+
+
+
+

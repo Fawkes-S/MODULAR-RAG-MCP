@@ -1,0 +1,14 @@
+llm:
+  provider: openai
+embedding:
+  model: text-embedding-3-small
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  provider: ragas
+observability:
+  log_level: INFO

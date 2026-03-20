@@ -8,7 +8,15 @@ version = "0.1.0"
 description = "Modular RAG MCP server skeleton"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+  "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.0.2",
+  "pytest-asyncio>=0.23.0",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -20,7 +28,8 @@ where = ["src"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = "-q"
+addopts = "-q -p no:cacheprovider"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
   "unit: unit tests",
   "integration: integration tests",
