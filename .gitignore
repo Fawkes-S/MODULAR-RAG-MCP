@@ -96,11 +96,13 @@ data/
 cache/
 logs/
 docs/
+tests/.tmp/
 *.log
 traces.jsonl
 
 # Auto-coder skill cache
 .github/skills/auto-coder/.spec_hash
+.codex/skills/auto-coder/.spec_hash
 
 # Secrets
 .env.local
