@@ -41,27 +41,27 @@
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| A1 | 初始化目录树与最小可运行入口 | [ ] | | |
-| A2 | 引入 pytest 并建立测试目录约定 | [ ] | | |
-| A3 | 配置加载与校验（Settings） | [ ] | | |
+| A1 | 初始化目录树与最小可运行入口 | [x] | 2026-03-20 | compileall/import checks passed |
+| A2 | 引入 pytest 并建立测试目录约定 | [x] | 2026-03-20 | pytest smoke and full run passed |
+| A3 | 配置加载与校验（Settings） | [x] | 2026-03-20 | settings loader/validation + tests passed |
 
 #### 阶段 B：Libs 可插拔层
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| B1 | LLM 抽象接口与工厂 | [ ] | | |
-| B2 | Embedding 抽象接口与工厂 | [ ] | | |
-| B3 | Splitter 抽象接口与工厂 | [ ] | | |
-| B4 | VectorStore 抽象接口与工厂 | [ ] | | |
-| B5 | Reranker 抽象接口与工厂（含 None 回退） | [ ] | | |
-| B6 | Evaluator 抽象接口与工厂 | [ ] | | |
-| B7.1 | OpenAI-Compatible LLM 实现 | [ ] | | |
-| B7.2 | Ollama LLM 实现 | [ ] | | |
-| B7.3 | OpenAI & Azure Embedding 实现 | [ ] | | |
-| B7.4 | Ollama Embedding 实现 | [ ] | | |
-| B7.5 | Recursive Splitter 默认实现 | [ ] | | |
-| B7.6 | ChromaStore 默认实现 | [ ] | | |
-| B7.7 | LLM Reranker 实现 | [ ] | | |
+| B1 | LLM 抽象接口与工厂 | [x] | 2026-03-20 | BaseLLM + LLMFactory + fake-provider tests passed |
+| B2 | Embedding 抽象接口与工厂 | [x] | 2026-03-20 | BaseEmbedding + EmbeddingFactory + stable fake-vector tests passed |
+| B3 | Splitter 抽象接口与工厂 | [x] | 2026-03-20 | BaseSplitter + SplitterFactory + provider routing tests passed |
+| B4 | VectorStore 抽象接口与工厂 | [x] | 2026-03-20 | BaseVectorStore + VectorStoreFactory + contract tests passed |
+| B5 | Reranker 抽象接口与工厂（含 None 回退） | [x] | 2026-03-20 | BaseReranker + NoneReranker + RerankerFactory + tests passed |
+| B6 | Evaluator 抽象接口与工厂 | [x] | 2026-03-20 | BaseEvaluator + EvaluatorFactory + CustomEvaluator + tests passed |
+| B7.1 | OpenAI-Compatible LLM 实现 | [x] | 2026-03-22 | OpenAI/Azure/DeepSeek providers + mock-http smoke tests passed |
+| B7.2 | Ollama LLM 实现 | [x] | 2026-03-22 | OllamaLLM + factory routing + mock-http tests passed |
+| B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2026-03-22 | OpenAIEmbedding/AzureEmbedding + factory routing + mock-http tests passed |
+| B7.4 | Ollama Embedding 实现 | [x] | 2026-03-24 | OllamaEmbedding + factory routing + mock-http tests passed |
+| B7.5 | Recursive Splitter 默认实现 | [x] | 2026-03-24 | RecursiveSplitter + factory routing + markdown-structure tests passed |
+| B7.6 | ChromaStore 默认实现 | [x] | 2026-03-24 | ChromaStore + factory routing + roundtrip integration tests passed（含受限环境自动降级） |
+| B7.7 | LLM Reranker 实现 | [x] | 2026-03-24 | LLMReranker + prompt loading + fallback signal + schema validation + tests passed |
 | B7.8 | Cross-Encoder Reranker 实现 | [ ] | | |
 | B8 | Vision LLM 抽象接口与工厂集成 | [ ] | | |
 | B9 | Azure Vision LLM 实现 | [ ] | | |

@@ -1,4 +1,4 @@
----
+﻿---
 name: skill-creator
 description: Guide for creating effective agent skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends the agent's capabilities with specialized knowledge, workflows, or tool integrations. Use when user says "create skill", "new skill", "build a skill", "update skill", or asks to make a reusable capability package.
 ---
@@ -222,7 +222,7 @@ When creating a new skill from scratch, always run the `init_skill.py` script. T
 Usage:
 
 ```bash
-python .github/skills/skill-creator/scripts/init_skill.py <skill-name> --path .github/skills
+python .codex/skills/skill-creator/scripts/init_skill.py <skill-name> --path .codex/skills
 ```
 
 The script:
@@ -285,3 +285,4 @@ After testing the skill, users may request improvements.
 2. Notice struggles or inefficiencies
 3. Identify how SKILL.md or bundled resources should be updated
 4. Implement changes and test again
+

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """QA Multi-Step Test Runner — Execute and verify compound test cases.
 
 Provides deterministic, non-skippable multi-step test execution for tests
@@ -8,7 +8,7 @@ Each function prints step-by-step results with ACTUAL values so the AI
 cannot infer or skip steps.
 
 Usage:
-    python .github/skills/qa-tester/scripts/qa_multistep.py <test_id>
+    python .codex/skills/qa-tester/scripts/qa_multistep.py <test_id>
 
 Supported test IDs:
     N-01   Complete lifecycle: ingest→query→delete→query
@@ -59,7 +59,7 @@ def run(args, check=False, capture=True):
 
 def clear_all():
     """Clear all data via bootstrap script."""
-    r = run([str(REPO_ROOT / ".github/skills/qa-tester/scripts/qa_bootstrap.py"), "clear"])
+    r = run([str(REPO_ROOT / ".codex/skills/qa-tester/scripts/qa_bootstrap.py"), "clear"])
     if r.returncode != 0:
         print(f"  ⚠️ Clear failed: {r.stderr}")
     return r.returncode == 0
@@ -687,3 +687,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

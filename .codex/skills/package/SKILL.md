@@ -1,4 +1,4 @@
----
+﻿---
 name: package
 description: "Clean and package the project for distribution. Removes __pycache__, .venv, build artifacts, data caches, logs, IDE files, coverage reports, and sanitizes API keys in config. Produces a minimal, ready-to-share codebase. Use when user says 'package', 'clean project', 'clean up', '打包', '清理项目', '清理缓存', 'prepare for distribution', 'remove caches', or wants to deliver a clean copy of the code."
 ---
@@ -26,7 +26,7 @@ Dry-run → Confirm → Execute → Verify
 Show what will be removed without deleting anything:
 
 ```powershell
-python .github/skills/package/scripts/clean.py
+python .codex/skills/package/scripts/clean.py
 ```
 
 Review the output with the user. The script lists:
@@ -44,13 +44,13 @@ Before executing, summarize what will be deleted and ask the user to confirm. Of
 
 ```powershell
 # Full clean (removes everything including data)
-python .github/skills/package/scripts/clean.py --execute
+python .codex/skills/package/scripts/clean.py --execute
 
 # Keep data and logs
-python .github/skills/package/scripts/clean.py --execute --keep-data
+python .codex/skills/package/scripts/clean.py --execute --keep-data
 
 # Skip secret sanitization
-python .github/skills/package/scripts/clean.py --execute --no-sanitize
+python .codex/skills/package/scripts/clean.py --execute --no-sanitize
 ```
 
 ## Step 4: Verify
@@ -92,8 +92,9 @@ Report results to user.
 | Stale artifacts | `nonexistent_traces.jsonl/` |
 | Config backups | `settings.yaml.bak`, `settings.yaml.qa_backup` |
 | Test artifacts | `.claude/skills/test-skill/`, `test_data/chroma/` |
-| Skill caches | `.github/skills/auto-coder/.spec_hash`, `.claude/skills/auto-coder/.spec_hash` |
+| Skill caches | `.codex/skills/auto-coder/.spec_hash`, `.claude/skills/auto-coder/.spec_hash` |
 
 ## What Gets Sanitized (not removed)
 
 - `config/settings.yaml`: `api_key` → `"YOUR_API_KEY_HERE"`, `azure_endpoint` → placeholder
+

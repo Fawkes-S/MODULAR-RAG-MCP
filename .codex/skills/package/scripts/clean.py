@@ -1,9 +1,9 @@
-"""Clean project for distribution — remove caches, venv, build artifacts, data, logs.
+﻿"""Clean project for distribution — remove caches, venv, build artifacts, data, logs.
 
 Usage:
-    python .github/skills/package/scripts/clean.py          # dry-run (show what would be deleted)
-    python .github/skills/package/scripts/clean.py --execute # actually delete
-    python .github/skills/package/scripts/clean.py --execute --keep-data  # keep data/ & logs/
+    python .codex/skills/package/scripts/clean.py          # dry-run (show what would be deleted)
+    python .codex/skills/package/scripts/clean.py --execute # actually delete
+    python .codex/skills/package/scripts/clean.py --execute --keep-data  # keep data/ & logs/
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parents[4]  # .github/skills/package/scripts → repo root
+REPO_ROOT = Path(__file__).resolve().parents[4]  # .codex/skills/package/scripts → repo root
 
 # ── Directories to remove ───────────────────────────────────────────────────
 REMOVE_DIRS: list[str] = [
@@ -88,7 +88,7 @@ REMOVE_FILES: list[str] = [
     ".env.*.local",
     "secrets.yaml",
     # Skill caches 
-    ".github/skills/auto-coder/.spec_hash",
+    ".codex/skills/auto-coder/.spec_hash",
     ".claude/skills/auto-coder/.spec_hash",
     # Config backups
     "config/settings.yaml.bak",
@@ -271,3 +271,4 @@ def _human_size(n: int) -> str:
 
 if __name__ == "__main__":
     main()
+

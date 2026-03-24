@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """QA Config — Switch settings.yaml profiles for testing different configurations.
 
 Usage:
-    python .github/skills/qa-tester/scripts/qa_config.py show          # List profiles
-    python .github/skills/qa-tester/scripts/qa_config.py check         # Verify credentials
-    python .github/skills/qa-tester/scripts/qa_config.py apply <name>  # Apply a profile
-    python .github/skills/qa-tester/scripts/qa_config.py restore       # Restore backup
+    python .codex/skills/qa-tester/scripts/qa_config.py show          # List profiles
+    python .codex/skills/qa-tester/scripts/qa_config.py check         # Verify credentials
+    python .codex/skills/qa-tester/scripts/qa_config.py apply <name>  # Apply a profile
+    python .codex/skills/qa-tester/scripts/qa_config.py restore       # Restore backup
 
 Profiles:
     deepseek         LLM → DeepSeek + Vision disabled (needs test_credentials.yaml)
@@ -215,3 +215,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

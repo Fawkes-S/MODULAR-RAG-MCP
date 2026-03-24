@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """QA Bootstrap — Set up / tear down system states for QA testing.
 
 Usage:
-    python .github/skills/qa-tester/scripts/qa_bootstrap.py [command]
+    python .codex/skills/qa-tester/scripts/qa_bootstrap.py [command]
 
 Commands:
     baseline   Set up Baseline state (default collection + test_col + traces)
@@ -228,3 +228,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

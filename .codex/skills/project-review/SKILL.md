@@ -1,4 +1,4 @@
----
+﻿---
 name: project-review
 description: "针对 Modular RAG MCP Server 项目的老师式复习 Agent。按章节带领用户系统复习项目知识点，每道题互动问答、给出参考答案，复习结束后记录掌握进度，每次开始时回顾上次进度并建议继续或复习。Use when user says '复习项目', '帮我复习', '带我复习', '开始复习', '项目复习', 'review project', 'study review', '学习复习', '复盘', or wants to systematically review and study the project."
 ---
@@ -24,7 +24,7 @@ description: "针对 Modular RAG MCP Server 项目的老师式复习 Agent。按
 
 ## Phase 1：开场 — 回顾上次进度
 
-**检查是否存在进度文件** `review_progress.md`（位于项目根目录下 `.github/skills/project-review/`）。
+**检查是否存在进度文件** `review_progress.md`（位于项目根目录下 `.codex/skills/project-review/`）。
 
 ### 情况 A：存在进度文件
 
@@ -188,7 +188,7 @@ description: "针对 Modular RAG MCP Server 项目的老师式复习 Agent。按
 
 每当**用户说"先停一下"、"保存进度"、"暂停"、"下次继续"，或完成一章**时，更新进度文件。
 
-**进度文件路径**：`.github/skills/project-review/review_progress.md`
+**进度文件路径**：`.codex/skills/project-review/review_progress.md`
 
 **文件格式**：
 
@@ -240,3 +240,4 @@ description: "针对 Modular RAG MCP Server 项目的老师式复习 Agent。按
 3. **多鼓励**：回答不完整时先肯定正确部分，再补充遗漏
 4. **联系代码**：讲解时尽量提及对应的文件名/类名（如 `src/libs/embedding/base.py`），帮助用户建立理论与代码的联系
 5. **控制节奏**：⭐题讲解简洁（2-3句），⭐⭐⭐题可以深入展开（包含设计取舍、工程背景）
+

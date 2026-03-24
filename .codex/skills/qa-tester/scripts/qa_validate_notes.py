@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """QA Note Validator — Detect inference-based notes in QA_TEST_PROGRESS.md.
 
 Scans all ✅ test entries and flags those whose Note column contains
 cross-referencing, inference, or missing execution evidence.
 
 Usage:
-    python .github/skills/qa-tester/scripts/qa_validate_notes.py
+    python .codex/skills/qa-tester/scripts/qa_validate_notes.py
 
 Exit code:
     0 — All notes pass validation
@@ -115,3 +115,4 @@ def validate():
 if __name__ == "__main__":
     ok = validate()
     sys.exit(0 if ok else 1)
+

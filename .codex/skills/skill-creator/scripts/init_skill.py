@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Skill Initializer - Creates a new skill from template
 
@@ -6,8 +6,8 @@ Usage:
     init_skill.py <skill-name> --path <path>
 
 Examples:
-    init_skill.py my-new-skill --path .github/skills
-    init_skill.py my-api-helper --path .github/skills
+    init_skill.py my-new-skill --path .codex/skills
+    init_skill.py my-api-helper --path .codex/skills
     init_skill.py custom-skill --path /custom/location
 """
 
@@ -278,8 +278,8 @@ def main():
         print("  - Max 64 characters")
         print("  - Must match directory name exactly")
         print("\nExamples:")
-        print("  init_skill.py my-new-skill --path .github/skills")
-        print("  init_skill.py my-api-helper --path .github/skills")
+        print("  init_skill.py my-new-skill --path .codex/skills")
+        print("  init_skill.py my-api-helper --path .codex/skills")
         print("  init_skill.py custom-skill --path /custom/location")
         sys.exit(1)
 
@@ -300,3 +300,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

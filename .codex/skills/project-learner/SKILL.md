@@ -1,4 +1,4 @@
----
+﻿---
 name: project-learner
 description: "Interactive project learning coach via interview-style Q&A. Reads codebase and docs, dynamically generates interview questions per knowledge domain and sub-topic, conducts up to 4 follow-up rounds, scores answers, provides learning guidance with code/doc references, and persists progress. 10 domains × 3-5 sub-topics = 45 knowledge points for comprehensive interview coverage. Use when user says '学习项目', '了解项目', '检验项目', '项目学习', '面试准备', 'learn project', 'study project', 'review project', 'interview prep', 'knowledge check', or wants to understand/master the project through guided Q&A."
 ---
@@ -98,7 +98,7 @@ Build an internal mental model covering these **10 Knowledge Domains**, each con
 
 ## Phase 2: Check Learning History
 
-1. Try reading `.github/skills/project-learner/references/LEARNING_PROGRESS.md`
+1. Try reading `.codex/skills/project-learner/references/LEARNING_PROGRESS.md`
 2. **File missing** → first-time learner, proceed to Phase 3
 3. **File exists** → parse BOTH tables:
    - **Domain Summary**: which domains are ⬜/🔴/🔶/✅
@@ -295,7 +295,7 @@ Guidelines:
 
 ## Phase 8: Persist Progress
 
-Update `.github/skills/project-learner/references/LEARNING_PROGRESS.md`.
+Update `.codex/skills/project-learner/references/LEARNING_PROGRESS.md`.
 
 If file doesn't exist, create it from the template in [references/LEARNING_PROGRESS.md](references/LEARNING_PROGRESS.md). If it exists, update it.
 
@@ -349,9 +349,10 @@ After persisting, ask the user (中文):
 
 | File | Purpose |
 |------|---------|
-| `.github/skills/project-learner/references/LEARNING_PROGRESS.md` | Persistent learning state (45 sub-topics) |
+| `.codex/skills/project-learner/references/LEARNING_PROGRESS.md` | Persistent learning state (45 sub-topics) |
 | `DEV_SPEC.md` | Project specification & architecture |
 | `config/settings.yaml` | Configuration reference |
 | `src/` | All source code modules |
 | `tests/` | Test suite for understanding test strategy |
 | `scripts/` | CLI entry points (ingest/query/evaluate) |
+

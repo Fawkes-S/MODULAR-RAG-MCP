@@ -25,7 +25,7 @@ Pause only at the end for commit confirmation. Run everything else autonomously.
 
 ## Reference Map
 
-All files under `.github/skills/auto-coder/references/`:
+All files under `.codex/skills/auto-coder/references/`:
 
 | File | Content | When to Read |
 |------|---------|-------------|
@@ -42,11 +42,11 @@ All files under `.github/skills/auto-coder/references/`:
 ### 1. Sync Spec
 
 ```powershell
-python .github/skills/auto-coder/scripts/sync_spec.py
+python .codex/skills/auto-coder/scripts/sync_spec.py
 ```
 
 Then read the schedule file to get task statuses:
-- Read `.github/skills/auto-coder/references/06-schedule.md`
+- Read `.codex/skills/auto-coder/references/06-schedule.md`
 
 Task markers:
 
@@ -68,7 +68,7 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
 
 ### 3. Implement
 
-1. **Read relevant spec** from `.github/skills/auto-coder/references/`:
+1. **Read relevant spec** from `.codex/skills/auto-coder/references/`:
    - Architecture: `05-architecture.md`
    - Tech details: `03-tech-stack.md`
    - Testing conventions: `04-testing.md`
@@ -84,18 +84,24 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
    - Match existing codebase patterns and style
 
 5. **Commenting policy (mandatory)**:
-   - Write standard production-quality comments for non-obvious logic, edge cases, invariants, and failure/fallback behavior.
-   - Add **detailed learning comments** for key code paths (pipeline orchestration, core algorithms, protocol handling, config validation).
-   - Explain **why** and tradeoffs, not line-by-line restatement of obvious code.
-   - Add docstrings for new public APIs and main data contracts, and prioritize richer method summaries that explain **用途（做什么）+ 方法（怎么做）+ 关键约束** for fast onboarding.
-   - **Language rule**: write comment content in Chinese by default (including detailed learning comments and docstrings), unless the user explicitly requests English comments.
-   - Keep comments concise and accurate; update comments when code changes.
-   - **Docstring level rule**: use structured Chinese docstrings (`Args`/`Returns`/`Raises`/`Example`) only for **关键/复杂/较长** methods (e.g., orchestration, factory routing, protocol handling, validation, fallback paths). For simple helper methods, use concise Chinese docstrings/comments only.
-
+   - **Goal**: comments/docstrings should let another engineer understand **what it does + how it works + key constraints** without reading the whole code path.
+   - **Language**: write comment content in Chinese by default (including docstrings), unless the user requests English.
+   - **Where to add deeper comments** (required for key paths): factories/routing, protocol handling, config validation, error/fallback handling, parsing/serialization, and any non-obvious algorithm.
+   - **Docstring depth rule (enforced)**:
+     - For **关键/复杂/较长** public methods (factory `create`, provider `chat/embed`, validation, fallback paths): use structured Chinese docstrings with `Args`/`Returns`/`Raises`/`Example` when helpful.
+     - For simple helpers: short Chinese docstrings/comments are fine.
+   - **Method summary must include** (when not trivial):
+     - 用途（解决什么问题/在流程中处于哪一段）
+     - 方法（核心步骤/核心数据结构/关键假设）
+     - 关键约束（输入 shape、边界条件、错误策略、性能/成本考虑）
+   - **Error comments**: when raising/wrapping exceptions, explain why this error is surfaced and what information is intentionally hidden (e.g., sensitive config).
+   - **Avoid**: line-by-line restating obvious code; prefer explaining *why* and tradeoffs.
+   - **Self-review checklist (comments)**: before tests, verify key paths have enough explanation for fast onboarding.
 6. **Write tests** alongside code:
    - Place in `tests/unit/` or `tests/integration/` per spec
    - Mock external deps in unit tests
    - **Test annotation rule (mandatory)**: every `test_*` method must include a Chinese docstring/comment that states **测试目标 + 场景输入 + 预期行为/验收点** so readers can quickly understand what is being validated.
+   - **Test comment style (mandatory)**: each `test_*` docstring must use a multi-line `Given/When/Then` (or “前置/动作/断言”) structure; do not compress all three parts into one line.
 
 7. **Self-review** before running tests:
    - Verify all planned files exist and tests import correctly.
@@ -120,7 +126,9 @@ Round 3 still failing → STOP, show failure report to user
 ### 5. Persist
 
 1. **Update `DEV_SPEC.md`** (global file): change task marker `[ ]` → `[x]`
-2. **Re-sync**: `python .github/skills/auto-coder/scripts/sync_spec.py --force`
+2. **Re-sync**: `python .codex/skills/auto-coder/scripts/sync_spec.py --force`
+2.5. **Update docs (optional)**:
+   - Only update `docs/notes/decisions.md` / `docs/notes/faq.md` when user explicitly requests it.
 3. **Show summary & ask**:
 
 ```
@@ -135,6 +143,8 @@ Round 3 still failing → STOP, show failure report to user
 ```
 
 On "next", loop back to step 1 and start the next task.
+
+
 
 
 
