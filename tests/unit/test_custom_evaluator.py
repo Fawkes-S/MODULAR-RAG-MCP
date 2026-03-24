@@ -49,6 +49,23 @@ def test_custom_evaluator_returns_stable_hit_rate_and_mrr(isolated_registry: dic
 
     result = evaluator.evaluate(samples)
 
+    '''
+    mrr 是什么
+    
+    含义：Mean Reciprocal Rank，平均倒数排名。
+    看“第一个正确结果”排第几：
+    排第1 -> 分数 1/1 = 1.0
+    排第2 -> 分数 1/2 = 0.5
+    排第3 -> 分数 1/3 ≈ 0.333
+    没命中 -> 0
+    最后对所有 query 取平均。
+    还是上面的例子：
+    
+    q1 第一个命中在 rank=2 -> 0.5
+    q2 没命中 -> 0
+    q3 第一个命中在 rank=1 -> 1.0
+    所以 mrr = (0.5 + 0 + 1.0) / 3 = 0.5。
+    '''
     # q1 命中 rank=2(rr=0.5), q2 未命中(rr=0), q3 命中 rank=1(rr=1)
     assert result["total"] == 3
     assert result["hit_rate"] == pytest.approx(2 / 3)

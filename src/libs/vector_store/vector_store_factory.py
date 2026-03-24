@@ -9,14 +9,10 @@ from libs.vector_store.base_vector_store import BaseVectorStore
 
 
 class VectorStoreFactory:
-    """VectorStore 提供商注册与创建入口。
-
-    设计说明：
-    - 业务层只依赖抽象接口，不感知底层 DB 细节。
-    - 所有 provider 分流收敛到工厂，便于统一错误处理和后续可观测增强。
-    """
+    """VectorStore 提供商注册与创建入口。"""
 
     _registry: dict[str, Callable[..., BaseVectorStore]] = {}
+    _builtin_loaded = False
 
     @classmethod
     def register(cls, provider: str, builder: Callable[..., BaseVectorStore]) -> None:
@@ -28,26 +24,25 @@ class VectorStoreFactory:
 
     @classmethod
     def create(cls, settings: Any) -> BaseVectorStore:
-        """根据配置创建 VectorStore 实例。
-
-        Args:
-            settings: 配置对象或字典。要求包含 `vector_store.provider`，
-                可选包含 `vector_store.persist_dir`。
-
-        Returns:
-            BaseVectorStore: 对应 provider 的向量存储实例。
-
-        Raises:
-            ValueError: 当 `vector_store.provider` 缺失，或 provider 未注册时抛出。
-        """
+        """根据配置创建 VectorStore 实例。"""
+        cls._ensure_builtin_providers()
         provider = cls._extract_provider(settings)
         key = provider.strip().lower()
         if key not in cls._registry:
             available = ", ".join(sorted(cls._registry)) or "<none>"
             raise ValueError(f"Unknown vector_store provider: {provider}. Available: {available}")
 
-        persist_dir = cls._extract_persist_dir(settings)
-        return cls._registry[key](persist_dir=persist_dir)
+        kwargs = cls._extract_vector_store_kwargs(settings)
+        kwargs.pop("provider", None)
+        return cls._registry[key](**kwargs)
+
+    @classmethod
+    def _ensure_builtin_providers(cls) -> None:
+        """幂等确保内置 provider 存在，避免测试清空 registry 后状态漂移。"""
+        from libs.vector_store.chroma_store import ChromaStore
+
+        cls._registry.setdefault("chroma", lambda **kwargs: ChromaStore(**kwargs))
+        cls._builtin_loaded = True
 
     @staticmethod
     def _extract_provider(settings: Any) -> str:
@@ -67,15 +62,22 @@ class VectorStoreFactory:
         raise ValueError("Missing required setting: vector_store.provider")
 
     @staticmethod
-    def _extract_persist_dir(settings: Any) -> str:
-        """提取可选持久化目录。"""
+    def _extract_vector_store_kwargs(settings: Any) -> dict[str, Any]:
+        """提取 vector_store 配置并转换为 provider 构造参数。"""
         if isinstance(settings, dict):
             vector_cfg = settings.get("vector_store")
             if isinstance(vector_cfg, dict):
-                persist_dir = vector_cfg.get("persist_dir", "")
-                return persist_dir if isinstance(persist_dir, str) else ""
-            return ""
+                return dict(vector_cfg)
+            return {}
 
         vector_obj = getattr(settings, "vector_store", None)
-        persist_dir = getattr(vector_obj, "persist_dir", "")
-        return persist_dir if isinstance(persist_dir, str) else ""
+        if vector_obj is None:
+            return {}
+        if hasattr(vector_obj, "__dict__"):
+            return dict(vars(vector_obj))
+
+        kwargs: dict[str, Any] = {}
+        for name in ("provider", "persist_dir", "collection_name"):
+            if hasattr(vector_obj, name):
+                kwargs[name] = getattr(vector_obj, name)
+        return kwargs

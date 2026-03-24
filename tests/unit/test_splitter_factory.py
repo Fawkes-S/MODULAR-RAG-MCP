@@ -50,7 +50,17 @@ def isolated_registry() -> dict[str, object]:
 
 
 def test_factory_routes_recursive_provider(isolated_registry: dict[str, object]) -> None:
-    """验证 recursive provider 会路由到对应实现，并按空行完成切分。"""
+    """
+    Given:
+        已注册 recursive provider。
+
+    When:
+        调用 SplitterFactory.create 创建 splitter。
+
+    Then:
+        返回 _RecursiveFakeSplitter 实例；
+        并且按空行切分文本结果正确。
+    """
     SplitterFactory.register("recursive", _RecursiveFakeSplitter)
     splitter = SplitterFactory.create({"splitter": {"provider": "recursive"}})
 
@@ -59,7 +69,17 @@ def test_factory_routes_recursive_provider(isolated_registry: dict[str, object])
 
 
 def test_factory_routes_semantic_provider(isolated_registry: dict[str, object]) -> None:
-    """验证 semantic provider 路由正确，并按句号切分文本。"""
+    """
+    Given:
+        已注册 semantic provider。
+
+    When:
+        调用 SplitterFactory.create 创建 splitter。
+
+    Then:
+        返回 _SemanticFakeSplitter 实例；
+        并且按句号切分结果正确。
+    """
     SplitterFactory.register("semantic", _SemanticFakeSplitter)
     splitter = SplitterFactory.create({"splitter": {"provider": "semantic"}})
 
@@ -68,7 +88,17 @@ def test_factory_routes_semantic_provider(isolated_registry: dict[str, object]) 
 
 
 def test_factory_routes_fixed_provider(isolated_registry: dict[str, object]) -> None:
-    """验证 fixed provider 路由正确，并按定长窗口切分。"""
+    """
+    Given:
+        已注册 fixed provider。
+
+    When:
+        调用 SplitterFactory.create 创建 splitter。
+
+    Then:
+        返回 _FixedFakeSplitter 实例；
+        并且按定长窗口切分结果正确。
+    """
     SplitterFactory.register("fixed", _FixedFakeSplitter)
     splitter = SplitterFactory.create({"splitter": {"provider": "fixed"}})
 
@@ -77,12 +107,30 @@ def test_factory_routes_fixed_provider(isolated_registry: dict[str, object]) -> 
 
 
 def test_factory_missing_provider_path_raises_readable_error(isolated_registry: dict[str, object]) -> None:
-    """验证缺少 `splitter.provider` 时报错信息可直接定位字段。"""
+    """
+    Given:
+        splitter 配置中缺少 provider 字段。
+
+    When:
+        调用 SplitterFactory.create。
+
+    Then:
+        抛出包含 `splitter.provider` 路径的可读错误。
+    """
     with pytest.raises(ValueError, match="splitter.provider"):
         SplitterFactory.create({"splitter": {}})
 
 
 def test_factory_unknown_provider_raises(isolated_registry: dict[str, object]) -> None:
-    """验证未知 splitter provider 会被拒绝，避免静默使用错误策略。"""
+    """
+    Given:
+        未注册的 provider（unknown）。
+
+    When:
+        调用 SplitterFactory.create。
+
+    Then:
+        明确抛出 Unknown splitter provider 错误。
+    """
     with pytest.raises(ValueError, match="Unknown splitter provider: unknown"):
         SplitterFactory.create({"splitter": {"provider": "unknown"}})
