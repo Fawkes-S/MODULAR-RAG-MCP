@@ -1,4 +1,4 @@
-## 6. 项目排期
+﻿## 6. 项目排期
 
 > **排期原则（严格对齐本 DEV_SPEC 的架构分层与目录结构）**
 > 
@@ -62,9 +62,9 @@
 | B7.5 | Recursive Splitter 默认实现 | [x] | 2026-03-24 | RecursiveSplitter + factory routing + markdown-structure tests passed |
 | B7.6 | ChromaStore 默认实现 | [x] | 2026-03-24 | ChromaStore + factory routing + roundtrip integration tests passed（含受限环境自动降级） |
 | B7.7 | LLM Reranker 实现 | [x] | 2026-03-24 | LLMReranker + prompt loading + fallback signal + schema validation + tests passed |
-| B7.8 | Cross-Encoder Reranker 实现 | [ ] | | |
-| B8 | Vision LLM 抽象接口与工厂集成 | [ ] | | |
-| B9 | Azure Vision LLM 实现 | [ ] | | |
+| B7.8 | Cross-Encoder Reranker 实现 | [x] | 2026-03-25 | CrossEncoderReranker + fallback signal + factory routing + mock-scorer tests passed |
+| B8 | Vision LLM 抽象接口与工厂集成 | [x] | 2026-03-25 | BaseVisionLLM + LLMFactory.create_vision_llm + routing tests passed |
+| B9 | Azure Vision LLM 实现 | [x] | 2026-03-25 | AzureVisionLLM + image path/base64 + compression hook + error-code tests passed |
 
 #### 阶段 C：Ingestion Pipeline MVP
 
@@ -1255,5 +1255,8 @@
 - **M4（完成阶段 F）**：Ingestion + Query 双链路可追踪，JSON Lines 持久化。
 - **M5（完成阶段 G）**：六页面可视化管理平台就绪（评估面板为占位），数据可浏览、可管理、链路可追踪。
 - **M6（完成阶段 H+I）**：评估体系完整 + E2E 验收通过 + 文档完善，形成"面试/教学/演示"可复现项目。
+
+
+
 
 

@@ -1,10 +1,22 @@
 ﻿"""LLM abstractions and provider clients."""
 
 from libs.llm.azure_llm import AzureLLM
+from libs.llm.azure_vision_llm import AzureVisionLLM
 from libs.llm.base_llm import BaseLLM
+from libs.llm.base_vision_llm import BaseVisionLLM, ChatResponse
 from libs.llm.deepseek_llm import DeepSeekLLM
 from libs.llm.llm_factory import LLMFactory
 from libs.llm.ollama_llm import OllamaLLM
 from libs.llm.openai_llm import OpenAILLM
 
-__all__ = ["BaseLLM", "LLMFactory", "OpenAILLM", "AzureLLM", "DeepSeekLLM", "OllamaLLM"]
+__all__ = [
+    "BaseLLM",
+    "BaseVisionLLM",
+    "ChatResponse",
+    "LLMFactory",
+    "OpenAILLM",
+    "AzureLLM",
+    "AzureVisionLLM",
+    "DeepSeekLLM",
+    "OllamaLLM",
+]

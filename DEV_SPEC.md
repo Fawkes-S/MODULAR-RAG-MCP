@@ -1972,9 +1972,9 @@ dashboard:
 | B7.5 | Recursive Splitter 默认实现 | [x] | 2026-03-24 | RecursiveSplitter + factory routing + markdown-structure tests passed |
 | B7.6 | ChromaStore 默认实现 | [x] | 2026-03-24 | ChromaStore + factory routing + roundtrip integration tests passed（含受限环境自动降级） |
 | B7.7 | LLM Reranker 实现 | [x] | 2026-03-24 | LLMReranker + prompt loading + fallback signal + schema validation + tests passed |
-| B7.8 | Cross-Encoder Reranker 实现 | [ ] | | |
-| B8 | Vision LLM 抽象接口与工厂集成 | [ ] | | |
-| B9 | Azure Vision LLM 实现 | [ ] | | |
+| B7.8 | Cross-Encoder Reranker 实现 | [x] | 2026-03-25 | CrossEncoderReranker + fallback signal + factory routing + mock-scorer tests passed |
+| B8 | Vision LLM 抽象接口与工厂集成 | [x] | 2026-03-25 | BaseVisionLLM + LLMFactory.create_vision_llm + routing tests passed |
+| B9 | Azure Vision LLM 实现 | [x] | 2026-03-25 | AzureVisionLLM + image path/base64 + compression hook + error-code tests passed |
 
 #### 阶段 C：Ingestion Pipeline MVP
 
@@ -3210,6 +3210,9 @@ RAG 系统的上限取决于其对特定业务数据的理解深度。未来的�
     - **未来演进**：不再硬编码使用混合检索。Server 可以将 `keyword_search` 和 `semantic_search` 作为独立工具暴露。Agent 可以根据用户意图自主判断：如果是搜人名，只用关键词搜；如果是搜概念，通过语义搜。这种工具使用的灵活性正是 Agentic RAG 的核心魅力。
 
 这种演进方向将把本项目从一个“智能搜索引擎”升级为一个“智能研究助理”的基础设施底座。
+
+
+
 
 
 

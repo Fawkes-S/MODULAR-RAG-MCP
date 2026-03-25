@@ -60,10 +60,15 @@ class RerankerFactory:
     @classmethod
     def _ensure_builtin_providers(cls) -> None:
         """幂等确保内置 provider 注册完成。"""
+        from libs.reranker.cross_encoder_reranker import CrossEncoderReranker
         from libs.reranker.llm_reranker import LLMReranker
 
         cls._registry.setdefault("none", lambda **_: NoneReranker())
         cls._registry.setdefault("llm", lambda **kwargs: LLMReranker.from_settings(kwargs.get("settings")))
+        cls._registry.setdefault(
+            "cross_encoder",
+            lambda **kwargs: CrossEncoderReranker.from_settings(kwargs.get("settings")),
+        )
         cls._builtin_loaded = True
 
     @staticmethod
@@ -107,7 +112,7 @@ class RerankerFactory:
             kwargs.update(dict(vars(rerank_obj)))
             return kwargs
 
-        for name in ("provider", "backend", "prompt_path"):
+        for name in ("provider", "backend", "prompt_path", "top_m", "timeout"):
             if hasattr(rerank_obj, name):
                 kwargs[name] = getattr(rerank_obj, name)
         return kwargs
