@@ -75,6 +75,9 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
    - **Reporting rule (mandatory)**: explicitly list what was read from `03-tech-stack.md` (section/topic keywords or matched lines) and explain how each item influenced the subsequent `Extract` / `Plan files` / `Code` decisions.
 
 2. **Extract** from spec: inputs/outputs, design principles (Pluggable? Config-driven? Factory?), file list, acceptance criteria.
+   - **Traceability rule (mandatory)**: build a concise mapping checklist before coding:
+     - 需求条目/验收点 -> 代码落点(文件/方法) -> 测试落点(用例名)
+     - Every key bullet in acceptance criteria must map to both implementation and a verification test.
 
 3. **Plan** files to create/modify before writing any code.
 
@@ -88,8 +91,48 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
    - **Language**: write comment content in Chinese by default (including docstrings), unless the user requests English.
    - **Where to add deeper comments** (required for key paths): factories/routing, protocol handling, config validation, error/fallback handling, parsing/serialization, and any non-obvious algorithm.
    - **Docstring depth rule (enforced)**:
-     - For **关键/复杂/较长** public methods (factory `create`, provider `chat/embed`, validation, fallback paths): use structured Chinese docstrings with `Args`/`Returns`/`Raises`/`Example` when helpful.
+     - For **关键/复杂/较长** public methods (factory `create`, provider `chat/embed`, validation, fallback paths): use structured Chinese docstrings with `Args`/`Returns`/`Raises`/`Example` when helpful, and explicitly cover:
+       - 做什么：该方法在当前流程中的职责与输出结果。
+       - 为什么：为何采用当前实现路径，而不是更直观的替代方案。
+       - 关键权衡：性能/可维护性/扩展性/成本上的主要取舍。
+       - 失败路径：异常、降级或回退策略，以及对调用方的可见行为。
      - For simple helpers: short Chinese docstrings/comments are fine.
+   - **Complex method docstring template (copyable)**:
+
+```python
+"""<一句话职责：该方法在流程中的位置与输出>
+
+做什么：
+- <核心职责 1>
+- <核心职责 2>
+
+为什么：
+- <选择当前实现路径的原因>
+
+关键权衡：
+- <性能/可维护性/扩展性/成本上的取舍>
+
+失败路径：
+- <异常或降级条件>
+- <对调用方可见行为：抛错/回退/默认值>
+
+Args:
+    <param>: <含义、格式、边界条件>
+
+Returns:
+    <返回值语义与关键字段>
+
+Raises:
+    <异常类型>: <触发条件>
+
+Example:
+    >>> <最小可运行调用示例>
+"""
+```
+
+   - **Template usage notes**:
+     - 复杂方法至少填写“做什么/为什么/关键权衡/失败路径”四段；`Args`/`Returns`/`Raises`/`Example`按需补齐。
+     - 若方法包含降级逻辑，`失败路径`必须写清“何时降级”与“降级后的行为契约”。
    - **Method summary must include** (when not trivial):
      - 用途（解决什么问题/在流程中处于哪一段）
      - 方法（核心步骤/核心数据结构/关键假设）
@@ -106,6 +149,7 @@ Quick-check predecessor artifacts exist (file-level only). On mismatch, log a wa
 7. **Self-review** before running tests:
    - Verify all planned files exist and tests import correctly.
    - Verify comment coverage on key logic is sufficient for fast onboarding/readability.
+   - Verify the 需求 -> 代码 -> 测试 mapping checklist is complete and each acceptance bullet has an executable test assertion path.
 
 ---
 
@@ -143,6 +187,11 @@ Round 3 still failing → STOP, show failure report to user
 ```
 
 On "next", loop back to step 1 and start the next task.
+
+
+
+
+
 
 
 
