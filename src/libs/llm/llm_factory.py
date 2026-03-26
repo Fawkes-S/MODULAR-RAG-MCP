@@ -93,8 +93,10 @@ class LLMFactory:
             return
 
         from libs.llm.azure_vision_llm import AzureVisionLLM
+        from libs.llm.dashscope_vision_llm import DashScopeVisionLLM
 
         cls._vision_registry.setdefault("azure", lambda **kwargs: AzureVisionLLM(**kwargs))
+        cls._vision_registry.setdefault("dashscope", lambda **kwargs: DashScopeVisionLLM(**kwargs))
         cls._vision_builtin_loaded = True
 
     @staticmethod

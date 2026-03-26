@@ -1975,14 +1975,15 @@ dashboard:
 | B7.8 | Cross-Encoder Reranker 实现 | [x] | 2026-03-25 | CrossEncoderReranker + fallback signal + factory routing + mock-scorer tests passed |
 | B8 | Vision LLM 抽象接口与工厂集成 | [x] | 2026-03-25 | BaseVisionLLM + LLMFactory.create_vision_llm + routing tests passed |
 | B9 | Azure Vision LLM 实现 | [x] | 2026-03-25 | AzureVisionLLM + image path/base64 + compression hook + error-code tests passed |
+| B9.1 | DashScope Vision LLM（Qwen3.5-Plus）实现 | [x] | 2026-03-25 | DashScopeVisionLLM + factory routing + image path/base64 + compression/error tests passed |
 
 #### 阶段 C：Ingestion Pipeline MVP
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [ ] | | |
-| C2 | 文件完整性检查（SHA256） | [ ] | | |
-| C3 | Loader 抽象基类与 PDF Loader | [ ] | | |
+| C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2026-03-26 | core.types contracts + metadata/images validation + serialization tests passed |
+| C2 | 文件完整性检查（SHA256） | [x] | 2026-03-26 | SQLiteIntegrityChecker + WAL + skip判定 + 并发写入 tests passed |
+| C3 | Loader 抽象基类与 PDF Loader | [x] | 2026-03-26 | BaseLoader + PdfLoader + image extraction/placeholder + degrade path tests passed |
 | C4 | Splitter 集成（调用 Libs） | [ ] | | |
 | C5 | Transform 基类 + ChunkRefiner | [ ] | | |
 | C6 | MetadataEnricher | [ ] | | |
@@ -2334,6 +2335,24 @@ dashboard:
   - API 调用失败时抛出清晰错误，包含 Azure 特有错误码。
   - mock 测试覆盖：正常调用、图片压缩、超时、认证失败等场景。
 - **测试方法**：`pytest -q tests/unit/test_azure_vision_llm.py`。
+
+### B9.1：DashScope Vision LLM（Qwen3.5-Plus）实现
+- **目标**：实现 `DashScopeVisionLLM`，支持通过阿里云百炼（DashScope）调用 `qwen3.5-plus` 进行图像理解，补齐“国内 + 国外双模型”方案中的国内默认实现。
+- **修改文件**：
+  - `src/libs/llm/dashscope_vision_llm.py`
+  - `src/libs/llm/llm_factory.py`（vision provider 注册 `dashscope`）
+  - `config/settings.yaml`（新增/更新 `vision_llm.provider: dashscope` 示例配置）
+  - `tests/unit/test_dashscope_vision_llm.py`（mock HTTP，不走真实 API）
+- **实现类/函数**：
+  - `DashScopeVisionLLM(BaseVisionLLM)`：实现 `chat_with_image` 方法
+  - 支持 DashScope 配置：`base_url`, `api_key`, `model`, `timeout`, `max_image_size`
+- **验收标准**：
+  - provider=dashscope 且配置 vision_llm 时，`LLMFactory.create_vision_llm()` 可创建 DashScope Vision LLM 实例。
+  - 支持图片路径和 base64 两种输入方式。
+  - 图片过大时自动压缩至 `max_image_size` 配置的尺寸（默认2048px）。
+  - API 调用失败时抛出清晰错误（包含 provider 与错误类型/状态码）。
+  - mock 测试覆盖：正常调用、图片压缩、超时、认证失败等场景。
+- **测试方法**：`pytest -q tests/unit/test_dashscope_vision_llm.py`。
 
 ---
 
@@ -3210,6 +3229,9 @@ RAG 系统的上限取决于其对特定业务数据的理解深度。未来的�
     - **未来演进**：不再硬编码使用混合检索。Server 可以将 `keyword_search` 和 `semantic_search` 作为独立工具暴露。Agent 可以根据用户意图自主判断：如果是搜人名，只用关键词搜；如果是搜概念，通过语义搜。这种工具使用的灵活性正是 Agentic RAG 的核心魅力。
 
 这种演进方向将把本项目从一个“智能搜索引擎”升级为一个“智能研究助理”的基础设施底座。
+
+
+
 
 
 
