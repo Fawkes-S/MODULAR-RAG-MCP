@@ -1,27 +1,46 @@
-﻿llm:
+﻿# Modular RAG MCP Server - Configuration
+# This is the main configuration file for the MCP Server.
+# Edit this file to configure LLM, Embedding, VectorStore, and other services.
+
+# =============================================================================
+# LLM Configuration
+# =============================================================================
+llm:
   provider: openai
   model: gpt-4o-mini
 
+# =============================================================================
+# Embedding Configuration
+# =============================================================================
 embedding:
   provider: openai
   model: text-embedding-3-small
 
+# =============================================================================
+# Vector Store Configuration
+# =============================================================================
 vector_store:
   provider: chroma
   persist_dir: data/db/chroma
 
+# =============================================================================
+# Retrieval Configuration
+# =============================================================================
 retrieval:
   top_k: 8
   sparse_top_k: 20
 
+# =============================================================================
+# Rerank Configuration
+# =============================================================================
 rerank:
   provider: none
   enabled: false
   top_m: 30
 
-# Vision LLM: 国内/国外双模型可配置切换
-# - azure: Azure OpenAI 视觉模型（如 gpt-4o）
-# - dashscope: 阿里百炼视觉模型（如 qwen3.5-plus）
+# =============================================================================
+# Vision LLM Configuration (for Image Captioning)
+# =============================================================================
 vision_llm:
   provider: dashscope
   model: qwen3.5-plus
@@ -29,10 +48,46 @@ vision_llm:
   max_image_size: 2048
   timeout: 30
 
+# =============================================================================
+# Evaluation Configuration
+# =============================================================================
 evaluation:
   provider: ragas
   enabled: false
 
+# =============================================================================
+# Observability Configuration
+# =============================================================================
 observability:
   log_level: INFO
   trace_file: logs/traces.jsonl
+
+# =============================================================================
+# Ingestion Configuration
+# =============================================================================
+ingestion:
+  # Splitter 主配置路径：由 SplitterFactory 读取并创建对应实现。
+  splitter: "recursive"  # 可选: recursive / semantic / fixed_length / 你注册的自定义 provider
+
+  # 通用切分参数（大多数 splitter 都会读取）。
+  chunk_size: 1000
+  chunk_overlap: 200
+
+  # provider 专有参数（可选）。
+  # 例如当你有自定义 splitter 需要额外参数时放这里：
+  # splitter_kwargs:
+  #   token: "demo"
+  #   some_flag: true
+
+  batch_size: 100
+
+  # Chunk Refiner Configuration (C5)
+  chunk_refiner:
+    use_llm: true  # Set to true to enable LLM-based refinement (requires LLM config)
+    # When use_llm is false or LLM call fails, falls back to rule-based refinement
+
+  # Metadata Enricher Configuration (C6)
+  metadata_enricher:
+    use_llm: true  # Set to true to enable LLM-based enrichment (requires LLM config)
+    # When use_llm is false or LLM call fails, falls back to rule-based enrichment
+

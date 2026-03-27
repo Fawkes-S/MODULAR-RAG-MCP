@@ -156,7 +156,6 @@ class PdfLoader(BaseLoader):
             for page_index in range(int(pymu_doc.page_count)):
                 page = pymu_doc.load_page(page_index)
                 page_number = page_index + 1
-                page_anchor = self._extract_page_anchor_text(page)
 
                 seq = 0
                 seen_xrefs: set[int] = set()
@@ -169,6 +168,9 @@ class PdfLoader(BaseLoader):
                     if xref in seen_xrefs:
                         continue
                     seen_xrefs.add(xref)
+
+                    # 优先根据图片几何位置提取“就近文本锚点”，避免占位符固定插在页首标题后。
+                    anchor_text = self._extract_anchor_text_for_image(page, xref)
 
                     extracted = pymu_doc.extract_image(xref)
                     image_bytes = extracted.get("image") if isinstance(extracted, dict) else None
@@ -199,7 +201,7 @@ class PdfLoader(BaseLoader):
                             "text_offset": 0,
                             "text_length": 0,
                             "position": {"width": width, "height": height},
-                            "_anchor_text": page_anchor,
+                            "_anchor_text": anchor_text,
                         }
                     )
 
@@ -217,6 +219,90 @@ class PdfLoader(BaseLoader):
             candidate = line.strip()
             if candidate:
                 return candidate[:120]
+        return ""
+
+    def _extract_anchor_text_for_image(self, page: Any, xref: int) -> str:
+        """为图片提取更接近其实际位置的文本锚点。
+
+        做什么：
+        - 读取页面文本块与图片矩形；
+        - 优先选择“位于图片上方且最近”的文本块末行作为锚点；
+        - 若无法定位，则回退为页面首行锚点。
+
+        为什么：
+        - 仅用页首锚点会把占位符插得过早（常在标题后），导致图文顺序偏离原文。
+
+        失败路径：
+        - 页面不支持几何接口或无可用文本块时，回退到 `_extract_page_anchor_text()`。
+        """
+        blocks = self._extract_text_blocks(page)
+        if not blocks:
+            return self._extract_page_anchor_text(page)
+
+        try:
+            rects = list(page.get_image_rects(int(xref)) or [])
+        except Exception:
+            rects = []
+
+        if rects:
+            try:
+                image_top = min(float(getattr(rect, "y0", 0.0)) for rect in rects)
+            except Exception:
+                image_top = 0.0
+
+            # 先找“在图片上方”的最近文本块。
+            above_blocks = [block for block in blocks if block["y1"] <= image_top]
+            if above_blocks:
+                nearest_above = max(above_blocks, key=lambda item: item["y1"])
+                line = self._extract_last_non_empty_line(nearest_above["text"])
+                if line:
+                    return line
+
+            # 若上方没有文本，退化到几何中心最近的文本块。
+            nearest = min(
+                blocks,
+                key=lambda item: abs(((item["y0"] + item["y1"]) / 2.0) - image_top),
+            )
+            line = self._extract_last_non_empty_line(nearest["text"])
+            if line:
+                return line
+
+        return self._extract_page_anchor_text(page)
+
+    @staticmethod
+    def _extract_text_blocks(page: Any) -> list[dict[str, Any]]:
+        """提取页面文本块（仅保留有文本且坐标可解析的块）。"""
+        try:
+            raw_blocks = page.get_text("blocks") or []
+        except Exception:
+            return []
+
+        blocks: list[dict[str, Any]] = []
+        for block in raw_blocks:
+            if not isinstance(block, (tuple, list)) or len(block) < 5:
+                continue
+
+            text = str(block[4] or "")
+            if not text.strip():
+                continue
+
+            try:
+                y0 = float(block[1])
+                y1 = float(block[3])
+            except Exception:
+                continue
+
+            blocks.append({"y0": y0, "y1": y1, "text": text})
+
+        return blocks
+
+    @staticmethod
+    def _extract_last_non_empty_line(text: str, max_len: int = 120) -> str:
+        """提取文本块末尾的非空行，作为更自然的插入锚点。"""
+        for line in reversed(text.splitlines()):
+            candidate = line.strip()
+            if candidate:
+                return candidate[:max_len]
         return ""
 
     def _insert_image_placeholders(self, markdown_text: str, images: list[dict[str, Any]]) -> str:
@@ -322,3 +408,4 @@ class PdfLoader(BaseLoader):
         except Exception:
             logger.warning("Failed to get page_count for %s; fallback to 1.", pdf_path, exc_info=True)
             return 1
+

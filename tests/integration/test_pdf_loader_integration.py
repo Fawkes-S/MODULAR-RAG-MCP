@@ -6,6 +6,7 @@ import shutil
 import sys
 import uuid
 from pathlib import Path
+from pprint import pprint
 
 import pytest
 
@@ -88,6 +89,7 @@ def test_pdf_loader_end_to_end_with_images() -> None:
 
     try:
         doc = loader.load(str(pdf_path))
+        pprint(doc)
         images = doc.metadata.get("images")
 
         assert isinstance(images, list)

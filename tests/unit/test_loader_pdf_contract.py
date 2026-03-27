@@ -256,3 +256,55 @@ def test_pdf_loader_contract_rejects_non_pdf_file() -> None:
     finally:
         if bad_file.exists():
             bad_file.unlink()
+
+
+def test_pdf_loader_anchor_prefers_text_nearest_above_image_rect() -> None:
+    """
+    Given:
+        页面中存在多段文本与一张图片，且图片下方还有文本。
+
+    When:
+        调用 `_extract_anchor_text_for_image()` 选择占位符插入锚点。
+
+    Then:
+        应优先返回“图片上方最近文本块”的末行，而不是页首标题，
+        以减少图文顺序偏差（占位符过早插入）的问题。
+    """
+
+    class _FakeRect:
+        def __init__(self, y0: float, y1: float) -> None:
+            self.y0 = y0
+            self.y1 = y1
+
+    class _FakePage:
+        def __init__(self, blocks: list[tuple[float, float, float, float, str, int, int]]) -> None:
+            self._blocks = blocks
+            self._rects: dict[int, list[_FakeRect]] = {}
+
+        def set_rects(self, xref: int, rects: list[_FakeRect]) -> None:
+            self._rects[xref] = rects
+
+        def get_image_rects(self, xref: int) -> list[_FakeRect]:
+            return self._rects.get(xref, [])
+
+        def get_text(self, mode: str) -> object:
+            if mode == "blocks":
+                return self._blocks
+            if mode == "text":
+                merged = "\n".join(str(block[4]).strip() for block in self._blocks if str(block[4]).strip())
+                return merged
+            return ""
+
+    blocks = [
+        (0.0, 10.0, 500.0, 30.0, "Document with Images\n", 0, 0),
+        (0.0, 120.0, 500.0, 160.0, "This document contains an embedded image below:\n", 1, 0),
+        (0.0, 230.0, 500.0, 260.0, "Text continues after the image.\n", 2, 0),
+    ]
+
+    page = _FakePage(blocks)
+    page.set_rects(7, [_FakeRect(170.0, 220.0)])
+
+    loader = PdfLoader()
+    anchor = loader._extract_anchor_text_for_image(page, 7)
+
+    assert anchor == "This document contains an embedded image below:"

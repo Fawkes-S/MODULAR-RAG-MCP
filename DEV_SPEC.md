@@ -1984,7 +1984,7 @@ dashboard:
 | C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2026-03-26 | core.types contracts + metadata/images validation + serialization tests passed |
 | C2 | 文件完整性检查（SHA256） | [x] | 2026-03-26 | SQLiteIntegrityChecker + WAL + skip判定 + 并发写入 tests passed |
 | C3 | Loader 抽象基类与 PDF Loader | [x] | 2026-03-26 | BaseLoader + PdfLoader + image extraction/placeholder + degrade path tests passed |
-| C4 | Splitter 集成（调用 Libs） | [ ] | | |
+| C4 | Splitter 集成（调用 Libs） | [x] | 2026-03-27 | DocumentChunker 适配层 + 图片按需分发 + 配置驱动切分 + 合同测试通过 |
 | C5 | Transform 基类 + ChunkRefiner | [ ] | | |
 | C6 | MetadataEnricher | [ ] | | |
 | C7 | ImageCaptioner | [ ] | | |
@@ -3229,6 +3229,7 @@ RAG 系统的上限取决于其对特定业务数据的理解深度。未来的�
     - **未来演进**：不再硬编码使用混合检索。Server 可以将 `keyword_search` 和 `semantic_search` 作为独立工具暴露。Agent 可以根据用户意图自主判断：如果是搜人名，只用关键词搜；如果是搜概念，通过语义搜。这种工具使用的灵活性正是 Agentic RAG 的核心魅力。
 
 这种演进方向将把本项目从一个“智能搜索引擎”升级为一个“智能研究助理”的基础设施底座。
+
 
 
 
