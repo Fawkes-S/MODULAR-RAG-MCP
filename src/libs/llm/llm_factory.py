@@ -53,6 +53,7 @@ class LLMFactory:
 
         kwargs = cls._extract_llm_kwargs(settings)
         kwargs.pop("provider", None)
+        kwargs = cls._normalize_llm_kwargs(key, kwargs)
         return cls._registry[key](**kwargs)
 
     @classmethod
@@ -67,12 +68,13 @@ class LLMFactory:
 
         kwargs = cls._extract_vision_llm_kwargs(settings)
         kwargs.pop("provider", None)
+        kwargs = cls._normalize_vision_llm_kwargs(key, kwargs)
         return cls._vision_registry[key](**kwargs)
 
     @classmethod
     def _ensure_builtin_providers(cls) -> None:
         """延迟注册内置文本 LLM provider。"""
-        if cls._builtin_loaded:
+        if cls._builtin_loaded and "openai" in cls._registry:
             return
 
         from libs.llm.azure_llm import AzureLLM
@@ -89,7 +91,7 @@ class LLMFactory:
     @classmethod
     def _ensure_builtin_vision_providers(cls) -> None:
         """延迟注册内置 Vision LLM provider。"""
-        if cls._vision_builtin_loaded:
+        if cls._vision_builtin_loaded and "dashscope" in cls._vision_registry:
             return
 
         from libs.llm.azure_vision_llm import AzureVisionLLM
@@ -159,6 +161,10 @@ class LLMFactory:
             "api_version",
             "timeout",
             "transport",
+            "max_retries",
+            "retry_backoff_seconds",
+            "retry_backoff_multiplier",
+            "retry_max_backoff_seconds",
         ):
             if hasattr(llm_obj, name):
                 kwargs[name] = getattr(llm_obj, name)
@@ -192,7 +198,81 @@ class LLMFactory:
             "timeout",
             "transport",
             "max_image_size",
+            "max_retries",
+            "retry_backoff_seconds",
+            "retry_backoff_multiplier",
+            "retry_max_backoff_seconds",
         ):
             if hasattr(vision_obj, name):
                 kwargs[name] = getattr(vision_obj, name)
         return kwargs
+
+    @staticmethod
+    def _normalize_llm_kwargs(provider: str, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """为内置 provider 过滤无关参数，避免构造器因未知参数报错。"""
+        retry_keys = {
+            "max_retries",
+            "retry_backoff_seconds",
+            "retry_backoff_multiplier",
+            "retry_max_backoff_seconds",
+        }
+
+        allowed_by_provider: dict[str, set[str]] = {
+            "openai": {"model", "api_key", "base_url", "timeout", "transport", *retry_keys},
+            "deepseek": {"model", "api_key", "base_url", "timeout", "transport", *retry_keys},
+            "azure": {
+                "model",
+                "api_key",
+                "endpoint",
+                "deployment_name",
+                "api_version",
+                "timeout",
+                "transport",
+                *retry_keys,
+            },
+            "ollama": {"model", "base_url", "timeout", "transport"},
+        }
+
+        allowed = allowed_by_provider.get(provider)
+        if allowed is None:
+            return dict(kwargs)
+        return {key: value for key, value in kwargs.items() if key in allowed}
+
+    @staticmethod
+    def _normalize_vision_llm_kwargs(provider: str, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """为内置 Vision provider 过滤无关参数，避免构造器因未知参数报错。"""
+        retry_keys = {
+            "max_retries",
+            "retry_backoff_seconds",
+            "retry_backoff_multiplier",
+            "retry_max_backoff_seconds",
+        }
+
+        allowed_by_provider: dict[str, set[str]] = {
+            "dashscope": {
+                "model",
+                "api_key",
+                "base_url",
+                "max_image_size",
+                "timeout",
+                "transport",
+                *retry_keys,
+            },
+            "azure": {
+                "model",
+                "api_key",
+                "endpoint",
+                "azure_endpoint",
+                "deployment_name",
+                "api_version",
+                "max_image_size",
+                "timeout",
+                "transport",
+                *retry_keys,
+            },
+        }
+
+        allowed = allowed_by_provider.get(provider)
+        if allowed is None:
+            return dict(kwargs)
+        return {key: value for key, value in kwargs.items() if key in allowed}

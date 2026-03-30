@@ -173,6 +173,34 @@ Round 3 still failing → STOP, show failure report to user
 2. **Re-sync**: `python .codex/skills/auto-coder/scripts/sync_spec.py --force`
 2.5. **Update docs (optional)**:
    - Only update `docs/notes/decisions.md` / `docs/notes/faq.md` when user explicitly requests it.
+
+2.6. **Implementation report (mandatory, user-visible)**:
+   - Before `Show summary & ask`, output a full **Implement 1/4 ~ 4/4** report to the user.
+   - Do not collapse this into a short paragraph.
+   - Required structure:
+
+```
+Implement 1/4 (Read spec)
+- Exact files read
+- What was read from `03-tech-stack.md` (keywords / matched lines)
+- How each item influenced `Extract` / `Plan files` / `Code`
+
+Implement 2/4 (Extract + mapping checklist)
+- Requirement/acceptance -> code location (file/method) -> test case mapping
+- Mark each mapped item as planned/done
+
+Implement 3/4 (Plan files)
+- Files to create/modify (with purpose)
+- Why each file change is necessary
+
+Implement 4/4 (Code)
+- What was actually changed
+- Commands run and outcomes
+- Deviations/fixes applied during implementation
+```
+
+   - **Non-compliance rule**: if this detailed report is missing, the run is incomplete even if code/tests passed.
+
 3. **Show summary & ask**:
 
 ```
@@ -187,6 +215,7 @@ Round 3 still failing → STOP, show failure report to user
 ```
 
 On "next", loop back to step 1 and start the next task.
+
 
 
 

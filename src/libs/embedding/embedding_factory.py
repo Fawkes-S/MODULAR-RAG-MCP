@@ -43,12 +43,13 @@ class EmbeddingFactory:
 
         kwargs = cls._extract_embedding_kwargs(settings)
         kwargs.pop("provider", None)
+        kwargs = cls._normalize_embedding_kwargs(key, kwargs)
         return cls._registry[key](**kwargs)
 
     @classmethod
     def _ensure_builtin_providers(cls) -> None:
         """延迟注册内置 provider。"""
-        if cls._builtin_loaded:
+        if cls._builtin_loaded and "openai" in cls._registry:
             return
 
         from libs.embedding.azure_embedding import AzureEmbedding
@@ -109,3 +110,45 @@ class EmbeddingFactory:
             if hasattr(embedding_obj, name):
                 kwargs[name] = getattr(embedding_obj, name)
         return kwargs
+
+    @staticmethod
+    def _normalize_embedding_kwargs(provider: str, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """为内置 provider 过滤无关参数，避免构造器因未知参数报错。"""
+        allowed_by_provider: dict[str, set[str]] = {
+            "openai": {
+                "model",
+                "api_key",
+                "base_url",
+                "timeout",
+                "max_chars",
+                "truncate_long_text",
+                "transport",
+            },
+            "azure": {
+                "model",
+                "api_key",
+                "endpoint",
+                "deployment_name",
+                "api_version",
+                "timeout",
+                "max_chars",
+                "truncate_long_text",
+                "transport",
+            },
+            "ollama": {
+                "model",
+                "base_url",
+                "timeout",
+                "max_chars",
+                "truncate_long_text",
+                "transport",
+            },
+        }
+
+        allowed = allowed_by_provider.get(provider)
+        if allowed is None:
+            # 自定义 provider：仅传递最常见字段，减少与测试桩签名冲突。
+            fallback_fields = {"model", "timeout", "max_chars", "truncate_long_text", "transport"}
+            return {key: value for key, value in kwargs.items() if key in fallback_fields}
+
+        return {key: value for key, value in kwargs.items() if key in allowed}

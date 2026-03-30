@@ -1,0 +1,68 @@
+﻿{
+  "cases": [
+    {
+      "name": "typical_noise_scenario",
+      "input": "ACME Report\nPage 1 of 3\n\n## Overview\n\nThis is the core content.\n\n----\n\nConfidential",
+      "expected_contains": ["## Overview", "This is the core content."],
+      "expected_not_contains": ["Page 1 of 3", "----"]
+    },
+    {
+      "name": "ocr_errors",
+      "input": "Th1s   is  a  t3xt  w1th   OCR  no1se.\n\nPage 2",
+      "expected_contains": ["Th1s is a t3xt w1th OCR no1se."],
+      "expected_not_contains": ["Page 2"]
+    },
+    {
+      "name": "page_header_footer",
+      "input": "Page 3 of 10\n\nChapter 2: Methods\n\nActual content line.\n\n第 3 页",
+      "expected_contains": ["Chapter 2: Methods", "Actual content line."],
+      "expected_not_contains": ["Page 3 of 10", "第 3 页"]
+    },
+    {
+      "name": "page_header_footer_with_descriptor_and_html_wrapper",
+      "input": "==============================\nPage 42 | Technical Documentation\n==============================\n\nChapter 5: System Architecture\n\nThe   microservices   architecture  consists  of  several  key  components.\n\n<!-- Internal note: Update diagram -->\n\n<div class=\"important\">\nEach service communicates via REST API or message queues.\n</div>\n\nFooter: Copyright 2024 Company | Confidential",
+      "expected_contains": [
+        "Chapter 5: System Architecture",
+        "The microservices architecture consists of several key components.",
+        "Each service communicates via REST API or message queues."
+      ],
+      "expected_not_contains": [
+        "Page 42 | Technical Documentation",
+        "<div class=\"important\">",
+        "</div>",
+        "Footer: Copyright 2024 Company | Confidential",
+        "=============================="
+      ]
+    },
+    {
+      "name": "excessive_whitespace",
+      "input": "Line A\n\n\n\nLine B\n\n\nLine C",
+      "expected_contains": ["Line A", "Line B", "Line C"],
+      "expected_not_contains": ["\n\n\n"]
+    },
+    {
+      "name": "format_markers",
+      "input": "<!-- build:dev -->\n# Title\n\nText body\n\n<!-- /build -->",
+      "expected_contains": ["# Title", "Text body"],
+      "expected_not_contains": ["<!-- build:dev -->", "<!-- /build -->"]
+    },
+    {
+      "name": "clean_text",
+      "input": "# Clean Title\n\nThis paragraph is already clean and should remain stable.",
+      "expected_contains": ["# Clean Title", "This paragraph is already clean and should remain stable."],
+      "expected_not_contains": []
+    },
+    {
+      "name": "code_blocks",
+      "input": "### Code Example\n\n```python\ndef hello(name):\n    return f\"Hello, {name}\"\n```\n\nPage 7",
+      "expected_contains": ["### Code Example", "```python", "return f\"Hello, {name}\""],
+      "expected_not_contains": ["Page 7"]
+    },
+    {
+      "name": "mixed_noise",
+      "input": "[ 2 / 9 ]\n\n<!-- hidden -->\n## Mixed\n\nText A\n\n----\n\nText B\n\nPage 2 of 9",
+      "expected_contains": ["## Mixed", "Text A", "Text B"],
+      "expected_not_contains": ["[ 2 / 9 ]", "<!-- hidden -->", "Page 2 of 9", "----"]
+    }
+  ]
+}

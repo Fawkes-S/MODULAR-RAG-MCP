@@ -16,6 +16,12 @@ from typing import Any, Callable
 from urllib import request
 
 from libs.llm.base_vision_llm import BaseVisionLLM, ChatResponse
+from libs.llm.retry_policy import (
+    RetryPolicy,
+    RetryableStatusError,
+    execute_with_retry,
+    summarize_exception,
+)
 
 TransportFn = Callable[[str, dict[str, Any], dict[str, str], float], dict[str, Any]]
 
@@ -33,6 +39,11 @@ class DashScopeVisionLLM(BaseVisionLLM):
         max_image_size: int = 2048,
         timeout: float = 30.0,
         transport: TransportFn | None = None,
+        retry_policy: RetryPolicy | None = None,
+        max_retries: int = 2,
+        retry_backoff_seconds: float = 0.25,
+        retry_backoff_multiplier: float = 2.0,
+        retry_max_backoff_seconds: float = 2.0,
     ) -> None:
         self.model = model
         self.api_key = api_key
@@ -40,6 +51,13 @@ class DashScopeVisionLLM(BaseVisionLLM):
         self.max_image_size = int(max_image_size)
         self.timeout = float(timeout)
         self._transport = transport or self._default_transport
+
+        self.retry_policy = retry_policy or RetryPolicy(
+            max_retries=max_retries,
+            initial_backoff_seconds=retry_backoff_seconds,
+            backoff_multiplier=retry_backoff_multiplier,
+            max_backoff_seconds=retry_max_backoff_seconds,
+        )
 
     def chat_with_image(
         self,
@@ -76,12 +94,24 @@ class DashScopeVisionLLM(BaseVisionLLM):
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
-        try:
+        def _send_once() -> dict[str, Any]:
             data = self._transport(url, payload, headers, float(self.timeout))
-        except Exception as exc:  # pragma: no cover
-            raise RuntimeError(f"[dashscope-vision] RequestError: {type(exc).__name__}: {exc}") from exc
+            self._raise_if_error_payload(data)
+            return data
 
-        self._raise_if_error_payload(data)
+        try:
+            data = execute_with_retry(
+                operation=_send_once,
+                policy=self.retry_policy,
+            )
+        except Exception as exc:  # pragma: no cover
+            # 401/403 这类业务错误直接透出，不包装成 RequestError。
+            if isinstance(exc, RuntimeError) and "DashScopeAPIError" in str(exc):
+                raise
+            summary = summarize_exception(exc)
+            suffix = f": {summary}" if summary else ""
+            raise RuntimeError(f"[dashscope-vision] RequestError: {type(exc).__name__}{suffix}") from exc
+
         content = self._extract_content(data)
         return ChatResponse(content=content, metadata={"provider": "dashscope", "trace": trace})
 
@@ -150,7 +180,17 @@ class DashScopeVisionLLM(BaseVisionLLM):
         err = data.get("error") if isinstance(data, dict) else None
         if isinstance(err, dict):
             code = err.get("code", "unknown")
-            message = err.get("message", "unknown error")
+            message = str(err.get("message", "unknown error"))
+
+            status_code: int | None = None
+            try:
+                status_code = int(code)
+            except Exception:
+                status_code = None
+
+            if status_code is not None and (status_code == 429 or status_code >= 500):
+                raise RetryableStatusError(status_code=status_code, message=message)
+
             raise RuntimeError(f"[dashscope-vision] DashScopeAPIError(code={code}): {message}")
 
     @staticmethod

@@ -1,4 +1,4 @@
-﻿"""LLM Reranker implementation.
+"""LLM Reranker implementation.
 
 实现目标：
 - 读取 `config/prompts/rerank.txt` 构造重排提示词；
@@ -9,9 +9,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
+from core.prompt_loader import load_prompt_template
 from libs.llm.base_llm import BaseLLM
 from libs.llm.llm_factory import LLMFactory
 from libs.reranker.base_reranker import BaseReranker
@@ -36,6 +36,12 @@ class LLMReranker(BaseReranker):
 
     provider_name = "llm"
 
+    DEFAULT_PROMPT_TEMPLATE = (
+        "你是候选重排助手。请根据 Query 对 Candidates 进行相关性排序。\n"
+        "只返回 JSON 对象：{{\"ranked_ids\": [\"id1\", \"id2\"]}}\n"
+        "Query:\n{query}\n\nCandidates(JSON):\n{candidates}"
+    )
+
     def __init__(
         self,
         llm: BaseLLM,
@@ -57,7 +63,14 @@ class LLMReranker(BaseReranker):
 
         self.llm = llm
         self.prompt_path = prompt_path
-        self.prompt_template = prompt_template if prompt_template is not None else self._load_prompt(prompt_path)
+        self.prompt_template = (
+            prompt_template
+            if prompt_template is not None
+            else load_prompt_template(
+                prompt_path=prompt_path,
+                default_template=self.DEFAULT_PROMPT_TEMPLATE,
+            )
+        )
 
         if not isinstance(self.prompt_template, str) or not self.prompt_template.strip():
             raise ValueError("[llm_reranker] ValidationError: prompt template must be non-empty")
@@ -89,12 +102,6 @@ class LLMReranker(BaseReranker):
         if isinstance(path, str) and path.strip():
             return path
         return "config/prompts/rerank.txt"
-
-    @staticmethod
-    def _load_prompt(prompt_path: str) -> str:
-        """从文件读取 rerank prompt。"""
-        path = Path(prompt_path)
-        return path.read_text(encoding="utf-8")
 
     def rerank(
         self,
@@ -201,3 +208,4 @@ class LLMReranker(BaseReranker):
             )
         )
         return [item for _, item in indexed]
+

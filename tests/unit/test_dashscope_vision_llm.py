@@ -181,3 +181,31 @@ def test_factory_can_create_dashscope_vision_llm() -> None:
     client = LLMFactory.create_vision_llm(settings)
 
     assert isinstance(client, DashScopeVisionLLM)
+
+def test_dashscope_vision_llm_retries_timeout_then_succeeds() -> None:
+    """
+    Given:
+        transport 首次抛 TimeoutError，第二次返回正常响应。
+    When:
+        调用 `chat_with_image`。
+    Then:
+        客户端应自动重试并成功，证明 Vision provider 也具备内置重试能力。
+    """
+    calls = {"count": 0}
+
+    def _transport(*_: Any) -> dict[str, Any]:
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise TimeoutError("vision timeout")
+        return {"choices": [{"message": {"content": "vision-recovered"}}]}
+
+    client = DashScopeVisionLLM(
+        transport=_transport,
+        max_retries=2,
+        retry_backoff_seconds=0.0,
+    )
+
+    result = client.chat_with_image(text="q", image_path=b"img")
+
+    assert result.content == "vision-recovered"
+    assert calls["count"] == 2

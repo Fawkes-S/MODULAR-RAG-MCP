@@ -154,3 +154,84 @@ def test_request_error_contains_provider_and_error_type(isolated_registry: dict[
 
     with pytest.raises(RuntimeError, match=r"\[deepseek\].*RequestError.*TimeoutError"):
         client.chat([{"role": "user", "content": "hi"}])
+
+def test_openai_retries_timeout_then_succeeds(isolated_registry: dict[str, object]) -> None:
+    """
+    Given:
+        首次请求抛出 TimeoutError，第二次返回正常响应的 mock transport。
+    When:
+        调用 OpenAI provider 的 `chat()`。
+    Then:
+        客户端应自动重试并成功返回内容，且 transport 调用次数为 2。
+    """
+    calls = {"count": 0}
+
+    def flaky_transport(
+        url: str,
+        payload: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+    ) -> dict[str, Any]:
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise TimeoutError("transient timeout")
+        return {"choices": [{"message": {"content": "openai-recovered"}}]}
+
+    client = LLMFactory.create(
+        {
+            "llm": {
+                "provider": "openai",
+                "model": "gpt-4o-mini",
+                "transport": flaky_transport,
+                "max_retries": 2,
+                "retry_backoff_seconds": 0.0,
+            }
+        }
+    )
+
+    text = client.chat([{"role": "user", "content": "hi"}])
+
+    assert text == "openai-recovered"
+    assert calls["count"] == 2
+
+
+def test_openai_non_retryable_error_does_not_retry(isolated_registry: dict[str, object]) -> None:
+    """
+    Given:
+        transport 抛出携带 `code=400` 的异常（不可重试错误）。
+    When:
+        调用 OpenAI provider 的 `chat()`。
+    Then:
+        不应重试，请求只发一次并直接失败。
+    """
+
+    class _BadRequestError(Exception):
+        code = 400
+
+    calls = {"count": 0}
+
+    def broken_transport(
+        url: str,
+        payload: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+    ) -> dict[str, Any]:
+        calls["count"] += 1
+        raise _BadRequestError("bad request")
+
+    client = LLMFactory.create(
+        {
+            "llm": {
+                "provider": "openai",
+                "model": "gpt-4o-mini",
+                "transport": broken_transport,
+                "max_retries": 3,
+                "retry_backoff_seconds": 0.0,
+            }
+        }
+    )
+
+    with pytest.raises(RuntimeError, match=r"\[openai\].*RequestError"):
+        client.chat([{"role": "user", "content": "hi"}])
+
+    assert calls["count"] == 1

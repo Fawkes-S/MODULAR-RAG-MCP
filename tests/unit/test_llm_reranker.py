@@ -1,4 +1,4 @@
-﻿"""LLMReranker 单元测试。"""
+"""LLMReranker 单元测试。"""
 
 from __future__ import annotations
 
@@ -153,3 +153,24 @@ def test_reranker_factory_can_create_llm_backend(monkeypatch: pytest.MonkeyPatch
     finally:
         if prompt_file.exists():
             prompt_file.unlink()
+
+
+def test_llm_reranker_uses_default_prompt_when_file_missing() -> None:
+    """
+    Given:
+        未提供 `prompt_template`，且 `prompt_path` 指向不存在的文件。
+
+    When:
+        初始化 `LLMReranker` 并执行 `rerank()`。
+
+    Then:
+        应回退到内置默认模板并正常完成重排，不因文件缺失报错。
+    """
+    fake_llm = _FakeLLM(response='{"ranked_ids": ["c1"]}')
+    reranker = LLMReranker(llm=fake_llm, prompt_path="config/prompts/does_not_exist_for_test.txt")
+
+    result = reranker.rerank(query="q", candidates=[{"id": "c1", "text": "t"}])
+
+    assert [item["id"] for item in result] == ["c1"]
+    assert fake_llm.last_messages is not None
+    assert "ranked_ids" in fake_llm.last_messages[0]["content"]

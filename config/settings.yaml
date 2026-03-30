@@ -7,7 +7,10 @@
 # =============================================================================
 llm:
   provider: openai
-  model: gpt-4o-mini
+  model: qwen3.5-plus
+  base_url: ${LLM_BASE_URL:-https://coding.dashscope.aliyuncs.com/v1}
+  api_key: ${LLM_API_KEY:-}
+  timeout: 45
 
 # =============================================================================
 # Embedding Configuration
@@ -34,19 +37,22 @@ retrieval:
 # Rerank Configuration
 # =============================================================================
 rerank:
-  provider: none
   enabled: false
+  provider: none  # Options: none, cross_encoder, llm
+  #model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
   top_m: 30
 
 # =============================================================================
 # Vision LLM Configuration (for Image Captioning)
 # =============================================================================
 vision_llm:
+  enabled: true  # Set to true to enable vision capabilities
   provider: dashscope
   model: qwen3.5-plus
-  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  base_url: ${VISION_LLM_BASE_URL:-https://coding.dashscope.aliyuncs.com/v1}
+  api_key: ${VISION_LLM_API_KEY:-}
   max_image_size: 2048
-  timeout: 30
+  timeout: 45
 
 # =============================================================================
 # Evaluation Configuration
@@ -90,4 +96,3 @@ ingestion:
   metadata_enricher:
     use_llm: true  # Set to true to enable LLM-based enrichment (requires LLM config)
     # When use_llm is false or LLM call fails, falls back to rule-based enrichment
-

@@ -75,8 +75,8 @@
 | C2 | 文件完整性检查（SHA256） | [x] | 2026-03-26 | SQLiteIntegrityChecker + WAL + skip判定 + 并发写入 tests passed |
 | C3 | Loader 抽象基类与 PDF Loader | [x] | 2026-03-26 | BaseLoader + PdfLoader + image extraction/placeholder + degrade path tests passed |
 | C4 | Splitter 集成（调用 Libs） | [x] | 2026-03-27 | DocumentChunker 适配层 + 图片按需分发 + 配置驱动切分 + 合同测试通过 |
-| C5 | Transform 基类 + ChunkRefiner | [ ] | | |
-| C6 | MetadataEnricher | [ ] | | |
+| C5 | Transform 基类 + ChunkRefiner | [x] | 2026-03-29 | BaseTransform + ChunkRefiner(rule+LLM+fallback) + TraceContext(min) + 27 unit tests passed; real-LLM integration tests added (env key required) |
+| C6 | MetadataEnricher | [x] | 2026-03-30 | MetadataEnricher(rule+LLM+fallback) + trace统计 + contract tests(含真实LLM用例) |
 | C7 | ImageCaptioner | [ ] | | |
 | C8 | DenseEncoder | [ ] | | |
 | C9 | SparseEncoder | [ ] | | |

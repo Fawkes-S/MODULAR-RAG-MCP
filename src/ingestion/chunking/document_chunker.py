@@ -1,4 +1,4 @@
-﻿"""DocumentChunker：在 Ingestion 层集成 Splitter（C4）。
+"""DocumentChunker：在 Ingestion 层集成 Splitter（C4）。
 
 该模块是 `libs.splitter` 与 Ingestion Pipeline 之间的适配器层：
 - `libs.splitter` 仅负责 `str -> list[str]` 的纯文本切分；
@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import hashlib
 import re
-from typing import Any
 
+from core.settings import Settings
 from core.types import Chunk, Document
 from libs.splitter.base_splitter import BaseSplitter
 from libs.splitter.splitter_factory import SplitterFactory
@@ -39,14 +39,18 @@ class DocumentChunker:
     - splitter 返回空列表：抛出 ValueError，避免静默丢数据。
 
     Args:
-        settings: 应用配置对象（dict 或对象），配置路径使用 `ingestion.*`。
+        settings: 强类型应用配置对象（`core.settings.Settings`）。
 
     Example:
-        >>> chunker = DocumentChunker({"ingestion": {"splitter": "recursive"}})
-        >>> chunks = chunker.split_document(doc)
+        >>> from core.settings import load_settings
+        >>> settings = load_settings("config/settings.yaml")
+        >>> chunker = DocumentChunker(settings)
     """
 
-    def __init__(self, settings: Any) -> None:
+    def __init__(self, settings: Settings) -> None:
+        if not isinstance(settings, Settings):
+            raise TypeError("DocumentChunker requires Settings; call load_settings('config/settings.yaml') first")
+
         self._settings = settings
         self.splitter: BaseSplitter = SplitterFactory.create(settings)
 
@@ -98,7 +102,7 @@ class DocumentChunker:
         return f"{doc_id}_{index:04d}_{digest}"
 
     @staticmethod
-    def _inherit_metadata(document: Document, chunk_index: int, chunk_text: str) -> dict[str, Any]:
+    def _inherit_metadata(document: Document, chunk_index: int, chunk_text: str) -> dict[str, object]:
         """继承并裁剪 metadata（含图片按需分发）。
 
         核心规则：
@@ -140,9 +144,9 @@ class DocumentChunker:
         return refs
 
     @staticmethod
-    def _select_images_by_refs(images: list[Any], refs: list[str]) -> list[dict[str, Any]]:
+    def _select_images_by_refs(images: list[object], refs: list[str]) -> list[dict[str, object]]:
         """按引用列表从文档级 images 中筛选子集。"""
-        image_map: dict[str, dict[str, Any]] = {}
+        image_map: dict[str, dict[str, object]] = {}
         for image in images:
             if not isinstance(image, dict):
                 continue
@@ -150,7 +154,7 @@ class DocumentChunker:
             if isinstance(image_id, str) and image_id.strip():
                 image_map[image_id] = dict(image)
 
-        selected: list[dict[str, Any]] = []
+        selected: list[dict[str, object]] = []
         for ref in refs:
             image = image_map.get(ref)
             if image is not None:

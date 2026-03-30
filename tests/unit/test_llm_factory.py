@@ -21,9 +21,11 @@ from core.settings import (
     RetrievalSettings,
     Settings,
     VectorStoreSettings,
+    load_settings,
 )
 from libs.llm.base_llm import BaseLLM
 from libs.llm.llm_factory import LLMFactory
+from libs.llm.openai_llm import OpenAILLM
 
 
 class _FakeLLM(BaseLLM):
@@ -40,12 +42,15 @@ class _FakeLLM(BaseLLM):
 def isolated_registry() -> dict[str, object]:
     """隔离全局注册表，避免测试用例互相污染状态。"""
     snapshot = dict(LLMFactory._registry)
+    built_snapshot = LLMFactory._builtin_loaded
     LLMFactory._registry.clear()
+    LLMFactory._builtin_loaded = False
     try:
         yield snapshot
     finally:
         LLMFactory._registry.clear()
         LLMFactory._registry.update(snapshot)
+        LLMFactory._builtin_loaded = built_snapshot
 
 
 def _build_settings(provider: str, model: str = "") -> Settings:
@@ -63,7 +68,7 @@ def _build_settings(provider: str, model: str = "") -> Settings:
 
 def test_factory_routes_to_registered_provider(isolated_registry: dict[str, object]) -> None:
     """验证工厂会按 provider 路由到已注册实现，并正确透传 model 参数。"""
-    LLMFactory.register("fake", lambda model="": _FakeLLM(model=model))
+    LLMFactory.register("fake", lambda model="", **_: _FakeLLM(model=model))
     settings = _build_settings(provider="fake", model="demo-model")
 
     client = LLMFactory.create(settings)
@@ -85,3 +90,25 @@ def test_factory_unknown_provider_raises(isolated_registry: dict[str, object]) -
 
     with pytest.raises(ValueError, match="Unknown llm provider: unknown"):
         LLMFactory.create(settings)
+
+
+def test_factory_can_create_openai_llm_from_loaded_settings_object() -> None:
+    """
+    Given:
+        通过 `load_settings(config/settings.yaml)` 得到的强类型 Settings 对象。
+
+    When:
+        调用 `LLMFactory.create(settings)`。
+
+    Then:
+        工厂能从 Settings.llm 读取 provider/model/base_url/api_key 并创建 OpenAI-compatible 客户端。
+    """
+    settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
+
+    client = LLMFactory.create(settings)
+
+    assert isinstance(client, OpenAILLM)
+    assert client.provider_name == "openai"
+    assert client.model == settings.llm.model
+    assert client.base_url == settings.llm.base_url
+    assert client.api_key == settings.llm.api_key

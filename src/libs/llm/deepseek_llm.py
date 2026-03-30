@@ -28,22 +28,14 @@ class DeepSeekLLM(OpenAILLM):
         base_url: str = "https://api.deepseek.com/v1",
         timeout: float = 30.0,
         transport: TransportFn | None = None,
-        **_: Any,
+        **kwargs: Any,
     ) -> None:
-        """初始化 DeepSeek 客户端。
-
-        Args:
-            model: 模型名。
-            api_key: API 密钥。
-            base_url: DeepSeek 服务地址。
-            timeout: 请求超时（秒）。
-            transport: 可注入传输函数，便于测试 mock。
-            **_: 兼容工厂透传的多余参数，防止非关键字段触发构造失败。
-        """
+        """初始化 DeepSeek 客户端。"""
         super().__init__(
             model=model,
             api_key=api_key,
             base_url=base_url,
             timeout=timeout,
             transport=transport,
+            **kwargs,
         )

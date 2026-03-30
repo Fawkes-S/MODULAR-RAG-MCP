@@ -44,11 +44,13 @@ class _FakeEmbedding(BaseEmbedding):
         for text in texts:
             digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
             head = int(digest[:8], 16)
-            vectors.append([
-                len(text) / 100.0,
-                (head % 1000) / 1000.0,
-                (head // 1000 % 1000) / 1000.0,
-            ])
+            vectors.append(
+                [
+                    len(text) / 100.0,
+                    (head % 1000) / 1000.0,
+                    (head // 1000 % 1000) / 1000.0,
+                ]
+            )
         return vectors
 
 
@@ -56,12 +58,15 @@ class _FakeEmbedding(BaseEmbedding):
 def isolated_registry() -> dict[str, object]:
     """隔离工厂全局注册表，避免测试互相污染。"""
     snapshot = dict(EmbeddingFactory._registry)
+    built_snapshot = EmbeddingFactory._builtin_loaded
     EmbeddingFactory._registry.clear()
+    EmbeddingFactory._builtin_loaded = False
     try:
         yield snapshot
     finally:
         EmbeddingFactory._registry.clear()
         EmbeddingFactory._registry.update(snapshot)
+        EmbeddingFactory._builtin_loaded = built_snapshot
 
 
 def _build_settings(provider: str, model: str = "") -> Settings:
@@ -79,7 +84,7 @@ def _build_settings(provider: str, model: str = "") -> Settings:
 
 def test_factory_routes_to_registered_provider(isolated_registry: dict[str, object]) -> None:
     """验证工厂会按 provider 路由到正确实现，并透传 model 给实例。"""
-    EmbeddingFactory.register("fake", lambda model="": _FakeEmbedding(model=model))
+    EmbeddingFactory.register("fake", lambda model="", **_: _FakeEmbedding(model=model))
     settings = _build_settings(provider="fake", model="emb-model")
 
     client = EmbeddingFactory.create(settings)
@@ -90,7 +95,7 @@ def test_factory_routes_to_registered_provider(isolated_registry: dict[str, obje
 
 def test_fake_embedding_vectors_are_stable(isolated_registry: dict[str, object]) -> None:
     """验证同一输入生成稳定向量，且输出 shape 为二维列表（N x D）。"""
-    EmbeddingFactory.register("fake", lambda model="": _FakeEmbedding(model=model))
+    EmbeddingFactory.register("fake", lambda model="", **_: _FakeEmbedding(model=model))
     client = EmbeddingFactory.create(_build_settings(provider="fake"))
 
     texts = ["hello", "world"]

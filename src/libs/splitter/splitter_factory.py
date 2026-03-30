@@ -1,10 +1,11 @@
-﻿"""Splitter 工厂：根据配置创建切分器实现。"""
+"""Splitter 工厂：根据配置创建切分器实现。"""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from typing import Any
 
+from core.settings import Settings
 from libs.splitter.base_splitter import BaseSplitter
 
 
@@ -13,8 +14,12 @@ class SplitterFactory:
 
     约定（主路径）：
     - provider: `ingestion.splitter`
-    - 通用参数: `ingestion.chunk_size` / `ingestion.chunk_overlap`
+    - 通用参数: `ingestion.chunk_size` / `ingestion.chunk_overlap` / `ingestion.separators`
     - provider 专有参数: `ingestion.splitter_kwargs`（可选，dict）
+
+    说明：
+    - 真实运行路径应传入 `core.settings.Settings`；
+    - 仍保留 dict 兼容分支，主要用于历史单元测试，后续可逐步移除。
     """
 
     _registry: dict[str, Callable[..., BaseSplitter]] = {}
@@ -30,22 +35,7 @@ class SplitterFactory:
 
     @classmethod
     def create(cls, settings: Any, **override_kwargs: Any) -> BaseSplitter:
-        """根据配置创建 Splitter 实例。
-
-        做什么：
-        - 从配置中读取 provider 与构造参数；
-        - 路由到对应注册实现并实例化。
-
-        为什么：
-        - 统一管理对象创建逻辑，保证“改配置不改代码”。
-
-        关键权衡：
-        - 仅暴露 ingestion 下的最小必要字段，避免把无关配置传入构造器导致类型错误。
-
-        失败路径：
-        - provider 缺失/未知时抛出可读 ValueError；
-        - provider 构造失败时，透传原始异常信息。
-        """
+        """根据配置创建 Splitter 实例。"""
         cls._ensure_builtin_providers()
 
         provider = cls._extract_provider(settings)
@@ -80,12 +70,7 @@ class SplitterFactory:
 
     @staticmethod
     def _extract_splitter_kwargs(settings: Any) -> dict[str, Any]:
-        """提取 splitter 构造参数。
-
-        来源：
-        - 通用参数：`ingestion.chunk_size` / `ingestion.chunk_overlap` / `ingestion.separators`
-        - 专有参数：`ingestion.splitter_kwargs`（dict，可选）
-        """
+        """提取 splitter 构造参数。"""
         ingestion_cfg = SplitterFactory._extract_ingestion_config(settings)
 
         kwargs: dict[str, Any] = {}
@@ -95,7 +80,7 @@ class SplitterFactory:
         if isinstance(splitter_kwargs, dict):
             kwargs.update(splitter_kwargs)
 
-        for field in ("chunk_size", "chunk_overlap", "separators", "use_langchain"):
+        for field in ("chunk_size", "chunk_overlap", "separators"):
             if field in ingestion_cfg:
                 kwargs[field] = ingestion_cfg[field]
 
@@ -104,6 +89,17 @@ class SplitterFactory:
     @staticmethod
     def _extract_ingestion_config(settings: Any) -> dict[str, Any]:
         """抽取 ingestion 配置并标准化为 dict。"""
+        if isinstance(settings, Settings):
+            ingestion = settings.ingestion
+            return {
+                "splitter": ingestion.splitter,
+                "chunk_size": ingestion.chunk_size,
+                "chunk_overlap": ingestion.chunk_overlap,
+                "separators": list(ingestion.separators),
+                "splitter_kwargs": dict(ingestion.splitter_kwargs),
+                "batch_size": ingestion.batch_size,
+            }
+
         if isinstance(settings, dict):
             ingestion = settings.get("ingestion")
             if isinstance(ingestion, dict):
@@ -120,7 +116,7 @@ class SplitterFactory:
             return dict(vars(ingestion_obj))
 
         extracted: dict[str, Any] = {}
-        for name in ("splitter", "chunk_size", "chunk_overlap", "separators", "use_langchain", "splitter_kwargs"):
+        for name in ("splitter", "chunk_size", "chunk_overlap", "separators", "splitter_kwargs"):
             if hasattr(ingestion_obj, name):
                 extracted[name] = getattr(ingestion_obj, name)
         return extracted

@@ -13,7 +13,9 @@ SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
+from core.settings import load_settings
 from libs.llm.base_vision_llm import BaseVisionLLM, ChatResponse
+from libs.llm.dashscope_vision_llm import DashScopeVisionLLM
 from libs.llm.llm_factory import LLMFactory
 
 
@@ -145,3 +147,25 @@ def test_factory_unknown_vision_provider_raises(isolated_vision_registry: dict[s
 
     with pytest.raises(ValueError, match="Unknown vision llm provider: unknown_vision"):
         LLMFactory.create_vision_llm(settings)
+
+
+def test_factory_can_create_vision_llm_from_loaded_settings_object() -> None:
+    """
+    Given:
+        通过 `load_settings(config/settings.yaml)` 得到的强类型 Settings 对象。
+
+    When:
+        调用 `LLMFactory.create_vision_llm(settings)`。
+
+    Then:
+        工厂能从 Settings.vision_llm 读取 provider/model/base_url/api_key 并创建 DashScopeVisionLLM。
+    """
+    settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
+
+    client = LLMFactory.create_vision_llm(settings)
+
+    assert isinstance(client, DashScopeVisionLLM)
+    assert client.provider_name == "dashscope"
+    assert client.model == settings.vision_llm.model
+    assert client.base_url == settings.vision_llm.base_url
+    assert client.api_key == settings.vision_llm.api_key

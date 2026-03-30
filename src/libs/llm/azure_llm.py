@@ -11,25 +11,13 @@ from typing import Any, Callable
 from urllib import request
 
 from libs.llm.base_llm import BaseLLM
+from libs.llm.retry_policy import RetryPolicy, execute_with_retry, summarize_exception
 
 TransportFn = Callable[[str, dict[str, Any], dict[str, str], float], dict[str, Any]]
 
 
 class AzureLLM(BaseLLM):
-    """Azure OpenAI 客户端实现。
-
-    用途：
-    - 通过 Azure endpoint + deployment 调用 chat completions，并返回文本。
-
-    方法：
-    - URL 形如：
-      `{endpoint}/openai/deployments/{deployment}/chat/completions?api-version={api_version}`
-    - 认证使用 `api-key` header。
-
-    关键约束：
-    - `endpoint` 和 `deployment_name` 必须非空。
-    - 错误信息需要可读，但不应泄露敏感配置（例如 api_key）。
-    """
+    """Azure OpenAI 客户端实现。"""
 
     provider_name = "azure"
 
@@ -42,6 +30,11 @@ class AzureLLM(BaseLLM):
         api_version: str = "2024-02-01",
         timeout: float = 30.0,
         transport: TransportFn | None = None,
+        retry_policy: RetryPolicy | None = None,
+        max_retries: int = 2,
+        retry_backoff_seconds: float = 0.25,
+        retry_backoff_multiplier: float = 2.0,
+        retry_max_backoff_seconds: float = 2.0,
     ) -> None:
         self.model = model
         self.api_key = api_key
@@ -52,19 +45,15 @@ class AzureLLM(BaseLLM):
         self.timeout = float(timeout)
         self._transport = transport or self._default_transport
 
+        self.retry_policy = retry_policy or RetryPolicy(
+            max_retries=max_retries,
+            initial_backoff_seconds=retry_backoff_seconds,
+            backoff_multiplier=retry_backoff_multiplier,
+            max_backoff_seconds=retry_max_backoff_seconds,
+        )
+
     def chat(self, messages: list[dict[str, Any]]) -> str:
-        """调用 Azure chat completions。
-
-        Args:
-            messages: chat 消息列表，shape 与 OpenAI 保持一致。
-
-        Returns:
-            str: assistant 文本。
-
-        Raises:
-            ValueError: 输入 shape 或必填配置（endpoint/deployment）非法；或响应 shape 非法。
-            RuntimeError: 网络请求失败，错误信息包含 provider 与错误类型。
-        """
+        """调用 Azure chat completions。"""
         self._validate_messages(messages)
 
         if not self.endpoint.strip():
@@ -82,10 +71,15 @@ class AzureLLM(BaseLLM):
             headers["api-key"] = self.api_key
 
         try:
-            data = self._transport(url, payload, headers, float(self.timeout))
+            data = execute_with_retry(
+                operation=lambda: self._transport(url, payload, headers, float(self.timeout)),
+                policy=self.retry_policy,
+            )
         except Exception as exc:  # pragma: no cover
             # 不回显 headers，避免 api_key 泄露。
-            raise RuntimeError(f"[azure] RequestError: {type(exc).__name__}: {exc}") from exc
+            summary = summarize_exception(exc)
+            suffix = f": {summary}" if summary else ""
+            raise RuntimeError(f"[azure] RequestError: {type(exc).__name__}{suffix}") from exc
 
         return self._extract_content(data)
 
