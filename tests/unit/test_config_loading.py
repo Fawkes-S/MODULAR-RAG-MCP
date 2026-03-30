@@ -59,12 +59,16 @@ vision_llm:
         encoding="utf-8",
     )
 
-def _assert_yaml_keys_are_covered(section_path: str, section: dict[str, object], dataclass_type: type) -> None:
+
+def _assert_yaml_keys_are_covered(
+    section_path: str,
+    section: dict[str, object],
+    dataclass_type: type,
+) -> None:
     """断言 YAML section 的键都能在对应 dataclass 中找到。"""
     field_names = {item.name for item in fields(dataclass_type)}
     missing = set(section.keys()) - field_names
     assert not missing, f"{section_path} has unmapped keys in Settings dataclass: {sorted(missing)}"
-
 
 
 def test_load_settings_success() -> None:
@@ -73,22 +77,29 @@ def test_load_settings_success() -> None:
     assert settings.embedding.provider == "openai"
     assert settings.retrieval.top_k > 0
 
-    # 新增断言：确保 load_settings 不再丢失 LLM 扩展字段。
+    # 确保 llm 扩展字段可读取。
     assert settings.llm.provider == "openai"
     assert settings.llm.model
     assert settings.llm.base_url.startswith("https://")
+    assert settings.llm.max_retries >= 0
+    assert settings.llm.retry_backoff_seconds >= 0
+    assert settings.llm.retry_backoff_multiplier >= 1.0
+    assert settings.llm.retry_max_backoff_seconds >= 0
 
-    # 新增断言：vision_llm 段可被正确读取并进入 Settings 对象。
+    # 确保 vision_llm 扩展字段可读取。
     assert settings.vision_llm.provider == "dashscope"
     assert settings.vision_llm.model
     assert settings.vision_llm.base_url.startswith("https://")
+    assert settings.vision_llm.max_retries >= 0
+    assert settings.vision_llm.retry_backoff_seconds >= 0
+    assert settings.vision_llm.retry_backoff_multiplier >= 1.0
+    assert settings.vision_llm.retry_max_backoff_seconds >= 0
 
-    # 新增断言：ingestion 段已进入强类型 Settings。
+    # ingestion 段也应进入强类型 Settings。
     assert settings.ingestion.splitter
     assert settings.ingestion.chunk_size > 0
     assert settings.ingestion.chunk_refiner.use_llm is True
     assert settings.ingestion.metadata_enricher.use_llm is True
-
 
 
 def test_settings_yaml_keys_are_mapped_by_settings_dataclasses() -> None:
@@ -138,6 +149,7 @@ def test_settings_yaml_keys_are_mapped_by_settings_dataclasses() -> None:
             metadata_enricher,
             MetadataEnricherSettings,
         )
+
 
 def test_load_settings_resolves_env_placeholder(monkeypatch: pytest.MonkeyPatch) -> None:
     """`${VAR}` 应从环境变量读取并替换。"""

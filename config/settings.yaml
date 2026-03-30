@@ -1,4 +1,4 @@
-﻿# Modular RAG MCP Server - Configuration
+# Modular RAG MCP Server - Configuration
 # This is the main configuration file for the MCP Server.
 # Edit this file to configure LLM, Embedding, VectorStore, and other services.
 
@@ -11,6 +11,10 @@ llm:
   base_url: ${LLM_BASE_URL:-https://coding.dashscope.aliyuncs.com/v1}
   api_key: ${LLM_API_KEY:-}
   timeout: 45
+  max_retries: 2
+  retry_backoff_seconds: 0.25     # 第一次重试前等待多久
+  retry_backoff_multiplier: 2.0   # 等待序列约为 0.25s -> 0.5s -> 1.0s
+  retry_max_backoff_seconds: 2.0  # 单次重试等待时间上限
 
 # =============================================================================
 # Embedding Configuration
@@ -53,6 +57,10 @@ vision_llm:
   api_key: ${VISION_LLM_API_KEY:-}
   max_image_size: 2048
   timeout: 45
+  max_retries: 2
+  retry_backoff_seconds: 0.25
+  retry_backoff_multiplier: 2.0
+  retry_max_backoff_seconds: 2.0
 
 # =============================================================================
 # Evaluation Configuration
@@ -96,3 +104,4 @@ ingestion:
   metadata_enricher:
     use_llm: true  # Set to true to enable LLM-based enrichment (requires LLM config)
     # When use_llm is false or LLM call fails, falls back to rule-based enrichment
+

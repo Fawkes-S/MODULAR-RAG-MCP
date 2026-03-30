@@ -1987,7 +1987,7 @@ dashboard:
 | C4 | Splitter 集成（调用 Libs） | [x] | 2026-03-27 | DocumentChunker 适配层 + 图片按需分发 + 配置驱动切分 + 合同测试通过 |
 | C5 | Transform 基类 + ChunkRefiner | [x] | 2026-03-29 | BaseTransform + ChunkRefiner(rule+LLM+fallback) + TraceContext(min) + 27 unit tests passed; real-LLM integration tests added (env key required) |
 | C6 | MetadataEnricher | [x] | 2026-03-30 | MetadataEnricher(rule+LLM+fallback) + trace统计 + contract tests(含真实LLM用例) |
-| C7 | ImageCaptioner | [ ] | | |
+| C7 | ImageCaptioner | [x] | 2026-03-30 | ImageCaptioner + fallback + prompt + tests passed |
 | C8 | DenseEncoder | [ ] | | |
 | C9 | SparseEncoder | [ ] | | |
 | C10 | BatchProcessor | [ ] | | |

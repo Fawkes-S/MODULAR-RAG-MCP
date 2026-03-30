@@ -1,11 +1,6 @@
 """Settings loading and validation.
 
-该模块负责将 `config/settings.yaml` 解析为强类型配置对象，并做基础校验。
-设计目标：
-- 对关键字段 fail-fast（provider/top_k 等）；
-- 保留 provider 扩展字段（api_key/base_url/timeout 等），让工厂可直接读取；
-- 支持环境变量占位符 `${VAR}` / `${VAR:-default}`，避免把密钥硬编码进仓库。
-- 强制把 `settings.yaml` 的结构映射到 `Settings` dataclass，避免“配置有了但代码读不到”。
+将 `config/settings.yaml` 解析为强类型 `Settings` 对象，并在启动时做必要的 fail-fast 校验。
 """
 
 from __future__ import annotations
@@ -31,6 +26,10 @@ class LLMSettings:
     deployment_name: str = ""
     api_version: str = ""
     timeout: float = 30.0
+    max_retries: int = 2
+    retry_backoff_seconds: float = 0.25
+    retry_backoff_multiplier: float = 2.0
+    retry_max_backoff_seconds: float = 2.0
 
 
 @dataclass(frozen=True)
@@ -46,6 +45,10 @@ class VisionLLMSettings:
     api_version: str = ""
     timeout: float = 30.0
     max_image_size: int = 2048
+    max_retries: int = 2
+    retry_backoff_seconds: float = 0.25
+    retry_backoff_multiplier: float = 2.0
+    retry_max_backoff_seconds: float = 2.0
 
 
 @dataclass(frozen=True)
@@ -126,7 +129,7 @@ class Settings:
     rerank: RerankSettings
     evaluation: EvaluationSettings
     observability: ObservabilitySettings
-    # 为保持向后兼容放在最后，并给默认值：旧测试不传 vision_llm/ingestion 也能构造 Settings。
+    # 放在末尾并提供默认值，保证历史测试可继续构造 Settings。
     vision_llm: VisionLLMSettings = field(default_factory=VisionLLMSettings)
     ingestion: IngestionSettings = field(default_factory=IngestionSettings)
 
@@ -141,7 +144,7 @@ def _read_nested(data: dict[str, Any], path: str) -> Any:
 
 
 def _as_dict(raw: Any) -> dict[str, Any]:
-    """把 section 标准化成 dict；缺失/非法时返回空 dict。"""
+    """将 section 标准化为 dict；缺失或类型错误时返回空 dict。"""
     return dict(raw) if isinstance(raw, dict) else {}
 
 
@@ -160,7 +163,7 @@ def _to_int(value: Any, default: int) -> int:
 
 
 def _parse_dotenv_file(dotenv_path: Path) -> dict[str, str]:
-    """解析 .env 文件（最小实现），忽略空行与注释。"""
+    """解析 .env（最小实现）：忽略空行与注释，支持 KEY=VALUE。"""
     values: dict[str, str] = {}
     if not dotenv_path.exists() or not dotenv_path.is_file():
         return values
@@ -190,7 +193,7 @@ def _parse_dotenv_file(dotenv_path: Path) -> dict[str, str]:
 
 
 def _load_nearest_dotenv(settings_path: Path) -> None:
-    """从 settings 文件向上查找最近的 `.env`，并注入到环境变量（不覆盖已有值）。"""
+    """从 settings 目录向上查找最近的 `.env` 并注入环境变量（不覆盖已有值）。"""
     for parent in [settings_path.parent, *settings_path.parents]:
         dotenv_path = parent / ".env"
         if not dotenv_path.exists():
@@ -218,7 +221,7 @@ def _resolve_env_in_string(text: str) -> str:
 
 
 def _resolve_env_placeholders(data: Any) -> Any:
-    """递归解析配置中的环境变量占位符。"""
+    """递归解析配置对象中的环境变量占位符。"""
     if isinstance(data, dict):
         return {key: _resolve_env_placeholders(value) for key, value in data.items()}
     if isinstance(data, list):
@@ -229,7 +232,7 @@ def _resolve_env_placeholders(data: Any) -> Any:
 
 
 def validate_settings(settings: Settings) -> None:
-    """Validate required settings fields."""
+    """校验关键配置字段并做边界检查。"""
     if not settings.llm.provider:
         raise ValueError("Missing required setting: llm.provider")
     if not settings.embedding.provider:
@@ -245,7 +248,6 @@ def validate_settings(settings: Settings) -> None:
     if not settings.observability.log_level:
         raise ValueError("Missing required setting: observability.log_level")
 
-    # Vision 配置是可选的，但启用时必须有 provider。
     if settings.vision_llm.enabled and not settings.vision_llm.provider:
         raise ValueError("Missing required setting: vision_llm.provider (when vision_llm.enabled=true)")
 
@@ -258,9 +260,27 @@ def validate_settings(settings: Settings) -> None:
     if settings.ingestion.batch_size <= 0:
         raise ValueError("Invalid setting: ingestion.batch_size must be > 0")
 
+    if settings.llm.max_retries < 0:
+        raise ValueError("Invalid setting: llm.max_retries must be >= 0")
+    if settings.llm.retry_backoff_seconds < 0:
+        raise ValueError("Invalid setting: llm.retry_backoff_seconds must be >= 0")
+    if settings.llm.retry_backoff_multiplier < 1.0:
+        raise ValueError("Invalid setting: llm.retry_backoff_multiplier must be >= 1.0")
+    if settings.llm.retry_max_backoff_seconds < 0:
+        raise ValueError("Invalid setting: llm.retry_max_backoff_seconds must be >= 0")
+
+    if settings.vision_llm.max_retries < 0:
+        raise ValueError("Invalid setting: vision_llm.max_retries must be >= 0")
+    if settings.vision_llm.retry_backoff_seconds < 0:
+        raise ValueError("Invalid setting: vision_llm.retry_backoff_seconds must be >= 0")
+    if settings.vision_llm.retry_backoff_multiplier < 1.0:
+        raise ValueError("Invalid setting: vision_llm.retry_backoff_multiplier must be >= 1.0")
+    if settings.vision_llm.retry_max_backoff_seconds < 0:
+        raise ValueError("Invalid setting: vision_llm.retry_max_backoff_seconds must be >= 0")
+
 
 def load_settings(path: str) -> Settings:
-    """Load YAML settings and validate required fields."""
+    """读取 YAML 配置并返回强类型 Settings。"""
     settings_path = Path(path)
     if not settings_path.exists():
         raise FileNotFoundError(f"Settings file not found: {path}")
@@ -305,6 +325,16 @@ def load_settings(path: str) -> Settings:
             deployment_name=str(llm_cfg.get("deployment_name", "")),
             api_version=str(llm_cfg.get("api_version", "")),
             timeout=_to_float(llm_cfg.get("timeout", 30.0), 30.0),
+            max_retries=_to_int(llm_cfg.get("max_retries", 2), 2),
+            retry_backoff_seconds=_to_float(llm_cfg.get("retry_backoff_seconds", 0.25), 0.25),
+            retry_backoff_multiplier=_to_float(
+                llm_cfg.get("retry_backoff_multiplier", 2.0),
+                2.0,
+            ),
+            retry_max_backoff_seconds=_to_float(
+                llm_cfg.get("retry_max_backoff_seconds", 2.0),
+                2.0,
+            ),
         ),
         embedding=EmbeddingSettings(
             provider=str(_read_nested(raw, "embedding.provider")),
@@ -352,6 +382,16 @@ def load_settings(path: str) -> Settings:
             api_version=str(vision_cfg.get("api_version", "")),
             timeout=_to_float(vision_cfg.get("timeout", 30.0), 30.0),
             max_image_size=_to_int(vision_cfg.get("max_image_size", 2048), 2048),
+            max_retries=_to_int(vision_cfg.get("max_retries", 2), 2),
+            retry_backoff_seconds=_to_float(vision_cfg.get("retry_backoff_seconds", 0.25), 0.25),
+            retry_backoff_multiplier=_to_float(
+                vision_cfg.get("retry_backoff_multiplier", 2.0),
+                2.0,
+            ),
+            retry_max_backoff_seconds=_to_float(
+                vision_cfg.get("retry_max_backoff_seconds", 2.0),
+                2.0,
+            ),
         ),
         ingestion=IngestionSettings(
             splitter=str(ingestion_cfg.get("splitter", "recursive")),
