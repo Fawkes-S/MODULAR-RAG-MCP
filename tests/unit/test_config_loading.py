@@ -1,4 +1,4 @@
-"""Tests for settings loading and validation."""
+﻿"""Tests for settings loading and validation."""
 
 from __future__ import annotations
 
@@ -74,7 +74,8 @@ def _assert_yaml_keys_are_covered(
 def test_load_settings_success() -> None:
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
     assert isinstance(settings, Settings)
-    assert settings.embedding.provider == "openai"
+    assert settings.embedding.provider == "huggingface_local"
+    assert settings.embedding.model == "data/models/all-MiniLM-L6-v2"
     assert settings.retrieval.top_k > 0
 
     # 确保 llm 扩展字段可读取。
@@ -311,3 +312,4 @@ def test_main_startup_loads_settings() -> None:
     )
     assert proc.returncode == 0, proc.stderr
     assert "Modular RAG MCP project skeleton is ready." in proc.stdout
+

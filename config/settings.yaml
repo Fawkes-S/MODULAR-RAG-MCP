@@ -1,6 +1,4 @@
-# Modular RAG MCP Server - Configuration
-# This is the main configuration file for the MCP Server.
-# Edit this file to configure LLM, Embedding, VectorStore, and other services.
+﻿# Modular RAG MCP Server - Configuration
 
 # =============================================================================
 # LLM Configuration
@@ -12,16 +10,20 @@ llm:
   api_key: ${LLM_API_KEY:-}
   timeout: 45
   max_retries: 2
-  retry_backoff_seconds: 0.25     # 第一次重试前等待多久
-  retry_backoff_multiplier: 2.0   # 等待序列约为 0.25s -> 0.5s -> 1.0s
-  retry_max_backoff_seconds: 2.0  # 单次重试等待时间上限
+  retry_backoff_seconds: 0.25
+  retry_backoff_multiplier: 2.0
+  retry_max_backoff_seconds: 2.0
 
 # =============================================================================
 # Embedding Configuration
 # =============================================================================
 embedding:
-  provider: openai
-  model: text-embedding-3-small
+  # 本地 HuggingFace 向量模型（固定使用项目内目录，避免运行时依赖外网）
+  provider: huggingface_local
+  model: data/models/all-MiniLM-L6-v2
+  device: cpu
+  batch_size: 32
+  normalize_embeddings: false
 
 # =============================================================================
 # Vector Store Configuration
@@ -42,15 +44,15 @@ retrieval:
 # =============================================================================
 rerank:
   enabled: false
-  provider: none  # Options: none, cross_encoder, llm
-  #model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  provider: none  # none / cross_encoder / llm
   top_m: 30
+  timeout: 10.0
 
 # =============================================================================
 # Vision LLM Configuration (for Image Captioning)
 # =============================================================================
 vision_llm:
-  enabled: true  # Set to true to enable vision capabilities
+  enabled: true
   provider: dashscope
   model: qwen3.5-plus
   base_url: ${VISION_LLM_BASE_URL:-https://coding.dashscope.aliyuncs.com/v1}
@@ -80,28 +82,17 @@ observability:
 # Ingestion Configuration
 # =============================================================================
 ingestion:
-  # Splitter 主配置路径：由 SplitterFactory 读取并创建对应实现。
-  splitter: "recursive"  # 可选: recursive / semantic / fixed_length / 你注册的自定义 provider
-
-  # 通用切分参数（大多数 splitter 都会读取）。
+  splitter: recursive
   chunk_size: 1000
   chunk_overlap: 200
-
-  # provider 专有参数（可选）。
-  # 例如当你有自定义 splitter 需要额外参数时放这里：
-  # splitter_kwargs:
-  #   token: "demo"
-  #   some_flag: true
-
   batch_size: 100
 
   # Chunk Refiner Configuration (C5)
   chunk_refiner:
-    use_llm: true  # Set to true to enable LLM-based refinement (requires LLM config)
-    # When use_llm is false or LLM call fails, falls back to rule-based refinement
+    use_llm: true
+    # prompt_path: config/prompts/chunk_refinement.txt
 
   # Metadata Enricher Configuration (C6)
   metadata_enricher:
-    use_llm: true  # Set to true to enable LLM-based enrichment (requires LLM config)
-    # When use_llm is false or LLM call fails, falls back to rule-based enrichment
+    use_llm: true
 

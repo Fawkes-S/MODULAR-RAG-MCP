@@ -1,6 +1,7 @@
-"""Settings loading and validation.
+﻿"""Settings loading and validation.
 
-将 `config/settings.yaml` 解析为强类型 `Settings` 对象，并在启动时做必要的 fail-fast 校验。
+将 `config/settings.yaml` 解析为强类型 `Settings` 对象，
+并在启动阶段执行 fail-fast 校验，避免配置问题延迟到运行时。
 """
 
 from __future__ import annotations
@@ -61,6 +62,11 @@ class EmbeddingSettings:
     deployment_name: str = ""
     api_version: str = ""
     timeout: float = 30.0
+    max_chars: int = 0
+    truncate_long_text: bool = False
+    device: str = "cpu"
+    batch_size: int = 32
+    normalize_embeddings: bool = False
 
 
 @dataclass(frozen=True)
@@ -129,7 +135,6 @@ class Settings:
     rerank: RerankSettings
     evaluation: EvaluationSettings
     observability: ObservabilitySettings
-    # 放在末尾并提供默认值，保证历史测试可继续构造 Settings。
     vision_llm: VisionLLMSettings = field(default_factory=VisionLLMSettings)
     ingestion: IngestionSettings = field(default_factory=IngestionSettings)
 
@@ -306,11 +311,7 @@ def load_settings(path: str) -> Settings:
     metadata_enricher_cfg = _as_dict(ingestion_cfg.get("metadata_enricher"))
 
     separators_raw = ingestion_cfg.get("separators", [])
-    separators = (
-        [str(item) for item in separators_raw if isinstance(item, str)]
-        if isinstance(separators_raw, list)
-        else []
-    )
+    separators = [str(item) for item in separators_raw if isinstance(item, str)] if isinstance(separators_raw, list) else []
 
     splitter_kwargs_raw = ingestion_cfg.get("splitter_kwargs", {})
     splitter_kwargs = dict(splitter_kwargs_raw) if isinstance(splitter_kwargs_raw, dict) else {}
@@ -327,14 +328,8 @@ def load_settings(path: str) -> Settings:
             timeout=_to_float(llm_cfg.get("timeout", 30.0), 30.0),
             max_retries=_to_int(llm_cfg.get("max_retries", 2), 2),
             retry_backoff_seconds=_to_float(llm_cfg.get("retry_backoff_seconds", 0.25), 0.25),
-            retry_backoff_multiplier=_to_float(
-                llm_cfg.get("retry_backoff_multiplier", 2.0),
-                2.0,
-            ),
-            retry_max_backoff_seconds=_to_float(
-                llm_cfg.get("retry_max_backoff_seconds", 2.0),
-                2.0,
-            ),
+            retry_backoff_multiplier=_to_float(llm_cfg.get("retry_backoff_multiplier", 2.0), 2.0),
+            retry_max_backoff_seconds=_to_float(llm_cfg.get("retry_max_backoff_seconds", 2.0), 2.0),
         ),
         embedding=EmbeddingSettings(
             provider=str(_read_nested(raw, "embedding.provider")),
@@ -345,6 +340,11 @@ def load_settings(path: str) -> Settings:
             deployment_name=str(embedding_cfg.get("deployment_name", "")),
             api_version=str(embedding_cfg.get("api_version", "")),
             timeout=_to_float(embedding_cfg.get("timeout", 30.0), 30.0),
+            max_chars=_to_int(embedding_cfg.get("max_chars", 0), 0),
+            truncate_long_text=bool(embedding_cfg.get("truncate_long_text", False)),
+            device=str(embedding_cfg.get("device", "cpu")),
+            batch_size=_to_int(embedding_cfg.get("batch_size", 32), 32),
+            normalize_embeddings=bool(embedding_cfg.get("normalize_embeddings", False)),
         ),
         vector_store=VectorStoreSettings(
             provider=str(_read_nested(raw, "vector_store.provider")),
@@ -384,14 +384,8 @@ def load_settings(path: str) -> Settings:
             max_image_size=_to_int(vision_cfg.get("max_image_size", 2048), 2048),
             max_retries=_to_int(vision_cfg.get("max_retries", 2), 2),
             retry_backoff_seconds=_to_float(vision_cfg.get("retry_backoff_seconds", 0.25), 0.25),
-            retry_backoff_multiplier=_to_float(
-                vision_cfg.get("retry_backoff_multiplier", 2.0),
-                2.0,
-            ),
-            retry_max_backoff_seconds=_to_float(
-                vision_cfg.get("retry_max_backoff_seconds", 2.0),
-                2.0,
-            ),
+            retry_backoff_multiplier=_to_float(vision_cfg.get("retry_backoff_multiplier", 2.0), 2.0),
+            retry_max_backoff_seconds=_to_float(vision_cfg.get("retry_max_backoff_seconds", 2.0), 2.0),
         ),
         ingestion=IngestionSettings(
             splitter=str(ingestion_cfg.get("splitter", "recursive")),
@@ -402,9 +396,7 @@ def load_settings(path: str) -> Settings:
             batch_size=_to_int(ingestion_cfg.get("batch_size", 100), 100),
             chunk_refiner=ChunkRefinerSettings(
                 use_llm=bool(chunk_refiner_cfg.get("use_llm", False)),
-                prompt_path=str(
-                    chunk_refiner_cfg.get("prompt_path", "config/prompts/chunk_refinement.txt")
-                ),
+                prompt_path=str(chunk_refiner_cfg.get("prompt_path", "config/prompts/chunk_refinement.txt")),
             ),
             metadata_enricher=MetadataEnricherSettings(
                 use_llm=bool(metadata_enricher_cfg.get("use_llm", False)),

@@ -49,16 +49,22 @@ class EmbeddingFactory:
     @classmethod
     def _ensure_builtin_providers(cls) -> None:
         """延迟注册内置 provider。"""
-        if cls._builtin_loaded and "openai" in cls._registry:
+        builtin_names = {"openai", "azure", "ollama", "huggingface_local"}
+        if cls._builtin_loaded and builtin_names.issubset(cls._registry.keys()):
             return
 
         from libs.embedding.azure_embedding import AzureEmbedding
+        from libs.embedding.huggingface_local_embedding import HuggingFaceLocalEmbedding
         from libs.embedding.ollama_embedding import OllamaEmbedding
         from libs.embedding.openai_embedding import OpenAIEmbedding
 
         cls._registry.setdefault("openai", lambda **kwargs: OpenAIEmbedding(**kwargs))
         cls._registry.setdefault("azure", lambda **kwargs: AzureEmbedding(**kwargs))
         cls._registry.setdefault("ollama", lambda **kwargs: OllamaEmbedding(**kwargs))
+        cls._registry.setdefault(
+            "huggingface_local",
+            lambda **kwargs: HuggingFaceLocalEmbedding(**kwargs),
+        )
         cls._builtin_loaded = True
 
     @staticmethod
@@ -106,6 +112,9 @@ class EmbeddingFactory:
             "max_chars",
             "truncate_long_text",
             "transport",
+            "device",
+            "batch_size",
+            "normalize_embeddings",
         ):
             if hasattr(embedding_obj, name):
                 kwargs[name] = getattr(embedding_obj, name)
@@ -143,12 +152,29 @@ class EmbeddingFactory:
                 "truncate_long_text",
                 "transport",
             },
+            "huggingface_local": {
+                "model",
+                "device",
+                "batch_size",
+                "normalize_embeddings",
+                "max_chars",
+                "truncate_long_text",
+            },
         }
 
         allowed = allowed_by_provider.get(provider)
         if allowed is None:
             # 自定义 provider：仅传递最常见字段，减少与测试桩签名冲突。
-            fallback_fields = {"model", "timeout", "max_chars", "truncate_long_text", "transport"}
+            fallback_fields = {
+                "model",
+                "timeout",
+                "max_chars",
+                "truncate_long_text",
+                "transport",
+                "device",
+                "batch_size",
+                "normalize_embeddings",
+            }
             return {key: value for key, value in kwargs.items() if key in fallback_fields}
 
         return {key: value for key, value in kwargs.items() if key in allowed}
