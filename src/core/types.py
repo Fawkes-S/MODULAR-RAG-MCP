@@ -160,8 +160,8 @@ class Chunk:
 
 @dataclass
 class ChunkRecord:
-    """存储/检索载体契约。"""
-    """代表已完全处理完毕、可随时存储和检索的数据块。
+    """存储/检索载体契约。
+    代表已完全处理完毕、可随时存储和检索的数据块。
 
     This is the output of the embedding pipeline and the data structure
     stored in vector databases. It extends Chunk with vector representations.

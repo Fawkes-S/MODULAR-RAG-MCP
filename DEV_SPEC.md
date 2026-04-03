@@ -1989,8 +1989,8 @@ dashboard:
 | C6 | MetadataEnricher | [x] | 2026-03-30 | MetadataEnricher(rule+LLM+fallback) + trace统计 + contract tests(含真实LLM用例) |
 | C7 | ImageCaptioner | [x] | 2026-03-30 | ImageCaptioner + fallback + prompt + tests passed |
 | C8 | DenseEncoder | [x] | 2026-03-30 | DenseEncoder(batch encode + contract checks + tests passed) |
-| C9 | SparseEncoder | [ ] | | |
-| C10 | BatchProcessor | [ ] | | |
+| C9 | SparseEncoder | [x] | 2026-03-31 | SparseEncoder(BM25 term weights + empty-text contract + tests passed) |
+| C10 | BatchProcessor | [x] | 2026-04-03 | BatchProcessor(batch split + dense/sparse orchestration + per-batch timing + tests passed) |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
 | C12 | VectorUpserter（幂等upsert） | [ ] | | |
 | C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
@@ -3229,6 +3229,8 @@ RAG 系统的上限取决于其对特定业务数据的理解深度。未来的�
     - **未来演进**：不再硬编码使用混合检索。Server 可以将 `keyword_search` 和 `semantic_search` 作为独立工具暴露。Agent 可以根据用户意图自主判断：如果是搜人名，只用关键词搜；如果是搜概念，通过语义搜。这种工具使用的灵活性正是 Agentic RAG 的核心魅力。
 
 这种演进方向将把本项目从一个“智能搜索引擎”升级为一个“智能研究助理”的基础设施底座。
+
+
 
 
 

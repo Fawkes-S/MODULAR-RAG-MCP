@@ -79,8 +79,8 @@
 | C6 | MetadataEnricher | [x] | 2026-03-30 | MetadataEnricher(rule+LLM+fallback) + trace统计 + contract tests(含真实LLM用例) |
 | C7 | ImageCaptioner | [x] | 2026-03-30 | ImageCaptioner + fallback + prompt + tests passed |
 | C8 | DenseEncoder | [x] | 2026-03-30 | DenseEncoder(batch encode + contract checks + tests passed) |
-| C9 | SparseEncoder | [ ] | | |
-| C10 | BatchProcessor | [ ] | | |
+| C9 | SparseEncoder | [x] | 2026-03-31 | SparseEncoder(BM25 term weights + empty-text contract + tests passed) |
+| C10 | BatchProcessor | [x] | 2026-04-03 | BatchProcessor(batch split + dense/sparse orchestration + per-batch timing + tests passed) |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
 | C12 | VectorUpserter（幂等upsert） | [ ] | | |
 | C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
