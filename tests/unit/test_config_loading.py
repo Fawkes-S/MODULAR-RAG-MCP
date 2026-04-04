@@ -75,7 +75,7 @@ def test_load_settings_success() -> None:
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
     assert isinstance(settings, Settings)
     assert settings.embedding.provider == "huggingface_local"
-    assert settings.embedding.model == "data/models/all-MiniLM-L6-v2"
+    assert Path(settings.embedding.model).resolve() == (PROJECT_ROOT / "data" / "models" / "all-MiniLM-L6-v2").resolve()
     assert settings.retrieval.top_k > 0
 
     # 确保 llm 扩展字段可读取。
@@ -312,4 +312,104 @@ def test_main_startup_loads_settings() -> None:
     )
     assert proc.returncode == 0, proc.stderr
     assert "Modular RAG MCP project skeleton is ready." in proc.stdout
+
+
+
+def test_load_settings_resolves_huggingface_local_model_path_against_project_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    Given:
+        一份 `embedding.provider=huggingface_local` 的配置，模型路径写成相对路径
+        `data/models/all-MiniLM-L6-v2`，且当前工作目录切到其他子目录。
+
+    When:
+        调用 `load_settings(path)` 读取该配置。
+
+    Then:
+        `settings.embedding.model` 应被解析为可用绝对路径，
+        指向该配置所属项目根目录下的模型目录，而不是当前 cwd 下的同名相对路径。
+    """
+    tmp_root = PROJECT_ROOT / "tests" / ".tmp" / "hf_model_path_resolution"
+    model_dir = tmp_root / "data" / "models" / "all-MiniLM-L6-v2"
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    settings_path = tmp_root / "config" / "settings.yaml"
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    settings_path.write_text(
+        """
+llm:
+  provider: openai
+embedding:
+  provider: huggingface_local
+  model: data/models/all-MiniLM-L6-v2
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  provider: ragas
+observability:
+  log_level: INFO
+vision_llm:
+  enabled: false
+""".strip(),
+        encoding="utf-8",
+    )
+
+    other_cwd = tmp_root / "tests" / "integration"
+    other_cwd.mkdir(parents=True, exist_ok=True)
+    monkeypatch.chdir(other_cwd)
+
+    settings = load_settings(str(settings_path))
+
+    assert Path(settings.embedding.model).is_absolute()
+    assert Path(settings.embedding.model).resolve() == model_dir.resolve()
+
+
+def test_load_settings_keeps_remote_embedding_model_name_unchanged() -> None:
+    """
+    Given:
+        `huggingface_local` 的模型名是远程仓库标识
+        `sentence-transformers/all-MiniLM-L6-v2`（非本地目录）。
+
+    When:
+        调用 `load_settings(path)`。
+
+    Then:
+        配置值应保持原样，不应被误改为本地绝对路径。
+    """
+    tmp_root = PROJECT_ROOT / "tests" / ".tmp" / "hf_remote_model_name"
+    tmp_root.mkdir(parents=True, exist_ok=True)
+    settings_path = tmp_root / "config" / "settings.yaml"
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+
+    remote_model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    settings_path.write_text(
+        f"""
+llm:
+  provider: openai
+embedding:
+  provider: huggingface_local
+  model: {remote_model_name}
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  provider: ragas
+observability:
+  log_level: INFO
+vision_llm:
+  enabled: false
+""".strip(),
+        encoding="utf-8",
+    )
+
+    settings = load_settings(str(settings_path))
+    assert settings.embedding.model == remote_model_name
 

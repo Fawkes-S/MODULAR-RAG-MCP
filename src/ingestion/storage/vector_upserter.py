@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from time import perf_counter
 
@@ -82,6 +83,7 @@ class VectorUpserter:
             # 保留上游 ID，便于“存储记录 -> 原始切分片段”回溯。
             metadata["source_chunk_id"] = record.id
             metadata["chunk_id"] = storage_id
+            metadata = self._normalize_metadata_for_vector_store(metadata)
 
             payload_records.append(
                 {
@@ -167,3 +169,49 @@ class VectorUpserter:
         raise ValueError(
             f"ChunkRecord {record.id} missing metadata.chunk_index and cannot infer from id"
         )
+
+    @staticmethod
+    def _normalize_metadata_for_vector_store(metadata: dict[str, object]) -> dict[str, object]:
+        """把复杂 metadata 归一化为 Chroma 可接收的值类型。
+
+        背景：
+        - Chroma metadata 仅接受 `str/int/float/bool` 以及“同构的原子类型 list”。
+        - 像 `heading_outline: list[dict]`、`images: list[dict]` 这类结构会在 upsert 阶段报错。
+
+        策略：
+        - 原子类型直接保留；
+        - 空 list、异构 list、或 list[dict] 统一 JSON 字符串化；
+        - dict 统一 JSON 字符串化；
+        - `None` 字段丢弃，避免存储层校验失败。
+        """
+
+        def _is_allowed_scalar(value: object) -> bool:
+            return isinstance(value, (str, int, float, bool))
+
+        normalized: dict[str, object] = {}
+        for key, value in metadata.items():
+            if value is None:
+                continue
+
+            if _is_allowed_scalar(value):
+                normalized[key] = value
+                continue
+
+            if isinstance(value, list):
+                if (
+                    value
+                    and all(_is_allowed_scalar(item) for item in value)
+                    and len({type(item) for item in value}) == 1
+                ):
+                    normalized[key] = value
+                else:
+                    normalized[key] = json.dumps(value, ensure_ascii=False, sort_keys=True)
+                continue
+
+            if isinstance(value, dict):
+                normalized[key] = json.dumps(value, ensure_ascii=False, sort_keys=True)
+                continue
+
+            normalized[key] = str(value)
+
+        return normalized

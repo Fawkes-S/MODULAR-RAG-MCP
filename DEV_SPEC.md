@@ -1994,14 +1994,14 @@ dashboard:
 | C11 | BM25Indexer（倒排索引+IDF计算） | [x] | 2026-04-03 | BM25Indexer(build/load/query + IDF formula + incremental/rebuild + tests passed) |
 | C12 | VectorUpserter（幂等upsert） | [x] | 2026-04-03 | VectorUpserter(stable id + idempotent upsert + trace stage) + tests passed |
 | C13 | ImageStorage（图片存储+SQLite索引） | [x] | 2026-04-04 | ImageStorage(file save + SQLite index + WAL + collection/doc_hash filters) + tests passed |
-| C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
-| C15 | 脚本入口 ingest.py | [ ] | | |
+| C14 | Pipeline 编排（MVP 串起来） | [x] | 2026-04-04 | IngestionPipeline(end-to-end orchestration + stage error wrapping + incremental skip/force) + integration tests passed |
+| C15 | 脚本入口 ingest.py | [x] | 2026-04-04 | scripts/ingest.py(cli path/collection/force + dir batch pdf) + tests/e2e/test_data_ingestion.py passed |
 
 #### 阶段 D：Retrieval MVP
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| D1 | QueryProcessor（关键词提取 + filters） | [ ] | | |
+| D1 | QueryProcessor（关键词提取 + filters） | [x] | 2026-04-04 | QueryProcessor(规则分词+停用词+内联filters解析) + tests/unit/test_query_processor.py passed |
 | D2 | DenseRetriever（调用 VectorStore.query） | [ ] | | |
 | D3 | SparseRetriever（BM25 查询） | [ ] | | |
 | D4 | RRF Fusion | [ ] | | |
@@ -3229,6 +3229,8 @@ RAG 系统的上限取决于其对特定业务数据的理解深度。未来的�
     - **未来演进**：不再硬编码使用混合检索。Server 可以将 `keyword_search` 和 `semantic_search` 作为独立工具暴露。Agent 可以根据用户意图自主判断：如果是搜人名，只用关键词搜；如果是搜概念，通过语义搜。这种工具使用的灵活性正是 Agentic RAG 的核心魅力。
 
 这种演进方向将把本项目从一个“智能搜索引擎”升级为一个“智能研究助理”的基础设施底座。
+
+
 
 
 

@@ -236,6 +236,32 @@ def _resolve_env_placeholders(data: Any) -> Any:
     return data
 
 
+def _resolve_existing_path_from_candidates(raw_value: str, candidates: list[Path]) -> str:
+    """将相对路径解析为“已存在”的绝对路径；找不到则返回原值。
+
+    设计意图：
+    - 配置里常用相对路径（例如 `data/models/...`），但运行时 cwd 可能变化（IDE/测试目录）。
+    - 对本地路径做“存在即绝对化”，可避免 cwd 差异导致找不到文件。
+    """
+    if not isinstance(raw_value, str):
+        return str(raw_value)
+
+    value = raw_value.strip()
+    if not value:
+        return value
+
+    path_obj = Path(value)
+    if path_obj.is_absolute():
+        return str(path_obj)
+
+    # 先试 cwd（兼容已有行为），再试 settings 目录与项目根目录。
+    for base in candidates:
+        candidate = (base / path_obj).resolve()
+        if candidate.exists():
+            return str(candidate)
+
+    return raw_value
+
 def validate_settings(settings: Settings) -> None:
     """校验关键配置字段并做边界检查。"""
     if not settings.llm.provider:
@@ -316,6 +342,16 @@ def load_settings(path: str) -> Settings:
     splitter_kwargs_raw = ingestion_cfg.get("splitter_kwargs", {})
     splitter_kwargs = dict(splitter_kwargs_raw) if isinstance(splitter_kwargs_raw, dict) else {}
 
+    project_root = settings_path.resolve().parent.parent
+    settings_dir = settings_path.resolve().parent
+
+    embedding_provider = str(_read_nested(raw, "embedding.provider"))
+    embedding_model = str(embedding_cfg.get("model", ""))
+    if embedding_provider.strip().lower() == "huggingface_local":
+        embedding_model = _resolve_existing_path_from_candidates(
+            embedding_model,
+            candidates=[Path.cwd(), settings_dir, project_root],
+        )
     settings = Settings(
         llm=LLMSettings(
             provider=str(_read_nested(raw, "llm.provider")),
@@ -332,8 +368,8 @@ def load_settings(path: str) -> Settings:
             retry_max_backoff_seconds=_to_float(llm_cfg.get("retry_max_backoff_seconds", 2.0), 2.0),
         ),
         embedding=EmbeddingSettings(
-            provider=str(_read_nested(raw, "embedding.provider")),
-            model=str(embedding_cfg.get("model", "")),
+            provider=embedding_provider,
+            model=embedding_model,
             api_key=str(embedding_cfg.get("api_key", "")),
             base_url=str(embedding_cfg.get("base_url", "https://api.openai.com/v1")),
             endpoint=str(embedding_cfg.get("endpoint", "")),
@@ -405,3 +441,4 @@ def load_settings(path: str) -> Settings:
     )
     validate_settings(settings)
     return settings
+

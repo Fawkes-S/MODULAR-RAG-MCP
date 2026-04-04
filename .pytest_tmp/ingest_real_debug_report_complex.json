@@ -1,0 +1,264 @@
+[
+  {
+    "source_path": "Q:\\Code\\PythonProject\\MODULAR-RAG-MCP\\tests\\fixtures\\sample_documents\\complex_technical_doc.pdf",
+    "status": "ok",
+    "result": {
+      "skipped": false,
+      "file_hash": "81d8141b708464255e5dc6f5fd68205bd1b56f662b377b1feddcbd02b9839efe",
+      "chunk_count": 11,
+      "vector_count": 11,
+      "image_count": 3,
+      "bm25_terms": 508,
+      "trace_id": "336dcde45fe74647b9a06a20e02f9216"
+    },
+    "trace": {
+      "trace_id": "336dcde45fe74647b9a06a20e02f9216",
+      "trace_type": "ingestion",
+      "created_at": "2026-04-04T15:58:02.538765+00:00",
+      "stages": [
+        {
+          "stage_name": "pipeline.integrity.compute_sha256",
+          "status": "ok",
+          "recorded_at": "2026-04-04T15:58:02.540767+00:00",
+          "details": {
+            "status": "ok",
+            "result": "81d8141b708464255e5dc6f5fd68205bd1b56f662b377b1feddcbd02b9839efe"
+          },
+          "elapsed_ms": 0.7015999872237444
+        },
+        {
+          "stage_name": "pipeline.integrity.should_skip",
+          "status": "ok",
+          "recorded_at": "2026-04-04T15:58:02.542765+00:00",
+          "details": {
+            "status": "ok",
+            "result": false
+          },
+          "elapsed_ms": 1.8478999845683575
+        },
+        {
+          "stage_name": "pipeline.load",
+          "status": "ok",
+          "recorded_at": "2026-04-04T15:58:02.890284+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "Document"
+          },
+          "elapsed_ms": 347.41190006025136
+        },
+        {
+          "stage_name": "pipeline.split",
+          "status": "ok",
+          "recorded_at": "2026-04-04T15:58:02.891284+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "list",
+            "count": 11
+          },
+          "elapsed_ms": 0.5793999880552292
+        },
+        {
+          "stage_name": "transform.chunk_refiner",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:11:23.914172+00:00",
+          "details": {
+            "total": 11,
+            "llm_success": 7,
+            "rule_fallback": 4,
+            "errors": 0
+          },
+          "elapsed_ms": 801023.0731000192
+        },
+        {
+          "stage_name": "pipeline.transform.ChunkRefiner",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:11:23.914172+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "list",
+            "count": 11
+          },
+          "elapsed_ms": 801023.107899935
+        },
+        {
+          "stage_name": "transform.metadata_enricher",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:21:45.544614+00:00",
+          "details": {
+            "total": 11,
+            "llm_success": 10,
+            "rule_fallback": 1,
+            "errors": 0,
+            "llm_enabled": true,
+            "llm_provider": "openai"
+          },
+          "elapsed_ms": 621629.9578000326
+        },
+        {
+          "stage_name": "pipeline.transform.MetadataEnricher",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:21:45.544614+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "list",
+            "count": 11
+          },
+          "elapsed_ms": 621630.0295999972
+        },
+        {
+          "stage_name": "transform.image_captioner",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.694567+00:00",
+          "details": {
+            "total": 11,
+            "chunks_with_images": 5,
+            "image_refs_total": 5,
+            "captioned_images": 0,
+            "fallback_images": 5,
+            "errors": 0,
+            "vision_enabled": true,
+            "vision_provider": "dashscope"
+          },
+          "elapsed_ms": 685148.1483000098
+        },
+        {
+          "stage_name": "pipeline.transform.ImageCaptioner",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.694567+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "list",
+            "count": 11
+          },
+          "elapsed_ms": 685148.1806000229
+        },
+        {
+          "stage_name": "embedding.dense_encoder",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.819167+00:00",
+          "details": {
+            "total": 11,
+            "batches": 1,
+            "vector_dim": 384,
+            "batch_size": 100,
+            "provider": "huggingface_local"
+          },
+          "elapsed_ms": 124.63079998269677
+        },
+        {
+          "stage_name": "embedding.sparse_encoder",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.820166+00:00",
+          "details": {
+            "total": 11,
+            "batches": 1,
+            "total_tokens": 1095,
+            "non_empty_chunks": 11,
+            "batch_size": 100,
+            "backend": "bm25"
+          },
+          "elapsed_ms": 0.636099954135716
+        },
+        {
+          "stage_name": "embedding.batch_processor.batch",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.820166+00:00",
+          "details": {
+            "batch_index": 1,
+            "batch_size": 11,
+            "dense_elapsed_ms": 124.64960000943393,
+            "sparse_elapsed_ms": 0.6483999313786626
+          },
+          "elapsed_ms": 125.57429994922131
+        },
+        {
+          "stage_name": "embedding.batch_processor",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.820166+00:00",
+          "details": {
+            "total": 11,
+            "batches": 1,
+            "batch_size": 100,
+            "dense_total_elapsed_ms": 124.64960000943393,
+            "sparse_total_elapsed_ms": 0.6483999313786626,
+            "dense_stage": "embedding.dense_encoder",
+            "sparse_stage": "embedding.sparse_encoder"
+          },
+          "elapsed_ms": 125.58570003602654
+        },
+        {
+          "stage_name": "pipeline.encode",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.820166+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "list",
+            "count": 11
+          },
+          "elapsed_ms": 125.6079999729991
+        },
+        {
+          "stage_name": "pipeline.store.images",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.841056+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "tuple",
+            "count": 2
+          },
+          "elapsed_ms": 20.269199972972274
+        },
+        {
+          "stage_name": "storage.vector_upserter",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.870073+00:00",
+          "details": {
+            "total": 11,
+            "upserted": 11,
+            "provider": "chroma"
+          },
+          "elapsed_ms": 29.32840003632009
+        },
+        {
+          "stage_name": "pipeline.store.vector_upsert",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.870073+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "list",
+            "count": 11
+          },
+          "elapsed_ms": 29.37120001297444
+        },
+        {
+          "stage_name": "pipeline.store.bm25",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.874073+00:00",
+          "details": {
+            "status": "ok",
+            "result_type": "dict",
+            "keys": [
+              "avg_doc_length",
+              "documents",
+              "persist_path",
+              "rebuild",
+              "terms"
+            ],
+            "terms": 508
+          },
+          "elapsed_ms": 3.0248999828472733
+        },
+        {
+          "stage_name": "pipeline.integrity.mark_success",
+          "status": "ok",
+          "recorded_at": "2026-04-04T16:33:10.879577+00:00",
+          "details": {
+            "status": "ok",
+            "result": "none"
+          },
+          "elapsed_ms": 5.001299898140132
+        }
+      ]
+    }
+  }
+]

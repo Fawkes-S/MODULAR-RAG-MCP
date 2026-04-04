@@ -212,3 +212,26 @@ def test_vector_upserter_records_trace_stage_details() -> None:
     assert stage["details"]["upserted"] == 1
     assert stage["details"]["provider"] == "chroma"
     assert "elapsed_ms" in stage
+
+def test_vector_upserter_serializes_complex_metadata_for_vector_store_compatibility() -> None:
+    """
+    Given:
+        metadata 中包含 `list[dict]` 等 Chroma 不接受的复杂结构。
+    When:
+        调用 `upsert()` 构建实际写入 payload。
+    Then:
+        复杂字段应被序列化为字符串，避免向量库 metadata 校验报错。
+    """
+    fake_store = _FakeVectorStore()
+    upserter = VectorUpserter(settings=_make_settings(), vector_store=fake_store)
+    record = _make_record(chunk_id="doc_0000_aaaa1111", text="complex-meta", chunk_index=0)
+    record.metadata["heading_outline"] = [{"level": 1, "title": "Overview"}]
+    record.metadata["images"] = [{"id": "img_1", "path": "data/images/img_1.png"}]
+    record.metadata["tags"] = ["rag", "pipeline"]
+
+    upserter.upsert([record])
+
+    payload_meta = fake_store.upsert_calls[0][0]["metadata"]
+    assert isinstance(payload_meta["heading_outline"], str)
+    assert isinstance(payload_meta["images"], str)
+    assert isinstance(payload_meta["tags"], list)
