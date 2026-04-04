@@ -81,9 +81,9 @@
 | C8 | DenseEncoder | [x] | 2026-03-30 | DenseEncoder(batch encode + contract checks + tests passed) |
 | C9 | SparseEncoder | [x] | 2026-03-31 | SparseEncoder(BM25 term weights + empty-text contract + tests passed) |
 | C10 | BatchProcessor | [x] | 2026-04-03 | BatchProcessor(batch split + dense/sparse orchestration + per-batch timing + tests passed) |
-| C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
-| C12 | VectorUpserter（幂等upsert） | [ ] | | |
-| C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
+| C11 | BM25Indexer（倒排索引+IDF计算） | [x] | 2026-04-03 | BM25Indexer(build/load/query + IDF formula + incremental/rebuild + tests passed) |
+| C12 | VectorUpserter（幂等upsert） | [x] | 2026-04-03 | VectorUpserter(stable id + idempotent upsert + trace stage) + tests passed |
+| C13 | ImageStorage（图片存储+SQLite索引） | [x] | 2026-04-04 | ImageStorage(file save + SQLite index + WAL + collection/doc_hash filters) + tests passed |
 | C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
 | C15 | 脚本入口 ingest.py | [ ] | | |
 
