@@ -13,7 +13,7 @@ SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from core.types import Chunk, ChunkRecord, Document, IMAGE_PLACEHOLDER_TEMPLATE
+from core.types import Chunk, ChunkRecord, Document, IMAGE_PLACEHOLDER_TEMPLATE, RetrievalResult
 
 
 def test_document_roundtrip_serialization_is_stable() -> None:
@@ -109,6 +109,30 @@ def test_chunk_record_roundtrip_serialization_is_stable() -> None:
 
     assert restored.dense_vector == [0.1, 0.2, 0.3]
     assert restored.sparse_vector == {"token_a": 1.0, "token_b": 0.5}
+
+
+def test_retrieval_result_roundtrip_serialization_is_stable() -> None:
+    """
+    Given:
+        一个包含 `chunk_id/score/text/metadata` 的 RetrievalResult。
+    When:
+        执行 `to_dict()` 与 `from_dict()` roundtrip。
+    Then:
+        检索结果关键字段保持一致，满足 D2 的统一返回契约。
+    """
+    result = RetrievalResult(
+        chunk_id="chunk_1",
+        score=0.88,
+        text="Azure OpenAI 配置说明",
+        metadata={"source_path": "docs/a.pdf", "page": 2},
+    )
+
+    restored = RetrievalResult.from_dict(result.to_dict())
+
+    assert restored.chunk_id == "chunk_1"
+    assert restored.score == 0.88
+    assert restored.text == "Azure OpenAI 配置说明"
+    assert restored.metadata == {"source_path": "docs/a.pdf", "page": 2}
 
 
 def test_metadata_requires_source_path() -> None:

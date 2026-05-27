@@ -241,3 +241,52 @@ class ChunkRecord:
             dense_vector=data.get("dense_vector"),
             sparse_vector=data.get("sparse_vector"),
         )
+
+
+@dataclass
+class RetrievalResult:
+    """检索结果契约（D2）。
+
+    用途：
+    - 作为 Dense/Sparse/Hybrid 检索阶段的统一返回结构；
+    - 保证后续 Fusion、Rerank、ResponseBuilder 使用稳定字段，不依赖底层存储返回 shape。
+
+    Attributes:
+        chunk_id: 命中 chunk 的唯一标识（通常来自向量库记录 ID）。
+        score: 相关性分数（越高越相关）。
+        text: 命中的正文文本。
+        metadata: 命中片段的附加元数据（来源路径、页码、标签等）。
+    """
+
+    chunk_id: str
+    score: float
+    text: str
+    metadata: dict[str, Any]
+
+    def __post_init__(self) -> None:
+        self.chunk_id = _ensure_non_empty_string(self.chunk_id, "chunk_id")
+        self.score = float(self.score)
+        if not isinstance(self.text, str):
+            raise ValueError("text must be string")
+        if not isinstance(self.metadata, dict):
+            raise ValueError("metadata must be dict")
+        self.metadata = dict(self.metadata)
+
+    def to_dict(self) -> dict[str, Any]:
+        """序列化为稳定字典结构。"""
+        return {
+            "chunk_id": self.chunk_id,
+            "score": self.score,
+            "text": self.text,
+            "metadata": dict(self.metadata),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "RetrievalResult":
+        """从字典反序列化。"""
+        return cls(
+            chunk_id=str(data.get("chunk_id", "")),
+            score=float(data.get("score", 0.0)),
+            text=str(data.get("text", "")),
+            metadata=dict(data.get("metadata", {})),
+        )

@@ -92,7 +92,7 @@
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | D1 | QueryProcessor（关键词提取 + filters） | [x] | 2026-04-04 | QueryProcessor(规则分词+停用词+内联filters解析) + tests/unit/test_query_processor.py passed |
-| D2 | DenseRetriever（调用 VectorStore.query） | [ ] | | |
+| D2 | DenseRetriever（调用 VectorStore.query） | [x] | 2026-04-05 | RetrievalResult + DenseRetriever(embed->query编排) + tests/unit/test_dense_retriever.py passed |
 | D3 | SparseRetriever（BM25 查询） | [ ] | | |
 | D4 | RRF Fusion | [ ] | | |
 | D5 | HybridSearch 编排 | [ ] | | |
