@@ -124,3 +124,45 @@ def test_vector_store_factory_can_create_chroma() -> None:
         if "store" in locals():
             store._client.delete_collection(collection_name)
         shutil.rmtree(workdir, ignore_errors=True)
+
+
+def test_chroma_store_get_by_ids_returns_records_in_requested_order() -> None:
+    """
+    Given:
+        ChromaStore 中已写入两条记录，包含 text 与 metadata。
+    When:
+        调用 `get_by_ids(["c2", "c1"])` 按指定顺序批量读取。
+    Then:
+        返回结果应包含 `id/text/metadata`，且顺序与请求 ID 顺序一致。
+    """
+    workdir = _isolated_workdir()
+    persist_dir = _stable_persist_dir(workdir)
+    collection_name = _new_collection("test_get_by_ids")
+
+    store = ChromaStore(persist_dir=persist_dir, collection_name=collection_name)
+    try:
+        store.upsert(
+            [
+                {
+                    "id": "c1",
+                    "vector": [1.0, 0.0],
+                    "metadata": {"source_path": "docs/a.pdf"},
+                    "text": "doc one",
+                },
+                {
+                    "id": "c2",
+                    "vector": [0.0, 1.0],
+                    "metadata": {"source_path": "docs/b.pdf"},
+                    "text": "doc two",
+                },
+            ]
+        )
+
+        rows = store.get_by_ids(["c2", "c1"])
+
+        assert [row["id"] for row in rows] == ["c2", "c1"]
+        assert rows[0]["text"] == "doc two"
+        assert rows[1]["metadata"]["source_path"] == "docs/a.pdf"
+    finally:
+        store._client.delete_collection(collection_name)
+        shutil.rmtree(workdir, ignore_errors=True)

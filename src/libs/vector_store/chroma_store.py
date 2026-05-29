@@ -137,3 +137,33 @@ class ChromaStore(BaseVectorStore):
             )
 
         return results
+
+    def get_by_ids(self, ids: list[str], trace: Any | None = None) -> list[dict[str, Any]]:
+        """按 ID 批量读取记录。"""
+        _ = trace
+        if not isinstance(ids, list):
+            raise ValueError("[chroma] ValidationError: ids must be list[str]")
+
+        normalized_ids: list[str] = []
+        for idx, item in enumerate(ids):
+            if not isinstance(item, str) or not item.strip():
+                raise ValueError(f"[chroma] ValidationError: ids[{idx}] must be non-empty string")
+            normalized_ids.append(item.strip())
+
+        if not normalized_ids:
+            return []
+
+        raw = self._collection.get(ids=normalized_ids, include=["metadatas", "documents"])
+        found_ids = raw.get("ids") or []
+        metadatas = raw.get("metadatas") or []
+        documents = raw.get("documents") or []
+
+        by_id: dict[str, dict[str, Any]] = {}
+        for i, item_id in enumerate(found_ids):
+            item_key = str(item_id)
+            metadata = metadatas[i] if i < len(metadatas) and isinstance(metadatas[i], dict) else {}
+            text = documents[i] if i < len(documents) and isinstance(documents[i], str) else ""
+            by_id[item_key] = {"id": item_key, "text": text, "metadata": metadata}
+
+        # 返回顺序与入参 ids 一致，便于上层稳定对齐分数与正文。
+        return [by_id[item_id] for item_id in normalized_ids if item_id in by_id]

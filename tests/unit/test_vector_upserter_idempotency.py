@@ -50,6 +50,10 @@ class _FakeVectorStore(BaseVectorStore):
         _ = vector, top_k, filters, trace
         return []
 
+    def get_by_ids(self, ids: list[str], trace: Any | None = None) -> list[dict[str, Any]]:
+        _ = ids, trace
+        return []
+
 
 def _make_settings() -> Settings:
     return Settings(

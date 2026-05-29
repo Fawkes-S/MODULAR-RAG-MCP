@@ -68,6 +68,28 @@ class _FakeVectorStore(BaseVectorStore):
         scored.sort(key=lambda x: x["score"], reverse=True)
         return scored[:top_k]
 
+    def get_by_ids(self, ids: list[str], trace: Any | None = None) -> list[dict[str, Any]]:
+        """按输入顺序返回命中的记录。"""
+        _ = trace
+        if not isinstance(ids, list):
+            raise ValueError("ids must be list[str]")
+
+        results: list[dict[str, Any]] = []
+        for idx, chunk_id in enumerate(ids):
+            if not isinstance(chunk_id, str) or not chunk_id.strip():
+                raise ValueError(f"ids[{idx}] must be non-empty string")
+            item = self._records.get(chunk_id)
+            if item is None:
+                continue
+            results.append(
+                {
+                    "id": item["id"],
+                    "text": "",
+                    "metadata": item["metadata"],
+                }
+            )
+        return results
+
 
 @pytest.fixture()
 def isolated_registry() -> dict[str, object]:

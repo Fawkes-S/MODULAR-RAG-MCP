@@ -47,3 +47,16 @@ class BaseVectorStore(ABC):
             list[dict[str, Any]]: 检索结果列表。每条结果至少包含 `id` 与 `score` 字段。
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def get_by_ids(self, ids: list[str], trace: Any | None = None) -> list[dict[str, Any]]:
+        """按 chunk ID 批量读取记录。
+
+        Args:
+            ids: 待查询的 chunk ID 列表。
+            trace: 可选链路上下文。
+
+        Returns:
+            list[dict[str, Any]]: 每条记录至少包含 `id`、`text`、`metadata`。
+        """
+        raise NotImplementedError
