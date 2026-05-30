@@ -2004,7 +2004,7 @@ dashboard:
 | D1 | QueryProcessor（关键词提取 + filters） | [x] | 2026-04-04 | QueryProcessor(规则分词+停用词+内联filters解析) + tests/unit/test_query_processor.py passed |
 | D2 | DenseRetriever（调用 VectorStore.query） | [x] | 2026-04-05 | RetrievalResult + DenseRetriever(embed->query编排) + tests/unit/test_dense_retriever.py passed |
 | D3 | SparseRetriever（BM25 查询） | [x] | 2026-05-27 | Base/Chroma get_by_ids + SparseRetriever(BM25->正文回填) + tests/unit/test_sparse_retriever.py passed |
-| D4 | RRF Fusion | [ ] | | |
+| D4 | RRF Fusion | [x] | 2026-05-29 | RRFFusion(deterministic + configurable k) + tests/unit/test_fusion_rrf.py passed |
 | D5 | HybridSearch 编排 | [ ] | | |
 | D6 | Reranker（Core 层编排 + Fallback） | [ ] | | |
 | D7 | 脚本入口 query.py（查询可用） | [ ] | | |
