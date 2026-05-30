@@ -96,7 +96,7 @@
 | D3 | SparseRetriever（BM25 查询） | [x] | 2026-05-27 | Base/Chroma get_by_ids + SparseRetriever(BM25->正文回填) + tests/unit/test_sparse_retriever.py passed |
 | D4 | RRF Fusion | [x] | 2026-05-29 | RRFFusion(deterministic + configurable k) + tests/unit/test_fusion_rrf.py passed |
 | D5 | HybridSearch 编排 | [x] | 2026-05-30 | HybridSearch(query->dense/sparse->RRF->post-filter) + tests/integration/test_hybrid_search.py passed |
-| D6 | Reranker（Core 层编排 + Fallback） | [ ] | | |
+| D6 | Reranker（Core 层编排 + Fallback） | [x] | 2026-05-31 | Core Reranker(fallback=true + reason) + tests/unit/test_reranker_fallback.py passed |
 | D7 | 脚本入口 query.py（查询可用） | [ ] | | |
 
 #### 阶段 E：MCP Server 层与 Tools
