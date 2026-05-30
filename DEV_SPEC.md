@@ -2005,7 +2005,7 @@ dashboard:
 | D2 | DenseRetriever（调用 VectorStore.query） | [x] | 2026-04-05 | RetrievalResult + DenseRetriever(embed->query编排) + tests/unit/test_dense_retriever.py passed |
 | D3 | SparseRetriever（BM25 查询） | [x] | 2026-05-27 | Base/Chroma get_by_ids + SparseRetriever(BM25->正文回填) + tests/unit/test_sparse_retriever.py passed |
 | D4 | RRF Fusion | [x] | 2026-05-29 | RRFFusion(deterministic + configurable k) + tests/unit/test_fusion_rrf.py passed |
-| D5 | HybridSearch 编排 | [ ] | | |
+| D5 | HybridSearch 编排 | [x] | 2026-05-30 | HybridSearch(query->dense/sparse->RRF->post-filter) + tests/integration/test_hybrid_search.py passed |
 | D6 | Reranker（Core 层编排 + Fallback） | [ ] | | |
 | D7 | 脚本入口 query.py（查询可用） | [ ] | | |
 
