@@ -2016,7 +2016,7 @@ dashboard:
 | E1 | MCP Server 入口与 Stdio 约束 | [x] | 2026-06-05 | minimal stdio JSON-RPC server + initialize integration test passed |
 | E2 | Protocol Handler 协议解析与能力协商 | [x] | 2026-06-06 | ProtocolHandler(initialize/tools/list/tools/call + JSON-RPC errors) + tests/unit/test_protocol_handler.py passed |
 | E3 | query_knowledge_hub Tool | [x] | 2026-06-06 | query tool + response builder + citations + mcp integration tests passed |
-| E4 | list_collections Tool | [ ] | | |
+| E4 | list_collections Tool | [x] | 2026-06-06 | list_collections directory scan tool + unit tests passed |
 | E5 | get_document_summary Tool | [ ] | | |
 | E6 | 多模态返回组装（Text + Image） | [ ] | | |
 
