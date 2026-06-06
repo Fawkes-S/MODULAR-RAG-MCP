@@ -1,4 +1,4 @@
-"""ProtocolHandler：MCP/JSON-RPC 协议解析与能力协商（E2）。"""
+"""ProtocolHandler：MCP/JSON-RPC 协议解析与 tool 路由。"""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ class ToolSpec:
     handler: ToolHandler
 
     def to_dict(self) -> dict[str, Any]:
-        """转换为 `tools/list` 响应里的标准结构。"""
+        """转换为 `tools/list` 响应中的标准结构。"""
         return {
             "name": self.name,
             "description": self.description,
@@ -31,20 +31,38 @@ class ToolSpec:
         }
 
 
+class ProtocolHandlerError(RuntimeError):
+    """协议层可识别的标准 JSON-RPC 错误。
+
+    做什么：
+    - 承载标准 JSON-RPC 错误码与消息；
+    - 让业务 tool 可以显式抛出“这是参数/协议错误”，而不是内部崩溃。
+
+    为什么：
+    - E3 之后，tool 层需要把非法参数映射到 `-32602 Invalid params`；
+    - 如果没有公开错误类型，普通异常会被统一包装成 `-32603 Internal error`，语义就错了。
+    """
+
+    def __init__(self, code: int, message: str) -> None:
+        super().__init__(message)
+        self.code = int(code)
+        self.message = str(message)
+
+
 class ProtocolHandler:
     """纯协议层处理器。
 
     做什么：
     - 处理 `initialize`、`tools/list`、`tools/call` 三类 MCP 核心方法；
-    - 屏蔽底层 server 的 JSON-RPC 细节，让 server 只负责 stdio 收发；
+    - 屏蔽 server 的 JSON-RPC 细节，让 server 只负责 stdio 收发；
     - 提供统一错误码与不泄露堆栈的错误输出。
 
     为什么：
-    - E2 需要把“协议逻辑”和“传输逻辑”分层，便于单元测试和后续扩展 tools。
+    - 协议逻辑和 stdio 传输逻辑分层后，更适合单元测试，也更容易逐步增加新 tools。
 
     关键权衡：
     - 当前阶段只做最小工具注册表，不引入复杂 schema 校验库；
-      参数检查以 shape 校验为主，优先保证行为清晰和测试稳定。
+    - 参数检查以 shape 校验为主，优先保证行为清晰和测试稳定。
     """
 
     def __init__(self, tools: list[ToolSpec] | None = None) -> None:
@@ -78,17 +96,17 @@ class ProtocolHandler:
         if method == "initialize":
             try:
                 return self._success_response(request_id, self.handle_initialize(params))
-            except _ProtocolHandlerJSONRPCError as exc:
+            except ProtocolHandlerError as exc:
                 return self._error_response(request_id, exc.code, exc.message)
         if method == "tools/list":
             try:
                 return self._success_response(request_id, self.handle_tools_list())
-            except _ProtocolHandlerJSONRPCError as exc:
+            except ProtocolHandlerError as exc:
                 return self._error_response(request_id, exc.code, exc.message)
         if method == "tools/call":
             try:
                 return self._success_response(request_id, self.handle_tools_call(params))
-            except _ProtocolHandlerJSONRPCError as exc:
+            except ProtocolHandlerError as exc:
                 return self._error_response(request_id, exc.code, exc.message)
         if method == "notifications/initialized":
             return None
@@ -149,10 +167,11 @@ class ProtocolHandler:
 
         try:
             result = tool.handler(dict(arguments))
-        except _ProtocolHandlerJSONRPCError:
+        except ProtocolHandlerError:
             raise
         except Exception:
-            # 不泄露堆栈或内部实现细节，只返回标准 internal error。
+            # 关键安全约束：协议层不向客户端暴露 Python 堆栈或内部实现细节，
+            # 否则既污染协议输出，也会把敏感配置信息带出去。
             raise self._jsonrpc_error(-32603, "Internal error")
 
         if not isinstance(result, dict):
@@ -177,14 +196,5 @@ class ProtocolHandler:
         }
 
     @staticmethod
-    def _jsonrpc_error(code: int, message: str) -> "_ProtocolHandlerJSONRPCError":
-        return _ProtocolHandlerJSONRPCError(code=code, message=message)
-
-
-class _ProtocolHandlerJSONRPCError(RuntimeError):
-    """ProtocolHandler 内部使用的标准 JSON-RPC 错误。"""
-
-    def __init__(self, code: int, message: str) -> None:
-        super().__init__(message)
-        self.code = int(code)
-        self.message = str(message)
+    def _jsonrpc_error(code: int, message: str) -> ProtocolHandlerError:
+        return ProtocolHandlerError(code=code, message=message)
