@@ -22,7 +22,7 @@ from core.query_engine.reranker import RerankOutput  # noqa: E402
 from core.types import RetrievalResult  # noqa: E402
 from mcp_server.protocol_handler import ProtocolHandler  # noqa: E402
 from mcp_server.server import MCPServer  # noqa: E402
-from mcp_server.tools import create_query_knowledge_hub_tool  # noqa: E402
+from mcp_server.tools import create_get_document_summary_tool, create_query_knowledge_hub_tool  # noqa: E402
 
 SERVER_SCRIPT = PROJECT_ROOT / "src" / "mcp_server" / "server.py"
 PYTHON_EXE = PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
@@ -206,3 +206,79 @@ def test_mcp_server_query_knowledge_hub_returns_markdown_and_citations() -> None
     assert tool_response["result"]["structuredContent"]["citations"][0]["page"] == 2
     assert fake_search.calls[0]["filters"] == {"collection": "manual"}
     assert fake_reranker.calls[0]["candidate_ids"] == ["chunk_001", "chunk_002"]
+
+
+def test_mcp_server_get_document_summary_returns_structured_summary() -> None:
+    """
+    Given:
+        一个注册了 `get_document_summary` 的 MCP server，并注入可控的摘要 resolver。
+    When:
+        客户端发送 `tools/call(get_document_summary)` 请求。
+    Then:
+        server 应返回合法 JSON-RPC 响应，
+        且 tool 结果中同时包含可展示文本和结构化的 `doc_id/title/summary/tags`。
+    """
+
+    def _resolver(doc_id: str) -> dict[str, object] | None:
+        if doc_id != "pdf_summary_001":
+            return None
+        return {
+            "title": "系统架构总览",
+            "summary": "概述模块边界、数据流和扩展点。",
+            "tags": ["architecture", "rag", "mcp"],
+            "source_path": "docs/architecture.pdf",
+        }
+
+    protocol_handler = ProtocolHandler(
+        tools=[
+            create_get_document_summary_tool(resolver=_resolver),
+        ]
+    )
+    stdin = io.StringIO(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 1,
+                        "method": "initialize",
+                        "params": {
+                            "protocolVersion": "2025-06-18",
+                            "capabilities": {},
+                            "clientInfo": {"name": "pytest-client", "version": "0.0.1"},
+                        },
+                    },
+                    ensure_ascii=False,
+                ),
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 2,
+                        "method": "tools/call",
+                        "params": {
+                            "name": "get_document_summary",
+                            "arguments": {"doc_id": "pdf_summary_001"},
+                        },
+                    },
+                    ensure_ascii=False,
+                ),
+            ]
+        )
+        + "\n"
+    )
+    stdout = io.StringIO()
+
+    exit_code = MCPServer(stdin=stdin, stdout=stdout, protocol_handler=protocol_handler).serve_forever()
+
+    output_lines = [line for line in stdout.getvalue().splitlines() if line.strip()]
+    initialize_response = json.loads(output_lines[0])
+    tool_response = json.loads(output_lines[1])
+
+    assert exit_code == 0
+    assert initialize_response["result"]["serverInfo"]["name"] == "modular-rag-mcp"
+    assert tool_response["jsonrpc"] == "2.0"
+    assert tool_response["id"] == 2
+    assert "系统架构总览" in tool_response["result"]["content"][0]["text"]
+    assert tool_response["result"]["structuredContent"]["doc_id"] == "pdf_summary_001"
+    assert tool_response["result"]["structuredContent"]["summary"] == "概述模块边界、数据流和扩展点。"
+    assert tool_response["result"]["structuredContent"]["tags"] == ["architecture", "rag", "mcp"]

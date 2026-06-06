@@ -7,7 +7,11 @@ import sys
 from typing import Any, TextIO
 
 from mcp_server.protocol_handler import ProtocolHandler
-from mcp_server.tools import create_list_collections_tool, create_query_knowledge_hub_tool
+from mcp_server.tools import (
+    create_get_document_summary_tool,
+    create_list_collections_tool,
+    create_query_knowledge_hub_tool,
+)
 from observability.logger import get_logger
 
 LOGGER = get_logger("mcp_server.server")
@@ -27,6 +31,7 @@ def build_default_protocol_handler() -> ProtocolHandler:
     handler = ProtocolHandler()
     handler.register_tool(create_query_knowledge_hub_tool())
     handler.register_tool(create_list_collections_tool())
+    handler.register_tool(create_get_document_summary_tool())
     return handler
 
 
