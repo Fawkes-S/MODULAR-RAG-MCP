@@ -2026,7 +2026,7 @@ dashboard:
 |---------|---------|------|---------|------|
 | F1 | TraceContext 增强（finish + 耗时统计 + trace_type） | [x] | 2026-06-07 | TraceContext(finish/elapsed/trace_type/to_dict) + tests/unit/test_trace_context.py passed |
 | F2 | 结构化日志 logger（JSON Lines） | [x] | 2026-06-07 | JSONL logger + TraceCollector + tests/unit/test_jsonl_logger.py passed |
-| F3 | 在 Query 链路打点 | [ ] | | |
+| F3 | 在 Query 链路打点 | [x] | 2026-06-07 | query trace stages/method-provider fields + integration/unit tests passed |
 | F4 | 在 Ingestion 链路打点 | [ ] | | |
 | F5 | Pipeline 进度回调 (on_progress) | [ ] | | |
 

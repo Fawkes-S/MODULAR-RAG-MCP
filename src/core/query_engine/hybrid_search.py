@@ -99,7 +99,21 @@ class HybridSearch:
             list[RetrievalResult]: 融合并过滤后的结果。
         """
         normalized_top_k = self._normalize_top_k(top_k)
+        query_processing_started = perf_counter()
         processed = self.query_processor.process(query=query, filters=filters)
+        if trace is not None:
+            trace.record_stage(
+                stage_name="query_processing",
+                details={
+                    "method": "rule_based_query_processor",
+                    "provider": type(self.query_processor).__name__,
+                    "original_query": query,
+                    "normalized_query": processed.normalized_query,
+                    "keywords": processed.keywords,
+                    "filters": processed.filters,
+                },
+                elapsed_ms=(perf_counter() - query_processing_started) * 1000.0,
+            )
 
         dense_candidate_k = max(normalized_top_k, int(self.settings.retrieval.top_k))
         sparse_candidate_k = max(normalized_top_k, int(self.settings.retrieval.sparse_top_k))
@@ -119,11 +133,27 @@ class HybridSearch:
             error_summary = "; ".join(f"{route}={message}" for route, message in route_errors.items())
             raise RuntimeError(f"hybrid search failed: both dense and sparse routes failed ({error_summary})")
 
+        fusion_started = perf_counter()
         fused_results = self.fusion.fuse(
             dense_results=dense_results,
             sparse_results=sparse_results,
             top_k=fusion_candidate_k,
         )
+        fusion_elapsed_ms = (perf_counter() - fusion_started) * 1000.0
+        if trace is not None:
+            trace.record_stage(
+                stage_name="fusion",
+                details={
+                    "method": "rrf",
+                    "provider": type(self.fusion).__name__,
+                    "top_k": fusion_candidate_k,
+                    "dense_count": len(dense_results),
+                    "sparse_count": len(sparse_results),
+                    "fused_count": len(fused_results),
+                    "degraded_routes": sorted(route_errors.keys()),
+                },
+                elapsed_ms=fusion_elapsed_ms,
+            )
         filtered_results = self._apply_metadata_filters(
             candidates=fused_results,
             filters=processed.filters,
@@ -134,6 +164,8 @@ class HybridSearch:
             trace.record_stage(
                 stage_name="hybrid_search",
                 details={
+                    "method": "query_processor_parallel_retrieval_rrf",
+                    "provider": type(self.fusion).__name__,
                     "query": processed.normalized_query,
                     "keywords": processed.keywords,
                     "top_k": normalized_top_k,

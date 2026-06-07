@@ -94,6 +94,8 @@ class DenseRetriever:
             trace.record_stage(
                 stage_name="dense_retrieval",
                 details={
+                    "method": "embedding_vector_query",
+                    "provider": self.settings.embedding.provider,
                     "query": normalized_query,
                     "top_k": normalized_top_k,
                     "result_count": len(normalized_results),

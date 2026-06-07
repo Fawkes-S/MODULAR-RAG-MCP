@@ -269,6 +269,8 @@ class Reranker:
         trace.record_stage(
             stage_name="rerank",
             details={
+                "method": "backend_rerank_with_fallback",
+                "provider": output.backend,
                 "backend": output.backend,
                 "input_count": input_count,
                 "output_count": output_count,

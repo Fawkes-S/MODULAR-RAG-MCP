@@ -88,6 +88,8 @@ class SparseRetriever:
             trace.record_stage(
                 stage_name="sparse_retrieval",
                 details={
+                    "method": "bm25_get_by_ids",
+                    "provider": "bm25",
                     "keywords": normalized_keywords,
                     "top_k": normalized_top_k,
                     "bm25_hits": len(bm25_hits),
