@@ -108,7 +108,7 @@
 | E3 | query_knowledge_hub Tool | [x] | 2026-06-06 | query tool + response builder + citations + mcp integration tests passed |
 | E4 | list_collections Tool | [x] | 2026-06-06 | list_collections directory scan tool + unit tests passed |
 | E5 | get_document_summary Tool | [x] | 2026-06-06 | cache-backed summary tool + MCP integration tests passed |
-| E6 | 多模态返回组装（Text + Image） | [ ] | | |
+| E6 | 多模态返回组装（Text + Image） | [x] | 2026-06-07 | multimodal assembler + MCP image content integration test passed |
 
 #### 阶段 F：Trace 基础设施与打点
 

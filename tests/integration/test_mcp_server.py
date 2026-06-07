@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import base64
 import io
 import json
+import shutil
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +22,10 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from core.query_engine.reranker import RerankOutput  # noqa: E402
+from core.response.multimodal_assembler import MultimodalAssembler  # noqa: E402
+from core.response.response_builder import ResponseBuilder  # noqa: E402
 from core.types import RetrievalResult  # noqa: E402
+from ingestion.storage.image_storage import ImageStorage  # noqa: E402
 from mcp_server.protocol_handler import ProtocolHandler  # noqa: E402
 from mcp_server.server import MCPServer  # noqa: E402
 from mcp_server.tools import create_get_document_summary_tool, create_query_knowledge_hub_tool  # noqa: E402
@@ -117,6 +123,17 @@ class _FakeReranker:
         )
         results = list(candidates if top_k is None else candidates[:top_k])
         return RerankOutput(results=results, fallback=False, fallback_reason=None, backend="none")
+
+
+@pytest.fixture()
+def image_storage_workspace() -> Path:
+    """在项目目录内创建图片测试工作区，避免依赖系统临时目录权限。"""
+    root = PROJECT_ROOT / ".pytest_tmp" / f"mcp_server_images_{uuid.uuid4().hex}"
+    root.mkdir(parents=True, exist_ok=True)
+    try:
+        yield root
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
 
 
 def test_mcp_server_query_knowledge_hub_returns_markdown_and_citations() -> None:
@@ -282,3 +299,118 @@ def test_mcp_server_get_document_summary_returns_structured_summary() -> None:
     assert tool_response["result"]["structuredContent"]["doc_id"] == "pdf_summary_001"
     assert tool_response["result"]["structuredContent"]["summary"] == "概述模块边界、数据流和扩展点。"
     assert tool_response["result"]["structuredContent"]["tags"] == ["architecture", "rag", "mcp"]
+
+
+def test_mcp_server_query_knowledge_hub_returns_text_and_image_content(
+    image_storage_workspace: Path,
+) -> None:
+    """
+    Given:
+        一个命中结果携带 `image_refs` 的 `query_knowledge_hub`，并为对应 `image_id` 准备好本地 ImageStorage 索引与图片文件。
+    When:
+        客户端通过 MCP 调用 `query_knowledge_hub`。
+    Then:
+        返回的 `content` 中应同时包含 text 与 image 两种类型，
+        且图片项的 `mimeType` 正确、`data` 是可解码的 base64 字符串。
+    """
+    image_storage = ImageStorage(
+        image_root=str(image_storage_workspace / "images"),
+        db_path=str(image_storage_workspace / "db" / "image_index.db"),
+    )
+    stored_path = image_storage.save_image(
+        image_id="img_arch_001",
+        image_bytes=(
+            b"\x89PNG\r\n\x1a\n"
+            b"\x00\x00\x00\rIHDR"
+            b"\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00"
+            b"\x90wS\xde"
+            b"\x00\x00\x00\x0cIDAT\x08\xd7c\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00"
+            b"\xc9\xfe\x92\xef"
+            b"\x00\x00\x00\x00IEND\xaeB`\x82"
+        ),
+        collection="demo",
+        doc_hash="img_arch",
+        page_num=1,
+        extension="png",
+    )
+
+    fake_search = _FakeHybridSearch(
+        results=[
+            RetrievalResult(
+                chunk_id="chunk_img_001",
+                score=0.93,
+                text="系统架构如下 [IMAGE: img_arch_001]。",
+                metadata={
+                    "source_path": "docs/architecture.pdf",
+                    "page": 1,
+                    "collection": "manual",
+                    "image_refs": ["img_arch_001"],
+                    "images": [{"id": "img_arch_001", "path": stored_path, "page": 1}],
+                },
+            )
+        ]
+    )
+    fake_reranker = _FakeReranker()
+    response_builder = ResponseBuilder(
+        multimodal_assembler=MultimodalAssembler(image_storage=image_storage),
+    )
+    protocol_handler = ProtocolHandler(
+        tools=[
+            create_query_knowledge_hub_tool(
+                searcher=fake_search,
+                reranker=fake_reranker,
+                response_builder=response_builder,
+            )
+        ]
+    )
+    stdin = io.StringIO(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 1,
+                        "method": "initialize",
+                        "params": {
+                            "protocolVersion": "2025-06-18",
+                            "capabilities": {},
+                            "clientInfo": {"name": "pytest-client", "version": "0.0.1"},
+                        },
+                    },
+                    ensure_ascii=False,
+                ),
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 2,
+                        "method": "tools/call",
+                        "params": {
+                            "name": "query_knowledge_hub",
+                            "arguments": {
+                                "query": "请展示系统架构图",
+                                "top_k": 1,
+                                "collection": "manual",
+                            },
+                        },
+                    },
+                    ensure_ascii=False,
+                ),
+            ]
+        )
+        + "\n"
+    )
+    stdout = io.StringIO()
+
+    exit_code = MCPServer(stdin=stdin, stdout=stdout, protocol_handler=protocol_handler).serve_forever()
+
+    output_lines = [line for line in stdout.getvalue().splitlines() if line.strip()]
+    tool_response = json.loads(output_lines[1])
+    content = tool_response["result"]["content"]
+    image_content = next(item for item in content if item["type"] == "image")
+
+    assert exit_code == 0
+    assert content[0]["type"] == "text"
+    assert "系统架构" in content[0]["text"]
+    assert image_content["mimeType"] == "image/png"
+    assert base64.b64decode(image_content["data"])
+    assert tool_response["result"]["structuredContent"]["images"][0]["image_id"] == "img_arch_001"

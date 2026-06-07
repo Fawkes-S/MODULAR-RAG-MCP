@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from core.response.citation_generator import CitationGenerator
+from core.response.multimodal_assembler import MultimodalAssembler
 from core.types import RetrievalResult
 
 
@@ -32,11 +33,13 @@ class ResponseBuilder:
     def __init__(
         self,
         citation_generator: CitationGenerator | None = None,
+        multimodal_assembler: MultimodalAssembler | None = None,
         max_snippet_chars: int = 220,
     ) -> None:
         if not isinstance(max_snippet_chars, int) or max_snippet_chars <= 0:
             raise ValueError("max_snippet_chars must be positive int")
         self.citation_generator = citation_generator or CitationGenerator()
+        self.multimodal_assembler = multimodal_assembler or MultimodalAssembler()
         self.max_snippet_chars = max_snippet_chars
 
     def build(
@@ -50,6 +53,7 @@ class ResponseBuilder:
         normalized_query = self._normalize_query(query)
         normalized_results = self._normalize_results(retrieval_results)
         citations = self.citation_generator.generate(normalized_results)
+        multimodal_payload = self.multimodal_assembler.assemble(normalized_results)
 
         structured_content = {
             "query": normalized_query,
@@ -57,6 +61,8 @@ class ResponseBuilder:
             "citations": citations,
             "results": [item.to_dict() for item in normalized_results],
         }
+        if multimodal_payload["images"]:
+            structured_content["images"] = multimodal_payload["images"]
         if isinstance(extra, dict) and extra:
             structured_content.update(dict(extra))
 
@@ -67,7 +73,7 @@ class ResponseBuilder:
         )
 
         return {
-            "content": [{"type": "text", "text": markdown}],
+            "content": [{"type": "text", "text": markdown}, *multimodal_payload["content"]],
             "structuredContent": structured_content,
         }
 
