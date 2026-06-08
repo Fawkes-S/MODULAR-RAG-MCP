@@ -255,10 +255,12 @@ class IngestionPipeline:
                 action=lambda: self.vector_upserter.upsert(records, trace=active_trace),
             )
 
+            bm25_records = self._build_bm25_records_with_storage_ids(records=records, vector_ids=vector_ids)
+
             bm25_stats = self._run_stage(
                 stage_name="store.bm25",
                 trace=active_trace,
-                action=lambda: self.bm25_indexer.build(records, rebuild=False),
+                action=lambda: self.bm25_indexer.build(bm25_records, rebuild=False),
             )
 
             self._run_stage(
@@ -316,6 +318,11 @@ class IngestionPipeline:
             )
             raise
 
+        finally:
+            # F4 要求 ingestion 入口显式形成完整 trace 类型；这里统一在入口收口，
+            # 既兼容外部传入 trace，也避免调用方忘记 finish 导致 trace 处于“未完成”状态。
+            active_trace.finish()
+
     def _run_stage(
         self,
         *,
@@ -344,6 +351,12 @@ class IngestionPipeline:
                     details={"status": "ok", **summary},
                     elapsed_ms=elapsed_ms,
                 )
+                self._record_f4_stage(
+                    trace=trace,
+                    stage_name=stage_name,
+                    elapsed_ms=elapsed_ms,
+                    summary=summary,
+                )
 
             LOGGER.info(
                 "[Pipeline] stage.done stage=%s elapsed_ms=%.2f summary=%s",
@@ -359,6 +372,13 @@ class IngestionPipeline:
                     stage_name=f"pipeline.{stage_name}",
                     details={"status": "error", "error_type": type(exc).__name__, "error": str(exc)},
                     elapsed_ms=elapsed_ms,
+                    status="error",
+                )
+                self._record_f4_stage(
+                    trace=trace,
+                    stage_name=stage_name,
+                    elapsed_ms=elapsed_ms,
+                    summary={"error_type": type(exc).__name__, "error": str(exc)},
                     status="error",
                 )
 
@@ -458,6 +478,48 @@ class IngestionPipeline:
             record.metadata = metadata
 
     @staticmethod
+    def _build_bm25_records_with_storage_ids(
+        *,
+        records: list[ChunkRecord],
+        vector_ids: list[str],
+    ) -> list[ChunkRecord]:
+        """为 BM25 构建生成与向量库存储主键对齐的记录视图。
+
+        为什么需要这个转换：
+        - `BatchProcessor`/上游 chunker 产出的 `record.id` 代表“切分阶段 ID”；
+        - `VectorUpserter` 会基于 source_path/chunk_index/content 重新生成真实存储主键 `chunk_xxx`；
+        - 如果 BM25 仍索引旧 `record.id`，而 SparseRetriever 再用这些 ID 去向量库回填正文，就会出现
+          “BM25 命中有结果，但 get_by_ids() 查不到正文”的错位问题。
+
+        这里的做法：
+        - 复制一份 `ChunkRecord` 视图给 BM25 使用；
+        - 把复制对象的 `id` 替换为 `vector_ids` 中对应的真实存储主键；
+        - 原始 `records` 保持不变，避免影响上游 trace/调试语义。
+        """
+        if len(records) != len(vector_ids):
+            raise ValueError(
+                "vector_ids length mismatch after vector upsert: "
+                f"records={len(records)}, vector_ids={len(vector_ids)}"
+            )
+
+        aligned_records: list[ChunkRecord] = []
+        for idx, (record, storage_id) in enumerate(zip(records, vector_ids)):
+            if not isinstance(storage_id, str) or not storage_id.strip():
+                raise ValueError(f"vector_ids[{idx}] must be non-empty string")
+
+            aligned_records.append(
+                ChunkRecord(
+                    id=storage_id,
+                    text=record.text,
+                    metadata=dict(record.metadata),
+                    dense_vector=list(record.dense_vector) if record.dense_vector is not None else None,
+                    sparse_vector=dict(record.sparse_vector) if record.sparse_vector is not None else None,
+                )
+            )
+
+        return aligned_records
+
+    @staticmethod
     def _validate_source_path(source_path: str) -> str:
         """校验并标准化源文件路径。"""
         if not isinstance(source_path, str) or not source_path.strip():
@@ -505,3 +567,120 @@ class IngestionPipeline:
             return summary
 
         return {"result_type": type(result).__name__}
+
+    def _record_f4_stage(
+        self,
+        *,
+        trace: TraceContext,
+        stage_name: str,
+        elapsed_ms: float,
+        summary: dict[str, object],
+        status: str = "ok",
+    ) -> None:
+        """为 F4 产出稳定的 ingestion 通用阶段名与 method/provider 字段。
+
+        做什么：
+        - 将现有细粒度 `pipeline.*` 阶段映射为 F4 验收要求的通用阶段：
+          `load/split/transform/embed/upsert`。
+        - 保留现有细粒度 trace 不变，同时补一层更稳定的“面向 Dashboard/验收”的入口级阶段。
+
+        为什么：
+        - 细粒度阶段适合排障，但阶段名会随着内部实现细分而波动；
+          F4 和后续 Dashboard 需要一组稳定、可横向比较的 ingestion 主阶段名。
+
+        关键权衡：
+        - 这里不会删除或覆盖 `pipeline.*`，而是额外追加一层汇总阶段，
+          避免破坏已有调试信息与历史测试。
+
+        失败路径：
+        - 未命中 F4 关注的阶段时直接跳过，不抛错；这样不会把非 F4 阶段强行塞进统一模型。
+        """
+        mapped = self._map_f4_stage(stage_name=stage_name, summary=summary)
+        if mapped is None:
+            return
+
+        trace.record_stage(
+            stage_name=mapped["stage_name"],
+            details={
+                "method": mapped["method"],
+                "provider": mapped["provider"],
+                "source_stage": stage_name,
+                **mapped["details"],
+            },
+            elapsed_ms=elapsed_ms,
+            status=status,
+        )
+
+    def _map_f4_stage(
+        self,
+        *,
+        stage_name: str,
+        summary: dict[str, object],
+    ) -> dict[str, object] | None:
+        """把 pipeline 内部阶段映射为 F4 统一 ingestion 阶段。
+
+        说明：
+        - `load`、`split`、`transform.*`、`encode`、`store.vector_upsert` 是 F4 的核心观察面。
+        - `store.images`、`store.bm25`、完整性检查等仍保留在 `pipeline.*` 细粒度 trace 中，
+          但不纳入本轮 F4 的统一主阶段集合。
+        """
+        if stage_name == "load":
+            return {
+                "stage_name": "load",
+                "method": "pdf_to_markdown_with_images",
+                "provider": type(self.loader).__name__,
+                "details": {
+                    "result_type": summary.get("result_type", "Document"),
+                    "document_id": getattr(summary, "document_id", None),
+                    **summary,
+                },
+            }
+
+        if stage_name == "split":
+            return {
+                "stage_name": "split",
+                "method": str(self.settings.ingestion.splitter).strip().lower() or "recursive",
+                "provider": type(getattr(self.chunker, "splitter", self.chunker)).__name__,
+                "details": {
+                    "chunk_size": int(self.settings.ingestion.chunk_size),
+                    "chunk_overlap": int(self.settings.ingestion.chunk_overlap),
+                    **summary,
+                },
+            }
+
+        if stage_name.startswith("transform."):
+            transform_name = stage_name.split(".", 1)[1]
+            return {
+                "stage_name": "transform",
+                "method": transform_name,
+                "provider": transform_name,
+                "details": {
+                    "transform_name": transform_name,
+                    **summary,
+                },
+            }
+
+        if stage_name == "encode":
+            return {
+                "stage_name": "embed",
+                "method": "batch_dense_sparse_encode",
+                "provider": self.settings.embedding.provider,
+                "details": {
+                    "batch_size": int(self.settings.ingestion.batch_size),
+                    "embedding_provider": self.settings.embedding.provider,
+                    **summary,
+                },
+            }
+
+        if stage_name == "store.vector_upsert":
+            return {
+                "stage_name": "upsert",
+                "method": "vector_store_upsert",
+                "provider": self.settings.vector_store.provider,
+                "details": {
+                    "vector_store_provider": self.settings.vector_store.provider,
+                    **summary,
+                },
+            }
+
+        return None

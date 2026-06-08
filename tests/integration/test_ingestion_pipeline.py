@@ -298,6 +298,10 @@ def _get_stage(trace: TraceContext, stage_name: str) -> dict[str, Any] | None:
     return None
 
 
+def _get_stages(trace: TraceContext, stage_name: str) -> list[dict[str, Any]]:
+    return [stage for stage in trace.stages if stage.get("stage_name") == stage_name]
+
+
 def _assert_pipeline_stage_trace_complete(trace: TraceContext) -> None:
     """校验 pipeline.* 阶段都出现且状态为 ok。"""
     stage_names = [stage.get("stage_name") for stage in trace.stages]
@@ -414,6 +418,78 @@ def test_ingestion_pipeline_runs_end_to_end_on_complex_pdf(integration_workspace
         assert all(Path(item["file_path"]).exists() for item in stored_images)
 
         assert integrity_checker.should_skip(result.file_hash) is True
+    finally:
+        vector_store._client.delete_collection(collection_name)
+
+
+def test_ingestion_pipeline_records_f4_ingestion_trace_contract(integration_workspace: Path) -> None:
+    """
+    Given:
+        一条可稳定执行的 IngestionPipeline，以及显式传入的 `TraceContext(trace_type="ingestion")`。
+    When:
+        执行一次完整摄取。
+    Then:
+        trace 中应出现 F4 关注的统一阶段 `load/split/transform/embed/upsert`，
+        且各阶段都包含 `elapsed_ms/method/provider/details`，最终 `trace_type` 为 `ingestion`。
+    """
+    collection_name = f"it_f4_trace_{uuid.uuid4().hex[:8]}"
+    pipeline, _image_storage, vector_store, _integrity_checker = _build_pipeline(
+        integration_workspace,
+        collection_name=collection_name,
+    )
+    trace = TraceContext(trace_type="ingestion")
+
+    try:
+        result = pipeline.run(
+            str(SIMPLE_PDF),
+            collection="test",
+            force=True,
+            trace=trace,
+        )
+
+        assert result.skipped is False
+
+        load_stage = _get_stage(trace, "load")
+        split_stage = _get_stage(trace, "split")
+        transform_stages = _get_stages(trace, "transform")
+        embed_stage = _get_stage(trace, "embed")
+        upsert_stage = _get_stage(trace, "upsert")
+
+        assert load_stage is not None
+        assert load_stage["details"]["method"] == "pdf_to_markdown_with_images"
+        assert load_stage["details"]["provider"] == "PdfLoader"
+        assert load_stage["details"]["source_stage"] == "load"
+        assert "elapsed_ms" in load_stage
+
+        assert split_stage is not None
+        assert split_stage["details"]["method"] == "recursive"
+        assert "provider" in split_stage["details"]
+        assert split_stage["details"]["chunk_size"] > 0
+        assert "elapsed_ms" in split_stage
+
+        assert len(transform_stages) == 3
+        assert [stage["details"]["method"] for stage in transform_stages] == [
+            "ChunkRefiner",
+            "MetadataEnricher",
+            "ImageCaptioner",
+        ]
+        assert all("provider" in stage["details"] for stage in transform_stages)
+        assert all("elapsed_ms" in stage for stage in transform_stages)
+
+        assert embed_stage is not None
+        assert embed_stage["details"]["method"] == "batch_dense_sparse_encode"
+        assert embed_stage["details"]["provider"] == pipeline.settings.embedding.provider
+        assert embed_stage["details"]["embedding_provider"] == pipeline.settings.embedding.provider
+        assert "elapsed_ms" in embed_stage
+
+        assert upsert_stage is not None
+        assert upsert_stage["details"]["method"] == "vector_store_upsert"
+        assert upsert_stage["details"]["provider"] == pipeline.settings.vector_store.provider
+        assert upsert_stage["details"]["vector_store_provider"] == pipeline.settings.vector_store.provider
+        assert "elapsed_ms" in upsert_stage
+
+        assert trace.is_finished is True
+        assert trace.to_dict()["trace_type"] == "ingestion"
     finally:
         vector_store._client.delete_collection(collection_name)
 
@@ -614,4 +690,3 @@ def test_ingestion_pipeline_full_real_settings_run_reports_stage_results(integra
             assert stored_images
     finally:
         vector_store._client.delete_collection(collection_name)
-
