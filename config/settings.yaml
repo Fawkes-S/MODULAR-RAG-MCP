@@ -4,15 +4,37 @@
 # LLM Configuration
 # =============================================================================
 llm:
-  provider: openai
-  model: qwen3.5-plus
-  base_url: ${LLM_BASE_URL:-https://coding.dashscope.aliyuncs.com/v1}
-  api_key: ${LLM_API_KEY:-}
+  # 只需修改这里的 profile 名称即可切换文本 LLM。
+  # 可选：minimax / qwen / deepseek / openai
+  profile: minimax
   timeout: 45
   max_retries: 2
   retry_backoff_seconds: 0.25
   retry_backoff_multiplier: 2.0
   retry_max_backoff_seconds: 2.0
+  profiles:
+    minimax:
+      provider: openai
+      model: MiniMax-M2.7
+      base_url: ${LLM_BASE_URL:-https://api.minimax.chat/v1}
+      api_key: ${LLM_API_KEY:-}
+    qwen:
+      provider: openai
+      model: qwen3.5-plus
+      base_url: ${QWEN_LLM_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      api_key: ${QWEN_LLM_API_KEY:-}
+    deepseek:
+      provider: deepseek
+      model: deepseek-v4-pro
+      base_url: ${DEEPSEEK_LLM_BASE_URL:-https://api.deepseek.com/v1}
+      api_key: ${DEEPSEEK_LLM_API_KEY:-}
+      proxy: ${DEEPSEEK_LLM_PROXY:-}
+    openai:
+      provider: openai
+      model: gpt-4o-mini
+      base_url: ${OPENAI_LLM_BASE_URL:-https://api.openai.com/v1}
+      api_key: ${OPENAI_LLM_API_KEY:-}
+      proxy: ${OPENAI_LLM_PROXY:-}
 
 # =============================================================================
 # Embedding Configuration
@@ -43,8 +65,8 @@ retrieval:
 # Rerank Configuration
 # =============================================================================
 rerank:
-  enabled: false
-  provider: none  # none / cross_encoder / llm
+  enabled: true
+  provider: llm  # none / cross_encoder / llm
   top_m: 30
   timeout: 10.0
 
@@ -53,16 +75,27 @@ rerank:
 # =============================================================================
 vision_llm:
   enabled: true
-  provider: dashscope
-  model: qwen3.5-plus
-  base_url: ${VISION_LLM_BASE_URL:-https://coding.dashscope.aliyuncs.com/v1}
-  api_key: ${VISION_LLM_API_KEY:-}
+  # 只需修改这里的 profile 名称即可切换 Vision LLM。
+  # 可选：qwen / gemini_flash
+  profile: gemini_flash
   max_image_size: 2048
   timeout: 45
   max_retries: 2
   retry_backoff_seconds: 0.25
   retry_backoff_multiplier: 2.0
   retry_max_backoff_seconds: 2.0
+  profiles:
+    qwen:
+      provider: dashscope
+      model: qwen3.5-plus
+      base_url: ${VISION_LLM_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      api_key: ${VISION_LLM_API_KEY:-}
+    gemini_flash:
+      provider: openai
+      model: gemini-2.5-flash
+      base_url: ${GEMINI_VISION_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai}
+      api_key: ${GEMINI_VISION_API_KEY:-}
+      proxy: ${GEMINI_VISION_PROXY:-}
 
 # =============================================================================
 # Evaluation Configuration
@@ -77,6 +110,16 @@ evaluation:
 observability:
   log_level: INFO
   trace_file: logs/traces.jsonl
+
+# =============================================================================
+# Dashboard Configuration
+# =============================================================================
+dashboard:
+  enabled: true
+  port: 8501
+  traces_dir: logs
+  auto_refresh: true
+  refresh_interval: 5
 
 # =============================================================================
 # Ingestion Configuration
@@ -95,4 +138,3 @@ ingestion:
   # Metadata Enricher Configuration (C6)
   metadata_enricher:
     use_llm: true
-

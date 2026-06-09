@@ -166,3 +166,71 @@ def test_chroma_store_get_by_ids_returns_records_in_requested_order() -> None:
     finally:
         store._client.delete_collection(collection_name)
         shutil.rmtree(workdir, ignore_errors=True)
+
+
+def test_chroma_store_get_collection_stats_summarizes_chunks_documents_and_images() -> None:
+    """
+    Given:
+        ChromaStore 中写入 3 条 chunk，分别属于两个业务 collection，
+        并带有 source_path、image_refs/images 等统计字段。
+
+    When:
+        调用 `get_collection_stats()` 读取当前向量库概览统计。
+
+    Then:
+        - 返回总 chunk/document/image 数；
+        - 能按业务 collection 维度拆出子统计；
+        - 统计结果可直接供 Dashboard Overview 页面展示。
+    """
+    workdir = _isolated_workdir()
+    persist_dir = _stable_persist_dir(workdir)
+    collection_name = _new_collection("test_stats")
+
+    store = ChromaStore(persist_dir=persist_dir, collection_name=collection_name)
+    try:
+        store.upsert(
+            [
+                {
+                    "id": "c1",
+                    "vector": [1.0, 0.0],
+                    "metadata": {
+                        "collection": "manual",
+                        "source_path": "docs/a.pdf",
+                        "image_refs": ["img-1"],
+                    },
+                    "text": "doc a / chunk 1",
+                },
+                {
+                    "id": "c2",
+                    "vector": [0.9, 0.1],
+                    "metadata": {
+                        "collection": "manual",
+                        "source_path": "docs/a.pdf",
+                        "images": ["img-2"],
+                    },
+                    "text": "doc a / chunk 2",
+                },
+                {
+                    "id": "c3",
+                    "vector": [0.0, 1.0],
+                    "metadata": {
+                        "collection": "faq",
+                        "source_path": "docs/b.pdf",
+                    },
+                    "text": "doc b / chunk 1",
+                },
+            ]
+        )
+
+        stats = store.get_collection_stats()
+
+        assert stats["chunk_count"] == 3
+        assert stats["document_count"] == 2
+        assert stats["image_count"] == 2
+        assert [row["name"] for row in stats["collections"]] == ["faq", "manual"]
+        assert stats["collections"][1]["chunk_count"] == 2
+        assert stats["collections"][1]["document_count"] == 1
+        assert stats["collections"][1]["image_count"] == 2
+    finally:
+        store._client.delete_collection(collection_name)
+        shutil.rmtree(workdir, ignore_errors=True)

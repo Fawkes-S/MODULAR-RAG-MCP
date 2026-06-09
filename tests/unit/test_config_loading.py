@@ -17,6 +17,7 @@ if str(SRC_PATH) not in sys.path:
 
 from core.settings import (
     ChunkRefinerSettings,
+    DashboardSettings,
     EmbeddingSettings,
     EvaluationSettings,
     IngestionSettings,
@@ -79,6 +80,7 @@ def test_load_settings_success() -> None:
     assert settings.retrieval.top_k > 0
 
     # 确保 llm 扩展字段可读取。
+    assert settings.llm.profile == "minimax"
     assert settings.llm.provider == "openai"
     assert settings.llm.model
     assert settings.llm.base_url.startswith("https://")
@@ -88,13 +90,21 @@ def test_load_settings_success() -> None:
     assert settings.llm.retry_max_backoff_seconds >= 0
 
     # 确保 vision_llm 扩展字段可读取。
-    assert settings.vision_llm.provider == "dashscope"
+    assert settings.vision_llm.profile
+    assert settings.vision_llm.provider in {"dashscope", "openai", "azure"}
     assert settings.vision_llm.model
     assert settings.vision_llm.base_url.startswith("https://")
     assert settings.vision_llm.max_retries >= 0
     assert settings.vision_llm.retry_backoff_seconds >= 0
     assert settings.vision_llm.retry_backoff_multiplier >= 1.0
     assert settings.vision_llm.retry_max_backoff_seconds >= 0
+
+    # dashboard 段应被读取为强类型配置，供 G1 启动脚本与页面使用。
+    assert settings.dashboard.enabled is True
+    assert settings.dashboard.port == 8501
+    assert settings.dashboard.traces_dir == "logs"
+    assert settings.dashboard.auto_refresh is True
+    assert settings.dashboard.refresh_interval == 5
 
     # ingestion 段也应进入强类型 Settings。
     assert settings.ingestion.splitter
@@ -128,6 +138,7 @@ def test_settings_yaml_keys_are_mapped_by_settings_dataclasses() -> None:
         ("vision_llm", VisionLLMSettings),
         ("evaluation", EvaluationSettings),
         ("observability", ObservabilitySettings),
+        ("dashboard", DashboardSettings),
         ("ingestion", IngestionSettings),
     ]
 
@@ -241,6 +252,173 @@ DOTENV_LLM_BASE_URL=https://dotenv.example/v1
 
     assert settings.llm.api_key == "dotenv-key"
     assert settings.llm.base_url == "https://dotenv.example/v1"
+
+
+def test_load_settings_merges_llm_and_vision_profiles() -> None:
+    """
+    Given:
+        `llm.profile` / `vision_llm.profile` 都指向 `profiles` 中的具名配置，
+        顶层 section 放公共 timeout/max_retries 字段。
+
+    When:
+        调用 `load_settings()`。
+
+    Then:
+        - provider/model/base_url/api_key 应取自所选 profile；
+        - timeout/max_retries 等公共字段应继续从顶层 section 继承。
+    """
+    tmp_dir = PROJECT_ROOT / "tests" / ".tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    settings_path = tmp_dir / "settings_profiles.yaml"
+    settings_path.write_text(
+        """
+llm:
+  profile: qwen
+  timeout: 41
+  max_retries: 3
+  profiles:
+    minimax:
+      provider: openai
+      model: MiniMax-M2.7
+      base_url: https://api.minimax.chat/v1
+      api_key: mini-key
+    qwen:
+      provider: openai
+      model: qwen3.5-plus
+      base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api_key: qwen-key
+embedding:
+  provider: openai
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  provider: ragas
+observability:
+  log_level: INFO
+vision_llm:
+  enabled: true
+  profile: gemini_flash
+  max_image_size: 1536
+  profiles:
+    qwen:
+      provider: dashscope
+      model: qwen3.5-plus
+      base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api_key: vision-qwen-key
+    gemini_flash:
+      provider: openai
+      model: gemini-2.5-flash
+      base_url: https://generativelanguage.googleapis.com/v1beta/openai
+      api_key: gemini-key
+""".strip(),
+        encoding="utf-8",
+    )
+
+    settings = load_settings(str(settings_path))
+
+    assert settings.llm.profile == "qwen"
+    assert settings.llm.provider == "openai"
+    assert settings.llm.model == "qwen3.5-plus"
+    assert settings.llm.base_url == "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    assert settings.llm.api_key == "qwen-key"
+    assert settings.llm.proxy == ""
+    assert settings.llm.timeout == 41.0
+    assert settings.llm.max_retries == 3
+
+    assert settings.vision_llm.profile == "gemini_flash"
+    assert settings.vision_llm.provider == "openai"
+    assert settings.vision_llm.model == "gemini-2.5-flash"
+    assert settings.vision_llm.base_url == "https://generativelanguage.googleapis.com/v1beta/openai"
+    assert settings.vision_llm.api_key == "gemini-key"
+    assert settings.vision_llm.proxy == ""
+    assert settings.vision_llm.max_image_size == 1536
+
+
+def test_load_settings_profile_can_override_proxy() -> None:
+    """当选中的 profile 指定 proxy 时，应把代理配置并入最终 Settings。"""
+    tmp_dir = PROJECT_ROOT / "tests" / ".tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    settings_path = tmp_dir / "settings_profile_proxy.yaml"
+    settings_path.write_text(
+        """
+llm:
+  profile: deepseek
+  profiles:
+    deepseek:
+      provider: deepseek
+      model: deepseek-chat
+      base_url: https://api.deepseek.com/v1
+      api_key: deepseek-key
+      proxy: http://127.0.0.1:10809
+embedding:
+  provider: openai
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  provider: ragas
+observability:
+  log_level: INFO
+vision_llm:
+  enabled: true
+  profile: gemini_flash
+  profiles:
+    gemini_flash:
+      provider: openai
+      model: gemini-2.5-flash
+      base_url: https://generativelanguage.googleapis.com/v1beta/openai
+      api_key: gemini-key
+      proxy: http://127.0.0.1:10809
+""".strip(),
+        encoding="utf-8",
+    )
+
+    settings = load_settings(str(settings_path))
+
+    assert settings.llm.proxy == "http://127.0.0.1:10809"
+    assert settings.vision_llm.proxy == "http://127.0.0.1:10809"
+
+
+def test_load_settings_unknown_profile_raises_readable_error() -> None:
+    """当 profile 名称不存在于 profiles 中时，应给出可读错误。"""
+    tmp_dir = PROJECT_ROOT / "tests" / ".tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    settings_path = tmp_dir / "settings_unknown_profile.yaml"
+    settings_path.write_text(
+        """
+llm:
+  profile: unknown
+  profiles:
+    qwen:
+      provider: openai
+      model: qwen3.5-plus
+embedding:
+  provider: openai
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  provider: ragas
+observability:
+  log_level: INFO
+vision_llm:
+  enabled: false
+""".strip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unknown llm.profile='unknown'"):
+        load_settings(str(settings_path))
 
 
 def test_load_settings_missing_required_field_reports_path() -> None:

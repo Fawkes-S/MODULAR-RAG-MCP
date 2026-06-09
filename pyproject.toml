@@ -26,6 +26,7 @@ dependencies = [
   "pymupdf>=1.27.2.2",
   "markitdown[pdf]>=0.1.5",
   "sentence-transformers>=3.0.0",
+  "streamlit>=1.45.0",
 ]
 
 [dependency-groups]

@@ -20,9 +20,12 @@ _ENV_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(:-([^}]*))?\}")
 @dataclass(frozen=True)
 class LLMSettings:
     provider: str
+    profile: str = ""
+    profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
     model: str = ""
     api_key: str = ""
     base_url: str = "https://api.openai.com/v1"
+    proxy: str = ""
     endpoint: str = ""
     deployment_name: str = ""
     api_version: str = ""
@@ -37,9 +40,12 @@ class LLMSettings:
 class VisionLLMSettings:
     enabled: bool = False
     provider: str = ""
+    profile: str = ""
+    profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
     model: str = ""
     api_key: str = ""
     base_url: str = ""
+    proxy: str = ""
     endpoint: str = ""
     azure_endpoint: str = ""
     deployment_name: str = ""
@@ -104,6 +110,15 @@ class ObservabilitySettings:
 
 
 @dataclass(frozen=True)
+class DashboardSettings:
+    enabled: bool = True
+    port: int = 8501
+    traces_dir: str = "logs"
+    auto_refresh: bool = True
+    refresh_interval: int = 5
+
+
+@dataclass(frozen=True)
 class ChunkRefinerSettings:
     use_llm: bool = False
     prompt_path: str = "config/prompts/chunk_refinement.txt"
@@ -135,6 +150,7 @@ class Settings:
     rerank: RerankSettings
     evaluation: EvaluationSettings
     observability: ObservabilitySettings
+    dashboard: DashboardSettings = field(default_factory=DashboardSettings)
     vision_llm: VisionLLMSettings = field(default_factory=VisionLLMSettings)
     ingestion: IngestionSettings = field(default_factory=IngestionSettings)
 
@@ -151,6 +167,41 @@ def _read_nested(data: dict[str, Any], path: str) -> Any:
 def _as_dict(raw: Any) -> dict[str, Any]:
     """将 section 标准化为 dict；缺失或类型错误时返回空 dict。"""
     return dict(raw) if isinstance(raw, dict) else {}
+
+
+def _merge_section_profile(section_name: str, section_cfg: dict[str, Any]) -> dict[str, Any]:
+    """按 `profile + profiles` 机制合并配置段。
+
+    设计意图：
+    - 用户只需修改 `profile` 名称即可切换 provider/model/base_url/api_key。
+    - 顶层 section 仍可放公共字段（timeout/retry/max_image_size 等），由 profile 局部覆盖。
+    """
+    merged = dict(section_cfg)
+    profile_name = str(merged.get("profile", "")).strip()
+    profiles_raw = merged.get("profiles", {})
+    profiles = profiles_raw if isinstance(profiles_raw, dict) else {}
+
+    if not profile_name:
+        if "profiles" in merged and not isinstance(profiles_raw, dict):
+            raise ValueError(f"Invalid setting: {section_name}.profiles must be mapping when provided")
+        return merged
+
+    if not profiles:
+        raise ValueError(
+            f"Invalid setting: {section_name}.profile='{profile_name}' requires {section_name}.profiles mapping"
+        )
+
+    selected = profiles.get(profile_name)
+    if not isinstance(selected, dict):
+        raise ValueError(
+            f"Invalid setting: unknown {section_name}.profile='{profile_name}'. "
+            f"Available: {sorted(profiles)}"
+        )
+
+    merged.update(selected)
+    merged["profile"] = profile_name
+    merged["profiles"] = profiles
+    return merged
 
 
 def _to_float(value: Any, default: float) -> float:
@@ -278,6 +329,12 @@ def validate_settings(settings: Settings) -> None:
         raise ValueError("Missing required setting: evaluation.provider")
     if not settings.observability.log_level:
         raise ValueError("Missing required setting: observability.log_level")
+    if settings.dashboard.port <= 0 or settings.dashboard.port > 65535:
+        raise ValueError("Invalid setting: dashboard.port must be between 1 and 65535")
+    if not settings.dashboard.traces_dir.strip():
+        raise ValueError("Missing required setting: dashboard.traces_dir")
+    if settings.dashboard.refresh_interval <= 0:
+        raise ValueError("Invalid setting: dashboard.refresh_interval must be > 0")
 
     if settings.vision_llm.enabled and not settings.vision_llm.provider:
         raise ValueError("Missing required setting: vision_llm.provider (when vision_llm.enabled=true)")
@@ -324,14 +381,15 @@ def load_settings(path: str) -> Settings:
 
     raw = _resolve_env_placeholders(raw)
 
-    llm_cfg = _as_dict(raw.get("llm"))
+    llm_cfg = _merge_section_profile("llm", _as_dict(raw.get("llm")))
     embedding_cfg = _as_dict(raw.get("embedding"))
     vector_cfg = _as_dict(raw.get("vector_store"))
     retrieval_cfg = _as_dict(raw.get("retrieval"))
     rerank_cfg = _as_dict(raw.get("rerank"))
     evaluation_cfg = _as_dict(raw.get("evaluation"))
     observability_cfg = _as_dict(raw.get("observability"))
-    vision_cfg = _as_dict(raw.get("vision_llm"))
+    dashboard_cfg = _as_dict(raw.get("dashboard"))
+    vision_cfg = _merge_section_profile("vision_llm", _as_dict(raw.get("vision_llm")))
     ingestion_cfg = _as_dict(raw.get("ingestion"))
     chunk_refiner_cfg = _as_dict(ingestion_cfg.get("chunk_refiner"))
     metadata_enricher_cfg = _as_dict(ingestion_cfg.get("metadata_enricher"))
@@ -354,10 +412,17 @@ def load_settings(path: str) -> Settings:
         )
     settings = Settings(
         llm=LLMSettings(
-            provider=str(_read_nested(raw, "llm.provider")),
+            provider=str(llm_cfg.get("provider", "")),
+            profile=str(llm_cfg.get("profile", "")),
+            profiles={
+                str(name): dict(value)
+                for name, value in llm_cfg.get("profiles", {}).items()
+                if isinstance(name, str) and isinstance(value, dict)
+            },
             model=str(llm_cfg.get("model", "")),
             api_key=str(llm_cfg.get("api_key", "")),
             base_url=str(llm_cfg.get("base_url", "https://api.openai.com/v1")),
+            proxy=str(llm_cfg.get("proxy", "")),
             endpoint=str(llm_cfg.get("endpoint", "")),
             deployment_name=str(llm_cfg.get("deployment_name", "")),
             api_version=str(llm_cfg.get("api_version", "")),
@@ -406,12 +471,26 @@ def load_settings(path: str) -> Settings:
             log_level=str(_read_nested(raw, "observability.log_level")),
             trace_file=str(observability_cfg.get("trace_file", "logs/traces.jsonl")),
         ),
+        dashboard=DashboardSettings(
+            enabled=bool(dashboard_cfg.get("enabled", True)),
+            port=_to_int(dashboard_cfg.get("port", 8501), 8501),
+            traces_dir=str(dashboard_cfg.get("traces_dir", "logs")),
+            auto_refresh=bool(dashboard_cfg.get("auto_refresh", True)),
+            refresh_interval=_to_int(dashboard_cfg.get("refresh_interval", 5), 5),
+        ),
         vision_llm=VisionLLMSettings(
             enabled=bool(vision_cfg.get("enabled", False)),
             provider=str(vision_cfg.get("provider", "")),
+            profile=str(vision_cfg.get("profile", "")),
+            profiles={
+                str(name): dict(value)
+                for name, value in vision_cfg.get("profiles", {}).items()
+                if isinstance(name, str) and isinstance(value, dict)
+            },
             model=str(vision_cfg.get("model", "")),
             api_key=str(vision_cfg.get("api_key", "")),
             base_url=str(vision_cfg.get("base_url", "")),
+            proxy=str(vision_cfg.get("proxy", "")),
             endpoint=str(vision_cfg.get("endpoint", "")),
             azure_endpoint=str(vision_cfg.get("azure_endpoint", "")),
             deployment_name=str(vision_cfg.get("deployment_name", "")),

@@ -167,3 +167,115 @@ class ChromaStore(BaseVectorStore):
 
         # 返回顺序与入参 ids 一致，便于上层稳定对齐分数与正文。
         return [by_id[item_id] for item_id in normalized_ids if item_id in by_id]
+
+    def get_collection_stats(self) -> dict[str, Any]:
+        """汇总当前 collection 的概览统计。
+
+        做什么：
+        - 读取当前 Chroma collection 中的 metadata；
+        - 聚合 chunk 数、文档数、图片数；
+        - 按业务 `metadata.collection` 维度拆出子统计，供 Dashboard 总览页直接展示。
+
+        为什么：
+        - G1 只需要“能看清当前库里有什么”的轻量统计，还不需要等到 G2 的
+          `DocumentManager` 完成后再读取跨存储信息；
+        - 因此这里先提供一个只依赖 Chroma 的只读统计方法，降低页面首版接入成本。
+
+        关键权衡：
+        - 这里优先复用现有 metadata 做近似统计，不额外访问 BM25、图片索引或文件完整性库；
+        - 因为 Chroma 里每条 chunk 都有 metadata，所以 chunk 数最准确，文档数和图片数
+          则通过去重后的 metadata 字段推导，足够支持 Overview 的趋势判断。
+
+        失败路径：
+        - 若 collection 为空，返回全 0 统计，而不是抛错阻断 Dashboard 启动；
+        - 若某些 metadata 字段缺失，则按“跳过该字段、保留其余统计”的策略降级。
+
+        Returns:
+            dict[str, Any]: 包含总量统计和按 collection 拆分的明细列表。
+        """
+        total_chunks = int(self._collection.count())
+        if total_chunks == 0:
+            return {
+                "collection_name": self.collection_name,
+                "chunk_count": 0,
+                "document_count": 0,
+                "image_count": 0,
+                "collections": [],
+            }
+
+        raw = self._collection.get(include=["metadatas"])
+        metadatas = raw.get("metadatas") or []
+        grouped: dict[str, dict[str, Any]] = {}
+
+        for metadata in metadatas:
+            if not isinstance(metadata, dict):
+                continue
+
+            # 优先使用业务 collection；若旧数据没有该字段，就回退到 Chroma collection 名称。
+            group_name = str(metadata.get("collection") or self.collection_name).strip() or self.collection_name
+            group = grouped.setdefault(
+                group_name,
+                {
+                    "name": group_name,
+                    "chunk_count": 0,
+                    "sources": set(),
+                    "images": set(),
+                },
+            )
+            group["chunk_count"] += 1
+
+            source_path = str(metadata.get("source_path") or metadata.get("source") or "").strip()
+            if source_path:
+                group["sources"].add(source_path)
+
+            for image_id in self._extract_image_ids(metadata):
+                group["images"].add(image_id)
+
+        collections: list[dict[str, Any]] = []
+        total_documents = 0
+        total_images = 0
+        for group_name in sorted(grouped):
+            group = grouped[group_name]
+            document_count = len(group["sources"])
+            image_count = len(group["images"])
+            total_documents += document_count
+            total_images += image_count
+            collections.append(
+                {
+                    "name": group_name,
+                    "chunk_count": group["chunk_count"],
+                    "document_count": document_count,
+                    "image_count": image_count,
+                }
+            )
+
+        return {
+            "collection_name": self.collection_name,
+            "chunk_count": total_chunks,
+            "document_count": total_documents,
+            "image_count": total_images,
+            "collections": collections,
+        }
+
+    @staticmethod
+    def _extract_image_ids(metadata: dict[str, Any]) -> list[str]:
+        """从兼容的 metadata 形态中提取唯一图片 ID 列表。"""
+        image_ids: list[str] = []
+
+        image_refs = metadata.get("image_refs")
+        if isinstance(image_refs, list):
+            for item in image_refs:
+                if isinstance(item, str) and item.strip():
+                    image_ids.append(item.strip())
+
+        images = metadata.get("images")
+        if isinstance(images, list):
+            for item in images:
+                if isinstance(item, str) and item.strip():
+                    image_ids.append(item.strip())
+                elif isinstance(item, dict):
+                    image_id = str(item.get("image_id", "")).strip()
+                    if image_id:
+                        image_ids.append(image_id)
+
+        return image_ids
