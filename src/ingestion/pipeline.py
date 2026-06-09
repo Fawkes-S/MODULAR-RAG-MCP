@@ -140,6 +140,7 @@ class IngestionPipeline:
         *,
         force: bool = False,
         trace: TraceContext | None = None,
+        on_progress: Callable[[str, int, int], None] | None = None,
     ) -> IngestionResult:
         """执行一次完整摄取。
 
@@ -155,6 +156,10 @@ class IngestionPipeline:
             collection: 目标集合名（用于向量库和图片索引分组）。
             force: 是否忽略完整性跳过直接重处理。
             trace: 可选追踪上下文；未提供时自动创建 `trace_type=ingestion`。
+            on_progress: 可选进度回调，签名为 `(stage_name, current, total)`。
+                - `stage_name` 使用 F5 统一阶段名：`load/split/transform/embed/upsert`
+                - `current` 表示当前已完成的进度步数
+                - `total` 表示本次运行总步数（随 transform 数量动态变化）
 
         Returns:
             IngestionResult: 本次执行结果摘要。
@@ -165,6 +170,8 @@ class IngestionPipeline:
         normalized_source = self._validate_source_path(source_path)
         normalized_collection = self._normalize_collection(collection)
         active_trace = trace or TraceContext(trace_type="ingestion")
+        progress_callback = self._normalize_on_progress(on_progress)
+        progress_state = self._make_progress_state()
 
         LOGGER.info(
             "[Pipeline] run.start source=%s collection=%s force=%s trace_id=%s",
@@ -219,11 +226,21 @@ class IngestionPipeline:
                 trace=active_trace,
                 action=lambda: self.loader.load(normalized_source),
             )
+            self._emit_progress(
+                on_progress=progress_callback,
+                progress_state=progress_state,
+                stage_name="load",
+            )
 
             chunks = self._run_stage(
                 stage_name="split",
                 trace=active_trace,
                 action=lambda: self.chunker.split_document(document),
+            )
+            self._emit_progress(
+                on_progress=progress_callback,
+                progress_state=progress_state,
+                stage_name="split",
             )
 
             transformed_chunks = chunks
@@ -234,11 +251,23 @@ class IngestionPipeline:
                     trace=active_trace,
                     action=lambda t=transform, c=transformed_chunks: t.transform(c, trace=active_trace),
                 )
+                # transform 链通常由多个独立子步骤组成；这里每完成一个子步骤就推进一次进度，
+                # 让 Dashboard 能看到比“整个 transform 结束后一次跳变”更平滑的反馈。
+                self._emit_progress(
+                    on_progress=progress_callback,
+                    progress_state=progress_state,
+                    stage_name="transform",
+                )
 
             records = self._run_stage(
                 stage_name="encode",
                 trace=active_trace,
                 action=lambda: self.batch_processor.process(transformed_chunks, trace=active_trace),
+            )
+            self._emit_progress(
+                on_progress=progress_callback,
+                progress_state=progress_state,
+                stage_name="embed",
             )
 
             image_count, image_path_map = self._run_stage(
@@ -253,6 +282,11 @@ class IngestionPipeline:
                 stage_name="store.vector_upsert",
                 trace=active_trace,
                 action=lambda: self.vector_upserter.upsert(records, trace=active_trace),
+            )
+            self._emit_progress(
+                on_progress=progress_callback,
+                progress_state=progress_state,
+                stage_name="upsert",
             )
 
             bm25_records = self._build_bm25_records_with_storage_ids(records=records, vector_ids=vector_ids)
@@ -684,3 +718,75 @@ class IngestionPipeline:
             }
 
         return None
+
+    def _make_progress_state(self) -> dict[str, int]:
+        """构造 F5 进度计数器。
+
+        做什么：
+        - 计算本次 pipeline 预计会产生多少个可观测进度步；
+        - 返回一个可在 `run()` 生命周期内原地递增的轻量状态字典。
+
+        为什么：
+        - transform 链长度是可配置的，不能把总步数写死成常量；
+        - 用简单字典而不是专门类，能减少额外样板代码，保持入口层实现直接可读。
+        """
+        return {
+            "current": 0,
+            "total": len(self.transforms) + 4,
+        }
+
+    @staticmethod
+    def _normalize_on_progress(
+        on_progress: Callable[[str, int, int], None] | None,
+    ) -> Callable[[str, int, int], None] | None:
+        """校验进度回调签名入口。
+
+        失败路径：
+        - 当调用方传入了非空但不可调用对象时，立即抛 `ValueError`，
+          避免 pipeline 跑到中途才因为回调对象错误而暴露问题。
+        """
+        if on_progress is None:
+            return None
+        if not callable(on_progress):
+            raise ValueError("on_progress must be callable when provided")
+        return on_progress
+
+    def _emit_progress(
+        self,
+        *,
+        on_progress: Callable[[str, int, int], None] | None,
+        progress_state: dict[str, int],
+        stage_name: str,
+    ) -> None:
+        """触发一次 F5 进度回调。
+
+        做什么：
+        - 在指定阶段完成后推进 `current` 计数；
+        - 调用外部回调，把当前阶段与 `(current, total)` 发送出去。
+
+        为什么：
+        - 回调属于“可观测性增强”而不是核心业务，因此实现应尽量集中在入口层，
+          避免把回调逻辑散落到各子组件里。
+
+        关键权衡：
+        - 外部回调异常不会中断 ingestion 主链路，只记录 warning。
+          这样 UI/展示层的问题不会反向拖垮数据摄取。
+        """
+        if on_progress is None:
+            return
+
+        progress_state["current"] += 1
+        current = int(progress_state["current"])
+        total = int(progress_state["total"])
+
+        try:
+            on_progress(stage_name, current, total)
+        except Exception as exc:
+            LOGGER.warning(
+                "[Pipeline] progress.callback_error stage=%s current=%s total=%s error=%s:%s",
+                stage_name,
+                current,
+                total,
+                type(exc).__name__,
+                exc,
+            )

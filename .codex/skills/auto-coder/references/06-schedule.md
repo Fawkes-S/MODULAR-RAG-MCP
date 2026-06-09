@@ -118,7 +118,7 @@
 | F2 | 结构化日志 logger（JSON Lines） | [x] | 2026-06-07 | JSONL logger + TraceCollector + tests/unit/test_jsonl_logger.py passed |
 | F3 | 在 Query 链路打点 | [x] | 2026-06-07 | query trace stages/method-provider fields + integration/unit tests passed |
 | F4 | 在 Ingestion 链路打点 | [x] | 2026-06-08 | ingestion trace stages/method-provider fields + integration tests passed |
-| F5 | Pipeline 进度回调 (on_progress) | [ ] | | |
+| F5 | Pipeline 进度回调 (on_progress) | [x] | 2026-06-09 | pipeline on_progress callback + unit tests passed |
 
 #### 阶段 G：可视化管理平台 Dashboard
 
