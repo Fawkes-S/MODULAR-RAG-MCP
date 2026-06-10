@@ -12,6 +12,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from observability.dashboard import app
+from observability.dashboard.pages import data_browser
 
 
 class _FakeNavigation:
@@ -63,8 +64,6 @@ def test_dashboard_app_registers_overview_and_placeholder_pages() -> None:
 
     titles = [page["title"] for group in fake_streamlit.page_groups.values() for page in group]
     url_paths = [page["url_path"] for group in fake_streamlit.page_groups.values() for page in group]
-    render_names = [page["render"].__name__ for group in fake_streamlit.page_groups.values() for page in group]
-
     assert fake_streamlit.page_config["page_title"] == "Modular RAG Dashboard"
     assert titles == [
         "系统总览",
@@ -75,5 +74,5 @@ def test_dashboard_app_registers_overview_and_placeholder_pages() -> None:
         "评估面板",
     ]
     assert len(url_paths) == len(set(url_paths))
-    assert len(render_names) == len(set(render_names))
+    assert fake_streamlit.page_groups["管理"][0]["render"] is data_browser.render
     assert fake_streamlit.navigation_ran is True

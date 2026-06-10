@@ -11,7 +11,7 @@ SRC_PATH = Path(__file__).resolve().parents[2]
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from observability.dashboard.pages import overview
+from observability.dashboard.pages import data_browser, overview
 
 
 def _slugify_path(value: str) -> str:
@@ -60,7 +60,7 @@ def build_page_groups(st: Any) -> dict[str, list[Any]]:
         ],
         "管理": [
             st.Page(
-                _make_placeholder_page("数据浏览器", "G3", "将展示文档列表、Chunk 详情和图片预览。"),
+                data_browser.render,
                 title="数据浏览器",
                 url_path="data-browser",
             ),
