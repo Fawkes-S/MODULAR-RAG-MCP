@@ -60,3 +60,27 @@ class BaseVectorStore(ABC):
             list[dict[str, Any]]: 每条记录至少包含 `id`、`text`、`metadata`。
         """
         raise NotImplementedError
+
+    def get_by_metadata(
+        self,
+        filters: dict[str, Any] | None = None,
+        trace: Any | None = None,
+    ) -> list[dict[str, Any]]:
+        """按 metadata 条件批量读取记录。
+
+        为什么这里先给默认实现而不是抽象方法：
+        - G2 需要这个能力，但当前很多测试桩只覆盖主检索接口；
+        - 若直接改成新的抽象方法，会把与 G2 无关的测试一起打断；
+        - 因此先由支持该能力的后端显式覆盖实现，未实现的后端给出清晰失败信息。
+        """
+        _ = (filters, trace)
+        raise NotImplementedError("get_by_metadata is not implemented for this vector store")
+
+    def delete_by_metadata(
+        self,
+        filters: dict[str, Any],
+        trace: Any | None = None,
+    ) -> int:
+        """按 metadata 条件批量删除记录。"""
+        _ = (filters, trace)
+        raise NotImplementedError("delete_by_metadata is not implemented for this vector store")

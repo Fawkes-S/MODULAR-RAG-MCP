@@ -226,6 +226,11 @@ class IngestionPipeline:
                 trace=active_trace,
                 action=lambda: self.loader.load(normalized_source),
             )
+            self._attach_runtime_metadata(
+                document=document,
+                collection=normalized_collection,
+                file_hash=file_hash,
+            )
             self._emit_progress(
                 on_progress=progress_callback,
                 progress_state=progress_state,
@@ -475,6 +480,23 @@ class IngestionPipeline:
             image_path_map[image_id] = stored_path
 
         return len(image_path_map), image_path_map
+
+    @staticmethod
+    def _attach_runtime_metadata(document: Document, collection: str, file_hash: str) -> None:
+        """把运行期 metadata 补到 Document 上，供后续 chunk 继承。
+
+        做什么：
+        - 注入 `collection`，让每个 chunk 在向量库中都可按业务集合过滤；
+        - 注入 `file_hash`，让后续 DocumentManager 更容易把向量库记录和完整性记录对齐。
+
+        为什么放在 split 前：
+        - DocumentChunker 会把文档级 metadata 复制到每个 chunk；
+        - 所以这里补一次，就能自动贯穿后续 transform/encode/upsert 全链路。
+        """
+        metadata = dict(document.metadata)
+        metadata["collection"] = collection
+        metadata["file_hash"] = file_hash
+        document.metadata = metadata
 
     @staticmethod
     def _patch_record_image_paths(records: list[ChunkRecord], image_path_map: dict[str, str]) -> None:

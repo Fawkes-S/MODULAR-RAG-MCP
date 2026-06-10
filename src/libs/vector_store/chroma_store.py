@@ -112,7 +112,7 @@ class ChromaStore(BaseVectorStore):
         raw = self._collection.query(
             query_embeddings=[[float(v) for v in vector]],
             n_results=top_k,
-            where=filters or None,
+            where=self._normalize_where(filters),
             include=["metadatas", "distances", "documents"],
         )
 
@@ -167,6 +167,71 @@ class ChromaStore(BaseVectorStore):
 
         # 返回顺序与入参 ids 一致，便于上层稳定对齐分数与正文。
         return [by_id[item_id] for item_id in normalized_ids if item_id in by_id]
+
+    def get_by_metadata(
+        self,
+        filters: dict[str, Any] | None = None,
+        trace: Any | None = None,
+    ) -> list[dict[str, Any]]:
+        """按 metadata 条件批量读取记录。
+
+        做什么：
+        - 支持 Dashboard/DocumentManager 以“文档视角”读取 chunk；
+        - `filters=None` 时返回当前 collection 下全部记录；
+        - 统一输出为 `id/text/metadata`，避免上层直接依赖 Chroma 原始返回结构。
+
+        关键权衡：
+        - 当前仅支持精确匹配过滤，不做复杂表达式；
+        - 返回顺序按 `chunk_index -> id` 稳定排序，便于页面渲染和测试断言。
+        """
+        _ = trace
+        if filters is not None and not isinstance(filters, dict):
+            raise ValueError("[chroma] ValidationError: filters must be dict or None")
+
+        raw = self._collection.get(
+            where=self._normalize_where(filters),
+            include=["metadatas", "documents"],
+        )
+        ids = raw.get("ids") or []
+        metadatas = raw.get("metadatas") or []
+        documents = raw.get("documents") or []
+
+        rows: list[dict[str, Any]] = []
+        for idx, item_id in enumerate(ids):
+            metadata = metadatas[idx] if idx < len(metadatas) and isinstance(metadatas[idx], dict) else {}
+            text = documents[idx] if idx < len(documents) and isinstance(documents[idx], str) else ""
+            rows.append(
+                {
+                    "id": str(item_id),
+                    "text": text,
+                    "metadata": metadata,
+                }
+            )
+
+        rows.sort(
+            key=lambda row: (
+                self._safe_int(row["metadata"].get("chunk_index")),
+                str(row["id"]),
+            )
+        )
+        return rows
+
+    def delete_by_metadata(self, filters: dict[str, Any], trace: Any | None = None) -> int:
+        """按 metadata 条件批量删除记录。
+
+        为什么先查再删：
+        - 上层需要明确知道删掉了多少条；
+        - Chroma 的 delete 调用本身不直接给出“实际删除数量”，
+          因此这里先查命中集，再按 ID 精确删除。
+        """
+        _ = trace
+        normalized_filters = self._validate_non_empty_filters(filters)
+        rows = self.get_by_metadata(normalized_filters)
+        if not rows:
+            return 0
+
+        self._collection.delete(ids=[row["id"] for row in rows])
+        return len(rows)
 
     def get_collection_stats(self) -> dict[str, Any]:
         """汇总当前 collection 的概览统计。
@@ -256,6 +321,47 @@ class ChromaStore(BaseVectorStore):
             "image_count": total_images,
             "collections": collections,
         }
+
+    @staticmethod
+    def _validate_non_empty_filters(filters: dict[str, Any]) -> dict[str, Any]:
+        """校验删除操作必须提供非空过滤条件，避免误删整库。"""
+        if not isinstance(filters, dict):
+            raise ValueError("[chroma] ValidationError: filters must be dict")
+        normalized = {str(key): value for key, value in filters.items() if str(key).strip()}
+        if not normalized:
+            raise ValueError("[chroma] ValidationError: filters must be non-empty dict")
+        return normalized
+
+    @staticmethod
+    def _safe_int(value: Any) -> int:
+        """把可能来自 metadata 的 chunk_index 安全转换为 int，用于稳定排序。"""
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str) and value.strip().isdigit():
+            return int(value.strip())
+        return 10**9
+
+    @staticmethod
+    def _normalize_where(filters: dict[str, Any] | None) -> dict[str, Any] | None:
+        """把通用过滤字典转换为 Chroma 接受的 where 结构。
+
+        Chroma 的约束是：
+        - 单字段过滤可以直接传 `{"field": value}`；
+        - 多字段过滤必须包装成 `{"$and": [{"field1": value1}, {"field2": value2}]}`。
+
+        上层调用方更自然的写法是普通 dict，所以这里统一做一次适配。
+        """
+        if filters is None:
+            return None
+        if not isinstance(filters, dict):
+            raise ValueError("[chroma] ValidationError: filters must be dict or None")
+
+        normalized = {str(key): value for key, value in filters.items() if str(key).strip()}
+        if not normalized:
+            return None
+        if len(normalized) == 1:
+            return normalized
+        return {"$and": [{key: value} for key, value in normalized.items()]}
 
     @staticmethod
     def _extract_image_ids(metadata: dict[str, Any]) -> list[str]:

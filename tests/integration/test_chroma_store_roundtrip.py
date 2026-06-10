@@ -234,3 +234,68 @@ def test_chroma_store_get_collection_stats_summarizes_chunks_documents_and_image
     finally:
         store._client.delete_collection(collection_name)
         shutil.rmtree(workdir, ignore_errors=True)
+
+
+def test_chroma_store_get_by_metadata_and_delete_by_metadata_roundtrip() -> None:
+    """
+    Given:
+        ChromaStore 中存在两份不同 `source_path/collection` 的 chunk 记录。
+    When:
+        先调用 `get_by_metadata()` 读取其中一份文档，再调用 `delete_by_metadata()` 删除它。
+    Then:
+        - 读取结果应只包含命中文档的 chunk；
+        - 删除返回值应等于命中数量；
+        - 删除后再次按相同 metadata 读取应为空列表。
+    """
+    workdir = _isolated_workdir()
+    persist_dir = _stable_persist_dir(workdir)
+    collection_name = _new_collection("test_metadata_ops")
+
+    store = ChromaStore(persist_dir=persist_dir, collection_name=collection_name)
+    try:
+        store.upsert(
+            [
+                {
+                    "id": "c1",
+                    "vector": [1.0, 0.0],
+                    "metadata": {
+                        "source_path": "docs/a.pdf",
+                        "collection": "manual",
+                        "chunk_index": 1,
+                    },
+                    "text": "doc a / chunk 2",
+                },
+                {
+                    "id": "c2",
+                    "vector": [0.9, 0.1],
+                    "metadata": {
+                        "source_path": "docs/a.pdf",
+                        "collection": "manual",
+                        "chunk_index": 0,
+                    },
+                    "text": "doc a / chunk 1",
+                },
+                {
+                    "id": "c3",
+                    "vector": [0.0, 1.0],
+                    "metadata": {
+                        "source_path": "docs/b.pdf",
+                        "collection": "faq",
+                        "chunk_index": 0,
+                    },
+                    "text": "doc b / chunk 1",
+                },
+            ]
+        )
+
+        rows = store.get_by_metadata({"source_path": "docs/a.pdf", "collection": "manual"})
+        removed = store.delete_by_metadata({"source_path": "docs/a.pdf", "collection": "manual"})
+        after_rows = store.get_by_metadata({"source_path": "docs/a.pdf", "collection": "manual"})
+
+        assert [row["id"] for row in rows] == ["c2", "c1"]
+        assert removed == 2
+        assert after_rows == []
+        assert [row["id"] for row in store.get_by_metadata()] == ["c3"]
+    finally:
+        store._client.delete_collection(collection_name)
+        shutil.rmtree(workdir, ignore_errors=True)

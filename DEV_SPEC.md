@@ -2035,7 +2035,7 @@ dashboard:
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | G1 | Dashboard 基础架构与系统总览页 | [x] | 2026-06-09 | Streamlit多页面骨架 + Overview配置/统计页 + start_dashboard脚本 + tests passed |
-| G2 | DocumentManager 实现 | [ ] | | |
+| G2 | DocumentManager 实现 | [x] | 2026-06-09 | DocumentManager(list/detail/delete/stats) + Chroma metadata read/delete + tests passed |
 | G3 | 数据浏览器页面 | [ ] | | |
 | G4 | Ingestion 管理页面 | [ ] | | |
 | G5 | Ingestion 追踪页面 | [ ] | | |
