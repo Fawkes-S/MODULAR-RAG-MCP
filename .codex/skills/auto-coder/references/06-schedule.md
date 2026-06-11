@@ -127,7 +127,7 @@
 | G1 | Dashboard 基础架构与系统总览页 | [x] | 2026-06-09 | Streamlit多页面骨架 + Overview配置/统计页 + start_dashboard脚本 + tests passed |
 | G2 | DocumentManager 实现 | [x] | 2026-06-09 | DocumentManager(list/detail/delete/stats) + Chroma metadata read/delete + tests passed |
 | G3 | 数据浏览器页面 | [x] | 2026-06-10 | data_browser 页面 + DataService 文档/chunk/图片浏览 + dashboard tests passed |
-| G4 | Ingestion 管理页面 | [ ] | | |
+| G4 | Ingestion 管理页面 | [x] | 2026-06-10 | ingestion_manager 页面 + PDF 上传摄取 + on_progress 实时进度 + 文档删除 + dashboard tests passed |
 | G5 | Ingestion 追踪页面 | [ ] | | |
 | G6 | Query 追踪页面 | [ ] | | |
 

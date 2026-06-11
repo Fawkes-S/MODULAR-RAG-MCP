@@ -12,7 +12,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from observability.dashboard import app
-from observability.dashboard.pages import data_browser
+from observability.dashboard.pages import data_browser, ingestion_manager
 
 
 class _FakeNavigation:
@@ -44,7 +44,7 @@ class _FakeStreamlit:
         return _FakeNavigation(self)
 
 
-def test_dashboard_app_registers_overview_and_placeholder_pages() -> None:
+def test_dashboard_app_registers_overview_and_management_pages() -> None:
     """
     Given:
         一个只实现 `Page/navigation/set_page_config` 的假 Streamlit 对象。
@@ -55,7 +55,8 @@ def test_dashboard_app_registers_overview_and_placeholder_pages() -> None:
     Then:
         - 页面配置应被设置；
         - `st.navigation()` 应注册 6 个页面；
-        - Overview 与其余占位页面都应进入导航；
+        - Overview、数据浏览器与 Ingestion 管理页都应接入真实页面；
+        - 其余未完成页面仍可先保留占位实现；
         - 最终会调用 `navigation.run()`。
     """
     fake_streamlit = _FakeStreamlit()
@@ -75,4 +76,5 @@ def test_dashboard_app_registers_overview_and_placeholder_pages() -> None:
     ]
     assert len(url_paths) == len(set(url_paths))
     assert fake_streamlit.page_groups["管理"][0]["render"] is data_browser.render
+    assert fake_streamlit.page_groups["管理"][1]["render"] is ingestion_manager.render
     assert fake_streamlit.navigation_ran is True

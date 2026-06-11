@@ -11,7 +11,7 @@ SRC_PATH = Path(__file__).resolve().parents[2]
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from observability.dashboard.pages import data_browser, overview
+from observability.dashboard.pages import data_browser, ingestion_manager, overview
 
 
 def _slugify_path(value: str) -> str:
@@ -65,7 +65,7 @@ def build_page_groups(st: Any) -> dict[str, list[Any]]:
                 url_path="data-browser",
             ),
             st.Page(
-                _make_placeholder_page("Ingestion 管理", "G4", "将支持文件上传、进度显示与文档删除。"),
+                ingestion_manager.render,
                 title="Ingestion 管理",
                 url_path="ingestion-manager",
             ),
