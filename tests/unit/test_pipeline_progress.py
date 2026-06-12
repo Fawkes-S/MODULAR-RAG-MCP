@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -176,7 +177,7 @@ class _FakeBM25Indexer:
         return {"terms": len(records) * 3, "doc_count": len(records)}
 
 
-def _make_settings() -> Settings:
+def _make_settings(trace_file: str = "logs/traces.jsonl") -> Settings:
     return Settings(
         llm=LLMSettings(provider="openai", model="gpt-4o-mini"),
         embedding=EmbeddingSettings(provider="openai", model="text-embedding-3-small"),
@@ -184,7 +185,7 @@ def _make_settings() -> Settings:
         retrieval=RetrievalSettings(top_k=8, sparse_top_k=20),
         rerank=RerankSettings(provider="none", enabled=False, top_m=30),
         evaluation=EvaluationSettings(provider="ragas", enabled=False),
-        observability=ObservabilitySettings(log_level="INFO", trace_file="logs/traces.jsonl"),
+        observability=ObservabilitySettings(log_level="INFO", trace_file=trace_file),
         vision_llm=VisionLLMSettings(enabled=False, provider=""),
         ingestion=IngestionSettings(
             splitter="recursive",
@@ -203,10 +204,15 @@ def sample_pdf_file(tmp_path: Path) -> Path:
     return pdf_path
 
 
-def _build_pipeline(*, should_skip: bool = False, transform_count: int = 3) -> IngestionPipeline:
+def _build_pipeline(
+    *,
+    should_skip: bool = False,
+    transform_count: int = 3,
+    trace_file: str = "logs/traces.jsonl",
+) -> IngestionPipeline:
     transforms = [_FakeTransform(f"Transform{index}") for index in range(1, transform_count + 1)]
     return IngestionPipeline(
-        settings=_make_settings(),
+        settings=_make_settings(trace_file=trace_file),
         integrity_checker=_FakeIntegrityChecker(should_skip=should_skip),
         loader=_FakeLoader(),
         chunker=_FakeChunker(),  # type: ignore[arg-type]
@@ -316,3 +322,46 @@ def test_pipeline_run_progress_callback_failure_does_not_break_ingestion(sample_
     assert result.skipped is False
     assert result.chunk_count == 1
     assert call_count["value"] >= 2
+
+
+def test_pipeline_run_persists_ingestion_trace_jsonl(sample_pdf_file: Path, tmp_path: Path) -> None:
+    """
+    Given:
+        一条使用 fake 组件的稳定 Pipeline，
+        且 `observability.trace_file` 指向测试临时目录下的 `traces.jsonl`。
+    When:
+        执行一次 `pipeline.run()`。
+    Then:
+        - 应真实创建 `traces.jsonl`；
+        - 文件内应追加一条 `trace_type == "ingestion"` 的 JSON Lines 记录；
+        - 记录里应包含 G5 页面依赖的 `source_path/collection` 上下文与主阶段数据。
+    """
+    trace_file = tmp_path / "logs" / "traces.jsonl"
+    pipeline = _build_pipeline(trace_file=str(trace_file))
+
+    result = pipeline.run(str(sample_pdf_file), collection="demo", force=True)
+
+    assert trace_file.exists() is True
+    records = [
+        json.loads(line)
+        for line in trace_file.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(records) == 1
+    payload = records[0]
+
+    assert payload["trace_id"] == result.trace_id
+    assert payload["trace_type"] == "ingestion"
+    assert float(payload["total_elapsed_ms"]) >= 0.0
+
+    stage_names = [stage["stage_name"] for stage in payload["stages"]]
+    assert "pipeline.request" in stage_names
+    assert "load" in stage_names
+    assert "split" in stage_names
+    assert "transform" in stage_names
+    assert "embed" in stage_names
+    assert "upsert" in stage_names
+
+    request_stage = next(stage for stage in payload["stages"] if stage["stage_name"] == "pipeline.request")
+    assert request_stage["details"]["collection"] == "demo"
+    assert request_stage["details"]["source_path"] == str(sample_pdf_file.resolve())

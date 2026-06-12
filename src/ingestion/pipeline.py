@@ -13,6 +13,7 @@ from time import perf_counter
 from typing import Any, Callable, TypeVar
 
 from core.settings import Settings
+from core.trace import TraceCollector
 from core.trace.trace_context import TraceContext
 from core.types import ChunkRecord, Document
 from ingestion.chunking.document_chunker import DocumentChunker
@@ -115,6 +116,7 @@ class IngestionPipeline:
         bm25_indexer: BM25Indexer | None = None,
         vector_upserter: VectorUpserter | None = None,
         image_storage: ImageStorage | None = None,
+        trace_collector: TraceCollector | None = None,
     ) -> None:
         if not isinstance(settings, Settings):
             raise TypeError("IngestionPipeline requires Settings; call load_settings('config/settings.yaml') first")
@@ -132,6 +134,7 @@ class IngestionPipeline:
         self.bm25_indexer = bm25_indexer or BM25Indexer()
         self.vector_upserter = vector_upserter or VectorUpserter(settings=settings)
         self.image_storage = image_storage or ImageStorage()
+        self.trace_collector = trace_collector or TraceCollector(trace_file=settings.observability.trace_file)
 
     def run(
         self,
@@ -180,8 +183,22 @@ class IngestionPipeline:
             bool(force),
             active_trace.trace_id,
         )
-
         file_path = Path(normalized_source)
+
+        # G5 需要在历史列表中展示“这次摄取处理的是哪个文件、写入哪个集合”。
+        # 这些信息不属于某个具体业务阶段的产物，而是整次 run 的入口上下文，
+        # 因此在这里提前记录成一条轻量 request 事件，供 TraceService 做兼容提取。
+        active_trace.record_stage(
+            stage_name="pipeline.request",
+            details={
+                "source_path": normalized_source,
+                "file_name": file_path.name or normalized_source,
+                "collection": normalized_collection,
+                "force": bool(force),
+            },
+            elapsed_ms=0.0,
+        )
+
         file_size = file_path.stat().st_size
         file_hash = ""
 
@@ -358,9 +375,13 @@ class IngestionPipeline:
             raise
 
         finally:
-            # F4 要求 ingestion 入口显式形成完整 trace 类型；这里统一在入口收口，
-            # 既兼容外部传入 trace，也避免调用方忘记 finish 导致 trace 处于“未完成”状态。
-            active_trace.finish()
+            # 之前摄取链路只是在内存里积累 trace，却没有真正落盘到 `traces.jsonl`，
+            # 这会导致“数据已经入库，但 Dashboard 追踪页始终为空”。
+            # 这里把 TraceCollector 接到 pipeline 入口的最终收口点，确保：
+            # 1. 无论是 Dashboard 上传还是 CLI ingest，都会自动写 trace；
+            # 2. 调用方不需要额外记住“先 finish，再 collect”的顺序；
+            # 3. 成功与失败两条路径都会留下可排障的追踪记录。
+            self.trace_collector.collect(active_trace)
 
     def _run_stage(
         self,
