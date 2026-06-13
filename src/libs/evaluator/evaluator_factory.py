@@ -9,11 +9,28 @@ from libs.evaluator.base_evaluator import BaseEvaluator
 from libs.evaluator.custom_evaluator import CustomEvaluator
 
 
+def _build_ragas_evaluator() -> BaseEvaluator:
+    """懒加载构造 `RagasEvaluator`。
+
+    做什么：
+    - 仅在调用方真的选择 `provider=ragas` 时导入评估实现；
+    - 避免模块导入阶段就触发可选依赖检查。
+
+    为什么：
+    - H1 的 Ragas 属于可选评估后端，不应影响 `custom` 等默认路径；
+    - 这样没有安装 `ragas` 的环境仍能正常导入工程和运行其它测试。
+    """
+    from observability.evaluation.ragas_evaluator import RagasEvaluator
+
+    return RagasEvaluator()
+
+
 class EvaluatorFactory:
     """Evaluator 提供商注册与创建入口。"""
 
     _registry: dict[str, Callable[..., BaseEvaluator]] = {
         "custom": lambda **_: CustomEvaluator(),
+        "ragas": lambda **_: _build_ragas_evaluator(),
     }
 
     @classmethod

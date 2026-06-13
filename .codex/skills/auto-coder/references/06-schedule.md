@@ -129,13 +129,13 @@
 | G3 | 数据浏览器页面 | [x] | 2026-06-10 | data_browser 页面 + DataService 文档/chunk/图片浏览 + dashboard tests passed |
 | G4 | Ingestion 管理页面 | [x] | 2026-06-10 | ingestion_manager 页面 + PDF 上传摄取 + on_progress 实时进度 + 文档删除 + dashboard tests passed |
 | G5 | Ingestion 追踪页面 | [x] | 2026-06-11 | ingestion_traces 页面 + TraceService(JSONL解析/阶段聚合) + dashboard tests passed |
-| G6 | Query 追踪页面 | [ ] | | |
+| G6 | Query 追踪页面 | [x] | 2026-06-12 | query_traces 页面 + query trace持久化/候选预览 + dashboard tests passed |
 
 #### 阶段 H：评估体系
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| H1 | RagasEvaluator 实现 | [ ] | | |
+| H1 | RagasEvaluator 实现 | [x] | 2026-06-14 | RagasEvaluator(lazy import + standardized metrics) + tests/unit/test_ragas_evaluator.py passed |
 | H2 | CompositeEvaluator 实现 | [ ] | | |
 | H3 | EvalRunner + Golden Test Set | [ ] | | |
 | H4 | 评估面板页面 | [ ] | | |
