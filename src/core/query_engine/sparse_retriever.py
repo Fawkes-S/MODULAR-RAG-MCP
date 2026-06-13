@@ -12,6 +12,23 @@ from ingestion.storage.bm25_indexer import BM25Indexer
 from libs.vector_store.vector_store_factory import VectorStoreFactory
 
 
+def _build_results_preview(results: list[RetrievalResult], limit: int = 5) -> list[dict[str, Any]]:
+    """构建稀疏检索结果的轻量预览。"""
+    preview: list[dict[str, Any]] = []
+    for index, item in enumerate(results[:limit], start=1):
+        preview.append(
+            {
+                "rank": index,
+                "chunk_id": item.chunk_id,
+                "score": float(item.score),
+                "source_path": str(item.metadata.get("source_path", "-")),
+                "collection": str(item.metadata.get("collection", "-")),
+                "text": str(item.text),
+            }
+        )
+    return preview
+
+
 class SparseRetriever:
     """基于 BM25 + VectorStore 的稀疏检索器。
 
@@ -44,6 +61,7 @@ class SparseRetriever:
 
         self.settings = settings
         self.bm25_indexer = bm25_indexer or BM25Indexer()
+        self._ensure_bm25_index_loaded()
         self.vector_store = vector_store or VectorStoreFactory.create(settings)
 
     def retrieve(
@@ -96,11 +114,31 @@ class SparseRetriever:
                     "result_count": len(results),
                     "backend": "bm25",
                     "vector_store_provider": self.settings.vector_store.provider,
+                    "results_preview": _build_results_preview(results),
                 },
                 elapsed_ms=(perf_counter() - started) * 1000.0,
             )
 
         return results
+
+    def _ensure_bm25_index_loaded(self) -> None:
+        """确保默认 BM25 索引器在查询前已从磁盘恢复索引。
+
+        为什么需要这一步：
+        - `BM25Indexer()` 构造时只初始化空内存结构，不会自动读取 `bm25_index.pkl`；
+        - 在线查询链路通常直接 new `SparseRetriever(settings)`，如果不显式 load，
+          `query()` 会看到空 `_inverted_index` 并始终返回空结果。
+
+        设计取舍：
+        - 仅在当前索引器还未持有倒排索引时调用 `load()`，避免重复 I/O；
+        - 若磁盘不存在索引文件，`load()` 会安全地恢复为空索引，不会抛错。
+        """
+        inverted = getattr(self.bm25_indexer, "_inverted_index", None)
+        if isinstance(inverted, dict) and inverted:
+            return
+        load_fn = getattr(self.bm25_indexer, "load", None)
+        if callable(load_fn):
+            load_fn()
 
     @staticmethod
     def _normalize_keywords(keywords: list[str]) -> list[str]:

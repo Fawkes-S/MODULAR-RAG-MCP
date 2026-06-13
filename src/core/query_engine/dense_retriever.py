@@ -12,6 +12,28 @@ from libs.embedding.embedding_factory import EmbeddingFactory
 from libs.vector_store.vector_store_factory import VectorStoreFactory
 
 
+def _build_results_preview(results: list[RetrievalResult], limit: int = 5) -> list[dict[str, Any]]:
+    """构建轻量结果预览，供 trace 与 Dashboard 使用。
+
+    为什么不直接把完整 `RetrievalResult` 列表写进 trace：
+    - trace 的职责是“可观测”，不是“复制整份结果集”；
+    - 只保留前几个候选的关键信息，既足够排障和做对比页，又能避免 jsonl 体积膨胀。
+    """
+    preview: list[dict[str, Any]] = []
+    for index, item in enumerate(results[:limit], start=1):
+        preview.append(
+            {
+                "rank": index,
+                "chunk_id": item.chunk_id,
+                "score": float(item.score),
+                "source_path": str(item.metadata.get("source_path", "-")),
+                "collection": str(item.metadata.get("collection", "-")),
+                "text": str(item.text),
+            }
+        )
+    return preview
+
+
 class DenseRetriever:
     """基于 Embedding + VectorStore 的稠密检索器。
 
@@ -101,6 +123,7 @@ class DenseRetriever:
                     "result_count": len(normalized_results),
                     "embedding_provider": self.settings.embedding.provider,
                     "vector_store_provider": self.settings.vector_store.provider,
+                    "results_preview": _build_results_preview(normalized_results),
                 },
                 elapsed_ms=(perf_counter() - started) * 1000.0,
             )

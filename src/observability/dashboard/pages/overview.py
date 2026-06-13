@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from libs.vector_store.chroma_store import ChromaStore
+from observability.dashboard.pages._table_utils import render_wrapped_dataframe
 from observability.dashboard.services.config_service import ComponentCard, ConfigService, RuntimeStatus
 
 
@@ -114,7 +115,7 @@ def _render_collection_stats(st: Any, stats: dict[str, Any], stats_error: str | 
 
     collection_rows = stats.get("collections", [])
     if isinstance(collection_rows, list) and collection_rows:
-        st.dataframe(collection_rows, use_container_width=True, hide_index=True)
+        render_wrapped_dataframe(st, collection_rows)
     else:
         st.info("当前向量库还没有可展示的数据。先执行 ingest，再回来查看统计。")
 

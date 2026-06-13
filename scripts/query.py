@@ -27,6 +27,7 @@ from core.query_engine.query_processor import QueryProcessor
 from core.query_engine.reranker import Reranker, RerankOutput
 from core.query_engine.sparse_retriever import SparseRetriever
 from core.settings import Settings, load_settings
+from core.trace import TraceCollector
 from core.trace.trace_context import TraceContext
 from core.types import RetrievalResult
 from observability.logger import get_logger
@@ -221,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
         filters["collection"] = str(args.collection).strip()
 
     trace = TraceContext(trace_type="query")
+    trace_collector = TraceCollector(trace_file=settings.observability.trace_file)
 
     print(
         f"[QUERY] start top_k={top_k} collection={filters.get('collection', '<any>')} "
@@ -242,46 +244,51 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     try:
-        hybrid_results = hybrid_search.search(
-            query=args.query,
-            top_k=top_k,
-            filters=filters or None,
-            trace=trace,
+        try:
+            hybrid_results = hybrid_search.search(
+                query=args.query,
+                top_k=top_k,
+                filters=filters or None,
+                trace=trace,
+            )
+        except RuntimeError as exc:
+            # 无索引或双路不可用时返回友好提示，而不是让 CLI 直接失败退出。
+            return _handle_empty_or_unavailable(error=exc)
+
+        if not hybrid_results:
+            return _handle_empty_or_unavailable()
+
+        if args.no_rerank:
+            final_output = RerankOutput(
+                results=hybrid_results,
+                fallback=False,
+                fallback_reason=None,
+                backend="disabled_by_flag",
+            )
+        else:
+            if reranker is None:
+                raise RuntimeError("reranker not initialized while --no-rerank is false")
+            final_output = reranker.rerank(
+                query=args.query,
+                candidates=hybrid_results,
+                top_k=top_k,
+                trace=trace,
+            )
+
+        if not final_output.results:
+            return _handle_empty_or_unavailable()
+
+        _print_final_results(final_output.results, top_k=top_k)
+        print(
+            f"\n[QUERY] done backend={final_output.backend} "
+            f"fallback={final_output.fallback} "
+            f"fallback_reason={final_output.fallback_reason}"
         )
-    except RuntimeError as exc:
-        # 无索引或双路不可用时返回友好提示，而不是让 CLI 直接失败退出。
-        return _handle_empty_or_unavailable(error=exc)
-
-    if not hybrid_results:
-        return _handle_empty_or_unavailable()
-
-    if args.no_rerank:
-        final_output = RerankOutput(
-            results=hybrid_results,
-            fallback=False,
-            fallback_reason=None,
-            backend="disabled_by_flag",
-        )
-    else:
-        if reranker is None:
-            raise RuntimeError("reranker not initialized while --no-rerank is false")
-        final_output = reranker.rerank(
-            query=args.query,
-            candidates=hybrid_results,
-            top_k=top_k,
-            trace=trace,
-        )
-
-    if not final_output.results:
-        return _handle_empty_or_unavailable()
-
-    _print_final_results(final_output.results, top_k=top_k)
-    print(
-        f"\n[QUERY] done backend={final_output.backend} "
-        f"fallback={final_output.fallback} "
-        f"fallback_reason={final_output.fallback_reason}"
-    )
-    return 0
+        return 0
+    finally:
+        # Query 追踪页需要从 `traces.jsonl` 读取历史；
+        # 因此 CLI 查询入口必须在请求结束时统一把内存 trace 落盘。
+        trace_collector.collect(trace)
 
 
 if __name__ == "__main__":

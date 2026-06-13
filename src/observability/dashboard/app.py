@@ -11,7 +11,7 @@ SRC_PATH = Path(__file__).resolve().parents[2]
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from observability.dashboard.pages import data_browser, ingestion_manager, ingestion_traces, overview
+from observability.dashboard.pages import data_browser, ingestion_manager, ingestion_traces, overview, query_traces
 
 
 def _slugify_path(value: str) -> str:
@@ -77,7 +77,7 @@ def build_page_groups(st: Any) -> dict[str, list[Any]]:
                 url_path="ingestion-traces",
             ),
             st.Page(
-                _make_placeholder_page("Query 追踪", "G6", "将展示查询历史、Dense/Sparse 对比与 Rerank 变化。"),
+                query_traces.render,
                 title="Query 追踪",
                 url_path="query-traces",
             ),

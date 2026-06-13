@@ -23,6 +23,7 @@ from typing import Any
 from core.settings import Settings, load_settings
 
 _INGESTION_STAGE_ORDER = ("load", "split", "transform", "embed", "upsert")
+_QUERY_STAGE_ORDER = ("query_processing", "dense_retrieval", "sparse_retrieval", "fusion", "rerank")
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ class DashboardTraceRecord:
     total_elapsed_ms: float
     status: str
     source_path: str
+    processing_source_path: str
     file_name: str
     collection: str
     stage_breakdown: tuple[TraceStageBreakdown, ...]
@@ -79,6 +81,40 @@ class TraceRuntimeConfig:
 
     auto_refresh: bool
     refresh_interval: int
+
+
+@dataclass(frozen=True)
+class QueryCandidatePreview:
+    """Query 追踪页展示的轻量候选项。"""
+
+    rank: int
+    chunk_id: str
+    score: float
+    source_path: str
+    collection: str
+    text: str
+
+
+@dataclass(frozen=True)
+class QueryTraceView:
+    """Query trace 的页面视图模型。"""
+
+    query_text: str
+    normalized_query: str
+    collection: str
+    keywords: tuple[str, ...]
+    top_k: int | None
+    stage_breakdown: tuple[TraceStageBreakdown, ...]
+    query_processing_details: dict[str, Any]
+    dense_details: dict[str, Any]
+    sparse_details: dict[str, Any]
+    fusion_details: dict[str, Any]
+    rerank_details: dict[str, Any]
+    dense_results: tuple[QueryCandidatePreview, ...]
+    sparse_results: tuple[QueryCandidatePreview, ...]
+    fusion_results: tuple[QueryCandidatePreview, ...]
+    rerank_results: tuple[QueryCandidatePreview, ...]
+    final_results: tuple[QueryCandidatePreview, ...]
 
 
 class TraceService:
@@ -159,6 +195,66 @@ class TraceService:
             refresh_interval=int(settings.dashboard.refresh_interval),
         )
 
+    def build_query_trace_view(self, record: DashboardTraceRecord) -> QueryTraceView:
+        """把通用 trace 记录转换为 Query 页面专用视图。
+
+        做什么：
+        - 从 `raw_payload.stages` 中提取 query/dense/sparse/fusion/rerank 的详情；
+        - 产出阶段耗时分布；
+        - 提取各阶段的候选预览列表，供页面做并列比较与名次变化展示。
+        """
+        stage_rows = record.raw_payload.get("stages")
+        stages = stage_rows if isinstance(stage_rows, list) else []
+
+        query_details = self._stage_details(stages, "query_processing")
+        fusion_details = self._stage_details(stages, "fusion")
+        rerank_details = self._stage_details(stages, "rerank")
+
+        dense_results = self._extract_query_candidate_preview(self._stage_details(stages, "dense_retrieval"))
+        sparse_results = self._extract_query_candidate_preview(self._stage_details(stages, "sparse_retrieval"))
+        fusion_results = self._extract_query_candidate_preview(fusion_details)
+        rerank_results = self._extract_query_candidate_preview(rerank_details)
+
+        query_text = str(query_details.get("original_query", "")).strip()
+        normalized_query = str(query_details.get("normalized_query", "")).strip()
+        collection = self._extract_context_value(payload=record.raw_payload, stages=stages, key="collection")
+        if collection == "-":
+            collection = str(query_details.get("filters", {}) if isinstance(query_details.get("filters"), dict) else {})
+            filters = query_details.get("filters")
+            if isinstance(filters, dict) and isinstance(filters.get("collection"), str) and filters.get("collection", "").strip():
+                collection = str(filters["collection"]).strip()
+            else:
+                collection = "-"
+
+        top_k = None
+        for details in (rerank_details, fusion_details):
+            raw_top_k = details.get("top_k")
+            if isinstance(raw_top_k, int) and raw_top_k > 0:
+                top_k = raw_top_k
+                break
+
+        keywords_raw = query_details.get("keywords")
+        keywords = tuple(str(item) for item in keywords_raw if isinstance(item, str)) if isinstance(keywords_raw, list) else ()
+
+        return QueryTraceView(
+            query_text=query_text or normalized_query or "-",
+            normalized_query=normalized_query or query_text or "-",
+            collection=collection,
+            keywords=keywords,
+            top_k=top_k,
+            stage_breakdown=self._build_query_stage_breakdown(stages),
+            query_processing_details=dict(query_details),
+            dense_details=dict(self._stage_details(stages, "dense_retrieval")),
+            sparse_details=dict(self._stage_details(stages, "sparse_retrieval")),
+            fusion_details=dict(fusion_details),
+            rerank_details=dict(rerank_details),
+            dense_results=dense_results,
+            sparse_results=sparse_results,
+            fusion_results=fusion_results,
+            rerank_results=rerank_results,
+            final_results=rerank_results or fusion_results,
+        )
+
     def _build_trace_record(self, payload: dict[str, Any]) -> DashboardTraceRecord | None:
         """把单条原始 payload 规整成页面可用记录。
 
@@ -180,6 +276,11 @@ class TraceService:
         stage_rows = stages if isinstance(stages, list) else []
 
         source_path = self._extract_context_value(payload=payload, stages=stage_rows, key="source_path")
+        processing_source_path = self._extract_context_value(
+            payload=payload,
+            stages=stage_rows,
+            key="processing_source_path",
+        )
         collection = self._extract_context_value(payload=payload, stages=stage_rows, key="collection")
         file_name = self._derive_file_name(source_path)
         stage_breakdown = self._build_ingestion_stage_breakdown(stage_rows)
@@ -193,6 +294,7 @@ class TraceService:
             total_elapsed_ms=total_elapsed_ms,
             status=status,
             source_path=source_path,
+            processing_source_path=processing_source_path,
             file_name=file_name,
             collection=collection,
             stage_breakdown=stage_breakdown,
@@ -263,6 +365,57 @@ class TraceService:
             for stage_name in _INGESTION_STAGE_ORDER
         )
 
+    def _build_query_stage_breakdown(self, stages: list[Any]) -> tuple[TraceStageBreakdown, ...]:
+        """把 query 原始阶段整理成 G6 页面需要的稳定主阶段。"""
+        buckets: dict[str, dict[str, Any]] = {
+            stage_name: {
+                "elapsed_ms": 0.0,
+                "status": "missing",
+                "method": "",
+                "provider": "",
+                "present": False,
+                "source_stages": [],
+            }
+            for stage_name in _QUERY_STAGE_ORDER
+        }
+
+        for raw_stage in stages:
+            if not isinstance(raw_stage, dict):
+                continue
+            stage_name = str(raw_stage.get("stage_name", "")).strip()
+            if stage_name not in buckets:
+                continue
+
+            details = raw_stage.get("details")
+            details_dict = details if isinstance(details, dict) else {}
+            bucket = buckets[stage_name]
+            bucket["present"] = True
+            bucket["elapsed_ms"] += self._coerce_float(raw_stage.get("elapsed_ms", 0.0))
+
+            if bucket["status"] != "error":
+                stage_status = str(raw_stage.get("status", "ok")).strip().lower() or "ok"
+                bucket["status"] = "error" if stage_status == "error" else "ok"
+
+            if not bucket["method"]:
+                bucket["method"] = str(details_dict.get("method", "")).strip()
+            if not bucket["provider"]:
+                bucket["provider"] = str(details_dict.get("provider", "")).strip()
+
+            bucket["source_stages"].append(stage_name)
+
+        return tuple(
+            TraceStageBreakdown(
+                stage_name=stage_name,
+                elapsed_ms=float(buckets[stage_name]["elapsed_ms"]),
+                status=str(buckets[stage_name]["status"]),
+                method=str(buckets[stage_name]["method"]),
+                provider=str(buckets[stage_name]["provider"]),
+                present=bool(buckets[stage_name]["present"]),
+                source_stages=tuple(str(item) for item in buckets[stage_name]["source_stages"]),
+            )
+            for stage_name in _QUERY_STAGE_ORDER
+        )
+
     @staticmethod
     def _derive_trace_status(*, stage_rows: list[Any], finished_at: str | None) -> str:
         """根据阶段状态推导整条 trace 的状态。"""
@@ -299,6 +452,48 @@ class TraceService:
                 return value.strip()
 
         return "-"
+
+    @staticmethod
+    def _stage_details(stages: list[Any], stage_name: str) -> dict[str, Any]:
+        """提取指定阶段的 details；缺失时返回空 dict。"""
+        for raw_stage in stages:
+            if not isinstance(raw_stage, dict):
+                continue
+            if str(raw_stage.get("stage_name", "")).strip() != stage_name:
+                continue
+            details = raw_stage.get("details")
+            if isinstance(details, dict):
+                return details
+            return {}
+        return {}
+
+    @staticmethod
+    def _extract_query_candidate_preview(details: dict[str, Any]) -> tuple[QueryCandidatePreview, ...]:
+        """从阶段 details 中提取候选预览。
+
+        失败路径：
+        - 若 `results_preview` 不存在或 shape 不合法，则回退为空列表；
+        - 页面层据此展示“暂无数据”，而不是因为单条 trace 缺字段直接崩掉。
+        """
+        raw_preview = details.get("results_preview")
+        if not isinstance(raw_preview, list):
+            return ()
+
+        preview: list[QueryCandidatePreview] = []
+        for index, item in enumerate(raw_preview, start=1):
+            if not isinstance(item, dict):
+                continue
+            preview.append(
+                QueryCandidatePreview(
+                    rank=int(item.get("rank", index)) if isinstance(item.get("rank", index), int) else index,
+                    chunk_id=str(item.get("chunk_id", "-")),
+                    score=TraceService._coerce_float(item.get("score", 0.0)),
+                    source_path=str(item.get("source_path", "-")),
+                    collection=str(item.get("collection", "-")),
+                    text=str(item.get("text", "")),
+                )
+            )
+        return tuple(preview)
 
     @staticmethod
     def _derive_file_name(source_path: str) -> str:

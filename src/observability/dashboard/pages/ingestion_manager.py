@@ -20,6 +20,7 @@ from uuid import uuid4
 
 from ingestion.document_manager import DeleteResult, DocumentInfo, DocumentManager
 from ingestion.pipeline import IngestionPipeline, IngestionResult
+from observability.dashboard.pages._table_utils import render_wrapped_dataframe
 from observability.dashboard.services.config_service import ConfigService
 from observability.dashboard.services.data_service import DataService
 
@@ -172,6 +173,7 @@ class IngestionManagerService:
                 str(staged_path),
                 collection=normalized_collection,
                 force=force,
+                logical_source_path=str(Path(uploaded_file.name).name),
                 on_progress=on_progress,
             )
         finally:
@@ -414,7 +416,7 @@ def _render_document_table(st: Any, documents: list[DocumentInfo]) -> None:
         }
         for item in documents
     ]
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    render_wrapped_dataframe(st, rows)
 
 
 def _find_document(documents: list[DocumentInfo], doc_id: str) -> DocumentInfo | None:

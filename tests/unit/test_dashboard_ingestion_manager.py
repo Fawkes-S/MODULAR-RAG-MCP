@@ -43,6 +43,7 @@ class _FakePipeline:
         collection: str = "default",
         *,
         force: bool = False,
+        logical_source_path: str | None = None,
         trace: Any | None = None,
         on_progress: Any | None = None,
     ) -> IngestionResult:
@@ -52,6 +53,7 @@ class _FakePipeline:
                 "source_path": source_path,
                 "collection": collection,
                 "force": force,
+                "logical_source_path": logical_source_path,
                 "file_exists_during_call": Path(source_path).exists(),
             }
         )
@@ -112,6 +114,7 @@ class _FakeStreamlit:
         self.dataframes: list[list[dict[str, Any]]] = []
         self.placeholder_captions: list[str] = []
         self.progress_updates: list[tuple[float, str | None]] = []
+        self.markdown_calls: list[dict[str, Any]] = []
 
         self._text_inputs = {"写入 collection": "demo"}
         self._checkboxes = {"强制重建": True}
@@ -178,6 +181,9 @@ class _FakeStreamlit:
     def dataframe(self, rows: list[dict[str, Any]], **kwargs: Any) -> None:
         _ = kwargs
         self.dataframes.append(rows)
+
+    def markdown(self, text: str, **kwargs: Any) -> None:
+        self.markdown_calls.append({"text": text, "kwargs": kwargs})
 
     def info(self, text: str) -> None:
         self.messages.append(("info", text))
@@ -309,6 +315,7 @@ def test_ingestion_manager_service_stages_uploaded_pdf_and_cleans_temp_file(tmp_
         ("upsert", 3, 3),
     ]
     assert len(fake_pipeline.calls) == 1
+    assert fake_pipeline.calls[0]["logical_source_path"] == "alpha.pdf"
     staged_path = Path(fake_pipeline.calls[0]["source_path"])
     assert fake_pipeline.calls[0]["file_exists_during_call"] is True
     assert staged_path.exists() is False
@@ -367,3 +374,4 @@ def test_ingestion_manager_render_triggers_ingest_delete_and_progress_updates() 
     assert any(message[0] == "success" and "删除完成" in message[1] for message in fake_streamlit.messages)
     assert any(update[1] and "加载文档" in update[1] for update in fake_streamlit.progress_updates)
     assert fake_streamlit.placeholder_captions[-1] == "最近完成阶段：写入存储"
+    assert any(call["kwargs"].get("unsafe_allow_html") is True for call in fake_streamlit.markdown_calls)

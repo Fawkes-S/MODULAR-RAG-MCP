@@ -13,6 +13,23 @@ from libs.reranker.base_reranker import BaseReranker
 from libs.reranker.reranker_factory import RerankerFactory
 
 
+def _build_results_preview(results: list[RetrievalResult], limit: int = 5) -> list[dict[str, Any]]:
+    """构建重排结果预览，用于 Query 追踪页做前后对比。"""
+    preview: list[dict[str, Any]] = []
+    for index, item in enumerate(results[:limit], start=1):
+        preview.append(
+            {
+                "rank": index,
+                "chunk_id": item.chunk_id,
+                "score": float(item.score),
+                "source_path": str(item.metadata.get("source_path", "-")),
+                "collection": str(item.metadata.get("collection", "-")),
+                "text": str(item.text),
+            }
+        )
+    return preview
+
+
 @dataclass(frozen=True)
 class RerankOutput:
     """重排输出契约。
@@ -276,6 +293,7 @@ class Reranker:
                 "output_count": output_count,
                 "fallback": output.fallback,
                 "fallback_reason": output.fallback_reason,
+                "results_preview": _build_results_preview(output.results),
             },
             elapsed_ms=(perf_counter() - started) * 1000.0,
         )

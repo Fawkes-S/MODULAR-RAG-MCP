@@ -223,6 +223,7 @@ def test_mcp_server_query_knowledge_hub_returns_markdown_and_citations() -> None
     assert tool_response["result"]["structuredContent"]["citations"][0]["page"] == 2
     assert fake_search.calls[0]["filters"] == {"collection": "manual"}
     assert fake_reranker.calls[0]["candidate_ids"] == ["chunk_001", "chunk_002"]
+    assert tool_response["result"]["structuredContent"]["trace_id"]
 
 
 def test_mcp_server_get_document_summary_returns_structured_summary() -> None:

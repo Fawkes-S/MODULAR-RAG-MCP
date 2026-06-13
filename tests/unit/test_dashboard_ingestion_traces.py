@@ -27,6 +27,7 @@ class _FakeStreamlit:
         self.messages: list[tuple[str, str]] = []
         self.dataframes: list[list[dict[str, Any]]] = []
         self.bar_charts: list[list[dict[str, Any]]] = []
+        self.markdown_calls: list[dict[str, Any]] = []
         self._selectboxes = {"选择一条摄取 Trace": "trace-new"}
 
     def title(self, text: str) -> None:
@@ -46,6 +47,10 @@ class _FakeStreamlit:
 
     def write(self, text: str) -> None:
         self.messages.append(("write", text))
+
+    def markdown(self, text: str, **kwargs: Any) -> None:
+        self.markdown_calls.append({"text": text, "kwargs": kwargs})
+        self.messages.append(("markdown", text))
 
     def dataframe(self, rows: list[dict[str, Any]], **kwargs: Any) -> None:
         _ = kwargs
@@ -117,6 +122,7 @@ def _make_trace_record(
         total_elapsed_ms=total_elapsed_ms,
         status=status,
         source_path=f"Q:/docs/{file_name}",
+        processing_source_path=f"Q:/tmp/dashboard_uploads/{file_name}",
         file_name=file_name,
         collection=collection,
         stage_breakdown=(
@@ -166,7 +172,122 @@ def _make_trace_record(
                 source_stages=("store.vector_upsert",),
             ),
         ),
-        raw_payload={"trace_id": trace_id},
+        raw_payload={
+            "trace_id": trace_id,
+            "stages": [
+                {
+                    "stage_name": "pipeline.request",
+                    "details": {
+                        "source_path": f"Q:/docs/{file_name}",
+                        "processing_source_path": f"Q:/tmp/dashboard_uploads/{file_name}",
+                        "collection": collection,
+                        "file_size": 2048,
+                    },
+                },
+                {
+                    "stage_name": "load",
+                    "elapsed_ms": 10.0,
+                    "status": "ok",
+                    "details": {
+                        "method": "pdf_to_markdown_with_images",
+                        "provider": "PdfLoader",
+                        "text_length": 800,
+                        "image_count": 1,
+                    },
+                },
+                {
+                    "stage_name": "split",
+                    "elapsed_ms": 15.0,
+                    "status": "ok",
+                    "details": {
+                        "method": "recursive",
+                        "provider": "RecursiveCharacterTextSplitter",
+                        "chunk_count": 3,
+                        "avg_chunk_length": 266.67,
+                        "max_chunk_length": 320,
+                    },
+                },
+                {
+                    "stage_name": "transform",
+                    "elapsed_ms": 20.0,
+                    "status": "ok",
+                    "details": {
+                        "method": "ChunkRefiner",
+                        "provider": "ChunkRefiner",
+                        "transform_name": "ChunkRefiner",
+                        "chunk_count": 3,
+                        "source_stage": "transform.ChunkRefiner",
+                    },
+                },
+                {
+                    "stage_name": "transform.chunk_refiner",
+                    "elapsed_ms": 6.0,
+                    "status": "ok",
+                    "details": {
+                        "total": 3,
+                        "llm_success": 0,
+                        "rule_fallback": 3,
+                        "errors": 0,
+                    },
+                },
+                {
+                    "stage_name": "transform.metadata_enricher",
+                    "elapsed_ms": 7.0,
+                    "status": "ok",
+                    "details": {
+                        "total": 3,
+                        "llm_success": 0,
+                        "rule_fallback": 3,
+                        "errors": 0,
+                        "llm_enabled": False,
+                        "llm_provider": "openai",
+                    },
+                },
+                {
+                    "stage_name": "transform.image_captioner",
+                    "elapsed_ms": 8.0,
+                    "status": "ok",
+                    "details": {
+                        "total": 3,
+                        "chunks_with_images": 1,
+                        "image_refs_total": 1,
+                        "captioned_images": 1,
+                        "fallback_images": 0,
+                        "errors": 0,
+                        "vision_enabled": False,
+                        "vision_provider": "",
+                    },
+                },
+                {
+                    "stage_name": "embed",
+                    "elapsed_ms": 30.0,
+                    "status": "ok",
+                    "details": {
+                        "method": "batch_dense_sparse_encode",
+                        "provider": "huggingface_local",
+                        "embedding_provider": "huggingface_local",
+                        "batch_count": 1,
+                        "batch_size": 16,
+                        "dense_dim": 384,
+                        "sparse_term_count": 18,
+                        "record_count": 3,
+                    },
+                },
+                {
+                    "stage_name": "upsert",
+                    "elapsed_ms": 25.0,
+                    "status": "error" if status == "failed" else "ok",
+                    "details": {
+                        "method": "vector_store_upsert",
+                        "provider": "chroma",
+                        "upsert_count": 3,
+                        "bm25_terms": 9,
+                        "bm25_doc_count": 3,
+                        "image_count": 1,
+                    },
+                },
+            ],
+        },
     )
 
 
@@ -207,15 +328,16 @@ def test_ingestion_traces_render_shows_history_warning_and_stage_chart() -> None
         - 页面应展示历史列表；
         - 因坏行计数应出现 warning；
         - 应为选中的 trace 画出阶段耗时图；
-        - 详情区应展示文件名、集合与总耗时等关键信息。
+        - 详情区应展示基础信息、汇总指标、阶段记录内容与原始阶段明细。
     """
     fake_streamlit = _FakeStreamlit()
     service = _FakeTraceService()
 
     render(trace_service=service, st_module=fake_streamlit)
 
-    assert fake_streamlit.dataframes
+    assert len(fake_streamlit.dataframes) >= 3
     assert fake_streamlit.dataframes[0][0]["trace_id"] == "trace-new"
+    assert fake_streamlit.dataframes[0][0]["started_at"] == "2026-06-11 10:00:00 UTC+00:00"
     assert any(kind == "warning" and "跳过了 1 行坏数据" in text for kind, text in fake_streamlit.messages)
     assert fake_streamlit.bar_charts
     assert [row["stage"] for row in fake_streamlit.bar_charts[0]] == [
@@ -226,3 +348,20 @@ def test_ingestion_traces_render_shows_history_warning_and_stage_chart() -> None
         "upsert",
     ]
     assert any(kind == "write" and "beta.pdf" in text for kind, text in fake_streamlit.messages)
+    assert any(kind == "markdown" and "基础信息" in text for kind, text in fake_streamlit.messages)
+    assert any(kind == "write" and "Processing Source Path" in text for kind, text in fake_streamlit.messages)
+    assert any(kind == "write" and "total_chunks" in text for kind, text in fake_streamlit.messages)
+    assert any(kind == "write" and "2026-06-11 10:00:00 UTC+00:00" in text for kind, text in fake_streamlit.messages)
+    assert fake_streamlit.dataframes[1][0]["阶段"] == "Load"
+    assert fake_streamlit.dataframes[1][0]["算法/方法"] == "pdf_to_markdown_with_images"
+    assert "提取图片数=1" in fake_streamlit.dataframes[1][0]["处理详情"]
+    assert fake_streamlit.dataframes[1][1]["阶段"] == "Split"
+    assert "chunk_size=-" in fake_streamlit.dataframes[1][1]["处理详情"]
+    assert any(row["阶段"] == "Transform / ChunkRefiner" for row in fake_streamlit.dataframes[1])
+    assert any("LLM成功数=0" in row["处理详情"] for row in fake_streamlit.dataframes[1] if row["阶段"] == "Transform / ChunkRefiner")
+    assert any(row["阶段"] == "Transform / ImageCaptioner" for row in fake_streamlit.dataframes[1])
+    assert any("生成caption图片数=1" in row["处理详情"] for row in fake_streamlit.dataframes[1] if row["阶段"] == "Transform / ImageCaptioner")
+    assert any(row["阶段"] == "Embed" and "向量维度=384" in row["处理详情"] for row in fake_streamlit.dataframes[1])
+    assert any(row["阶段"] == "Upsert" and "BM25文档数=3" in row["处理详情"] for row in fake_streamlit.dataframes[1])
+    assert fake_streamlit.dataframes[2][0]["stage_name"] == "pipeline.request"
+    assert any(call["kwargs"].get("unsafe_allow_html") is True for call in fake_streamlit.markdown_calls)

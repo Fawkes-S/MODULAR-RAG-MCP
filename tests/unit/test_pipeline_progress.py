@@ -241,6 +241,7 @@ def test_pipeline_run_emits_progress_for_each_main_stage(sample_pdf_file: Path) 
         str(sample_pdf_file),
         collection="demo",
         force=True,
+        logical_source_path="blogger_intro.pdf",
         on_progress=lambda stage_name, current, total: progress_events.append((stage_name, current, total)),
     )
 
@@ -316,6 +317,7 @@ def test_pipeline_run_progress_callback_failure_does_not_break_ingestion(sample_
         str(sample_pdf_file),
         collection="demo",
         force=True,
+        logical_source_path="blogger_intro.pdf",
         on_progress=_flaky_progress,
     )
 
@@ -334,12 +336,17 @@ def test_pipeline_run_persists_ingestion_trace_jsonl(sample_pdf_file: Path, tmp_
     Then:
         - 应真实创建 `traces.jsonl`；
         - 文件内应追加一条 `trace_type == "ingestion"` 的 JSON Lines 记录；
-        - 记录里应包含 G5 页面依赖的 `source_path/collection` 上下文与主阶段数据。
+        - 记录里应包含 G5 页面依赖的 `source_path/processing_source_path/collection` 上下文与主阶段数据。
     """
     trace_file = tmp_path / "logs" / "traces.jsonl"
     pipeline = _build_pipeline(trace_file=str(trace_file))
 
-    result = pipeline.run(str(sample_pdf_file), collection="demo", force=True)
+    result = pipeline.run(
+        str(sample_pdf_file),
+        collection="demo",
+        force=True,
+        logical_source_path="blogger_intro.pdf",
+    )
 
     assert trace_file.exists() is True
     records = [
@@ -364,4 +371,6 @@ def test_pipeline_run_persists_ingestion_trace_jsonl(sample_pdf_file: Path, tmp_
 
     request_stage = next(stage for stage in payload["stages"] if stage["stage_name"] == "pipeline.request")
     assert request_stage["details"]["collection"] == "demo"
-    assert request_stage["details"]["source_path"] == str(sample_pdf_file.resolve())
+    assert request_stage["details"]["source_path"] == "blogger_intro.pdf"
+    assert request_stage["details"]["processing_source_path"] == str(sample_pdf_file.resolve())
+    assert request_stage["details"]["file_name"] == "blogger_intro.pdf"

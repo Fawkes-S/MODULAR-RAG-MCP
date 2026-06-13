@@ -12,7 +12,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from observability.dashboard import app
-from observability.dashboard.pages import data_browser, ingestion_manager, ingestion_traces
+from observability.dashboard.pages import data_browser, ingestion_manager, ingestion_traces, query_traces
 
 
 class _FakeNavigation:
@@ -55,7 +55,7 @@ def test_dashboard_app_registers_overview_and_management_pages() -> None:
     Then:
         - 页面配置应被设置；
         - `st.navigation()` 应注册 6 个页面；
-        - Overview、数据浏览器、Ingestion 管理与 Ingestion 追踪页都应接入真实页面；
+        - Overview、数据浏览器、Ingestion 管理、Ingestion 追踪与 Query 追踪页都应接入真实页面；
         - 其余未完成页面仍可先保留占位实现；
         - 最终会调用 `navigation.run()`。
     """
@@ -78,4 +78,5 @@ def test_dashboard_app_registers_overview_and_management_pages() -> None:
     assert fake_streamlit.page_groups["管理"][0]["render"] is data_browser.render
     assert fake_streamlit.page_groups["管理"][1]["render"] is ingestion_manager.render
     assert fake_streamlit.page_groups["追踪"][0]["render"] is ingestion_traces.render
+    assert fake_streamlit.page_groups["追踪"][1]["render"] is query_traces.render
     assert fake_streamlit.navigation_ran is True

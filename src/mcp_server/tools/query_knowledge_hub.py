@@ -8,6 +8,7 @@ from core.query_engine.hybrid_search import HybridSearch
 from core.query_engine.reranker import RerankOutput, Reranker
 from core.response.response_builder import ResponseBuilder
 from core.settings import Settings, load_settings
+from core.trace import TraceCollector
 from core.trace.trace_context import TraceContext
 from mcp_server.protocol_handler import ProtocolHandlerError, ToolSpec
 
@@ -57,6 +58,7 @@ class QueryKnowledgeHubTool:
         searcher: Any | None = None,
         reranker: Any | None = None,
         response_builder: ResponseBuilder | None = None,
+        trace_collector: TraceCollector | None = None,
     ) -> None:
         self.settings_path = settings_path
         self.settings_loader = settings_loader or load_settings
@@ -64,6 +66,7 @@ class QueryKnowledgeHubTool:
         self._settings: Settings | None = None
         self._searcher = searcher
         self._reranker = reranker
+        self._trace_collector = trace_collector
 
     def handle(self, arguments: dict[str, Any]) -> dict[str, Any]:
         """执行一次知识库查询并返回 MCP tool 结果。"""
@@ -75,30 +78,35 @@ class QueryKnowledgeHubTool:
         top_k = self._normalize_top_k(arguments.get("top_k"))
         trace = TraceContext(trace_type="query")
 
-        filters = {"collection": collection} if collection is not None else None
-        retrieval_results = self._get_searcher().search(
-            query=query,
-            top_k=top_k,
-            filters=filters,
-            trace=trace,
-        )
-        rerank_output = self._get_reranker().rerank(
-            query=query,
-            candidates=retrieval_results,
-            top_k=top_k,
-            trace=trace,
-        )
-
-        return self.response_builder.build(
-            rerank_output.results,
-            query,
-            extra=self._build_extra_payload(
-                collection=collection,
+        try:
+            filters = {"collection": collection} if collection is not None else None
+            retrieval_results = self._get_searcher().search(
+                query=query,
+                top_k=top_k,
+                filters=filters,
+                trace=trace,
+            )
+            rerank_output = self._get_reranker().rerank(
+                query=query,
+                candidates=retrieval_results,
                 top_k=top_k,
                 trace=trace,
-                rerank_output=rerank_output,
-            ),
-        )
+            )
+
+            return self.response_builder.build(
+                rerank_output.results,
+                query,
+                extra=self._build_extra_payload(
+                    collection=collection,
+                    top_k=top_k,
+                    trace=trace,
+                    rerank_output=rerank_output,
+                ),
+            )
+        finally:
+            # Query 追踪页依赖 `traces.jsonl` 中存在 query 记录；
+            # 因此 MCP 查询入口也必须像 CLI 一样在请求结束时统一收口并持久化 trace。
+            self._get_trace_collector().collect(trace)
 
     def _get_settings(self) -> Settings:
         """懒加载配置，避免 `initialize/tools/list` 触发重型依赖初始化。"""
@@ -115,6 +123,11 @@ class QueryKnowledgeHubTool:
         if self._reranker is None:
             self._reranker = Reranker(settings=self._get_settings())
         return self._reranker
+
+    def _get_trace_collector(self) -> TraceCollector:
+        if self._trace_collector is None:
+            self._trace_collector = TraceCollector(trace_file=self._get_settings().observability.trace_file)
+        return self._trace_collector
 
     @staticmethod
     def _build_extra_payload(
@@ -170,6 +183,7 @@ def create_query_knowledge_hub_tool(
     searcher: Any | None = None,
     reranker: Any | None = None,
     response_builder: ResponseBuilder | None = None,
+    trace_collector: TraceCollector | None = None,
 ) -> ToolSpec:
     """构造可注册到 `ProtocolHandler` 的 ToolSpec。"""
     tool = QueryKnowledgeHubTool(
@@ -178,6 +192,7 @@ def create_query_knowledge_hub_tool(
         searcher=searcher,
         reranker=reranker,
         response_builder=response_builder,
+        trace_collector=trace_collector,
     )
     return ToolSpec(
         name=QueryKnowledgeHubTool.NAME,

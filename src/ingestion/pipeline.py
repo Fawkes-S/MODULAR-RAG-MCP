@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from math import ceil
 from pathlib import Path
 from time import perf_counter
 from typing import Any, Callable, TypeVar
@@ -142,6 +143,7 @@ class IngestionPipeline:
         collection: str = "default",
         *,
         force: bool = False,
+        logical_source_path: str | None = None,
         trace: TraceContext | None = None,
         on_progress: Callable[[str, int, int], None] | None = None,
     ) -> IngestionResult:
@@ -172,6 +174,9 @@ class IngestionPipeline:
         """
         normalized_source = self._validate_source_path(source_path)
         normalized_collection = self._normalize_collection(collection)
+        normalized_logical_source = self._normalize_logical_source_path(
+            logical_source_path or normalized_source
+        )
         active_trace = trace or TraceContext(trace_type="ingestion")
         progress_callback = self._normalize_on_progress(on_progress)
         progress_state = self._make_progress_state()
@@ -184,6 +189,7 @@ class IngestionPipeline:
             active_trace.trace_id,
         )
         file_path = Path(normalized_source)
+        file_size = file_path.stat().st_size
 
         # G5 需要在历史列表中展示“这次摄取处理的是哪个文件、写入哪个集合”。
         # 这些信息不属于某个具体业务阶段的产物，而是整次 run 的入口上下文，
@@ -191,15 +197,15 @@ class IngestionPipeline:
         active_trace.record_stage(
             stage_name="pipeline.request",
             details={
-                "source_path": normalized_source,
-                "file_name": file_path.name or normalized_source,
+                "source_path": normalized_logical_source,
+                "processing_source_path": normalized_source,
+                "file_name": Path(normalized_logical_source).name or normalized_logical_source,
                 "collection": normalized_collection,
                 "force": bool(force),
+                "file_size": file_size,
             },
             elapsed_ms=0.0,
         )
-
-        file_size = file_path.stat().st_size
         file_hash = ""
 
         try:
@@ -217,7 +223,12 @@ class IngestionPipeline:
             if should_skip and not force:
                 active_trace.record_stage(
                     stage_name="pipeline.skip",
-                    details={"reason": "integrity_hit", "file_hash": file_hash, "source_path": normalized_source},
+                    details={
+                        "reason": "integrity_hit",
+                        "file_hash": file_hash,
+                        "source_path": normalized_logical_source,
+                        "processing_source_path": normalized_source,
+                    },
                     elapsed_ms=0.0,
                 )
                 LOGGER.info(
@@ -226,7 +237,7 @@ class IngestionPipeline:
                     file_hash,
                 )
                 return IngestionResult(
-                    source_path=normalized_source,
+                    source_path=normalized_logical_source,
                     collection=normalized_collection,
                     file_hash=file_hash,
                     skipped=True,
@@ -245,6 +256,7 @@ class IngestionPipeline:
             )
             self._attach_runtime_metadata(
                 document=document,
+                source_path=normalized_logical_source,
                 collection=normalized_collection,
                 file_hash=file_hash,
             )
@@ -324,14 +336,14 @@ class IngestionPipeline:
                 trace=active_trace,
                 action=lambda: self.integrity_checker.mark_success(
                     file_hash=file_hash,
-                    file_path=normalized_source,
+                    file_path=normalized_logical_source,
                     file_size=file_size,
                     chunk_count=len(records),
                 ),
             )
 
             result = IngestionResult(
-                source_path=normalized_source,
+                source_path=normalized_logical_source,
                 collection=normalized_collection,
                 file_hash=file_hash,
                 skipped=False,
@@ -358,7 +370,7 @@ class IngestionPipeline:
                     self.integrity_checker.mark_failed(
                         file_hash=file_hash,
                         error_msg=f"{type(exc).__name__}: {exc}",
-                        file_path=normalized_source,
+                        file_path=normalized_logical_source,
                         file_size=file_size,
                     )
                 except Exception:
@@ -403,7 +415,7 @@ class IngestionPipeline:
         try:
             result = action()
             elapsed_ms = (perf_counter() - started) * 1000.0
-            summary = self._summarize_result_for_log(result)
+            summary = self._summarize_result_for_log(result, stage_name=stage_name)
 
             if trace is not None:
                 trace.record_stage(
@@ -415,6 +427,7 @@ class IngestionPipeline:
                     trace=trace,
                     stage_name=stage_name,
                     elapsed_ms=elapsed_ms,
+                    result=result,
                     summary=summary,
                 )
 
@@ -438,6 +451,7 @@ class IngestionPipeline:
                     trace=trace,
                     stage_name=stage_name,
                     elapsed_ms=elapsed_ms,
+                    result=None,
                     summary={"error_type": type(exc).__name__, "error": str(exc)},
                     status="error",
                 )
@@ -503,7 +517,12 @@ class IngestionPipeline:
         return len(image_path_map), image_path_map
 
     @staticmethod
-    def _attach_runtime_metadata(document: Document, collection: str, file_hash: str) -> None:
+    def _attach_runtime_metadata(
+        document: Document,
+        source_path: str,
+        collection: str,
+        file_hash: str,
+    ) -> None:
         """把运行期 metadata 补到 Document 上，供后续 chunk 继承。
 
         做什么：
@@ -515,6 +534,7 @@ class IngestionPipeline:
         - 所以这里补一次，就能自动贯穿后续 transform/encode/upsert 全链路。
         """
         metadata = dict(document.metadata)
+        metadata["source_path"] = source_path
         metadata["collection"] = collection
         metadata["file_hash"] = file_hash
         document.metadata = metadata
@@ -607,6 +627,19 @@ class IngestionPipeline:
             raise FileNotFoundError(f"source_path not found or not file: {resolved}")
         return str(resolved)
 
+    @staticmethod
+    def _normalize_logical_source_path(source_path: str) -> str:
+        """规范化供 trace/索引展示使用的逻辑源路径。
+
+        这里与 `_validate_source_path()` 的差异是刻意设计的：
+        - `source_path` 用于 pipeline 真正读取文件，必须存在；
+        - `logical_source_path` 用于告诉系统“这份文档从业务视角叫什么”，
+          在 Dashboard 上传场景下，它不一定对应当前磁盘上的那份临时文件。
+        """
+        if not isinstance(source_path, str) or not source_path.strip():
+            raise ValueError("logical_source_path must be non-empty string when provided")
+        return source_path.strip()
+
     @classmethod
     def _normalize_collection(cls, collection: str) -> str:
         """校验 collection，避免非法路径片段。"""
@@ -617,8 +650,7 @@ class IngestionPipeline:
             raise ValueError(f"collection contains unsafe characters: {collection!r}")
         return normalized
 
-    @staticmethod
-    def _summarize_result_for_log(result: Any) -> dict[str, object]:
+    def _summarize_result_for_log(self, result: Any, *, stage_name: str) -> dict[str, object]:
         """把阶段返回值压缩为日志可读摘要，避免日志打印大对象。"""
         if result is None:
             return {"result": "none"}
@@ -629,11 +661,42 @@ class IngestionPipeline:
         if isinstance(result, (str, int, float)):
             return {"result": result}
 
+        if isinstance(result, Document):
+            images = result.metadata.get("images")
+            return {
+                "result_type": "Document",
+                "document_id": result.id,
+                "text_length": len(result.text),
+                "doc_type": str(result.metadata.get("doc_type", "")),
+                "image_count": len(images) if isinstance(images, list) else 0,
+            }
+
         if isinstance(result, list):
-            return {"result_type": "list", "count": len(result)}
+            summary: dict[str, object] = {"result_type": "list", "count": len(result)}
+            if stage_name == "split" and result and all(hasattr(item, "text") for item in result):
+                text_lengths = [len(str(getattr(item, "text", ""))) for item in result]
+                summary["chunk_count"] = len(result)
+                summary["avg_chunk_length"] = round(sum(text_lengths) / len(text_lengths), 2)
+                summary["max_chunk_length"] = max(text_lengths)
+            elif stage_name.startswith("transform.") and result:
+                summary["chunk_count"] = len(result)
+            elif stage_name == "encode" and result:
+                first_record = result[0]
+                dense_vector = getattr(first_record, "dense_vector", None)
+                sparse_vector = getattr(first_record, "sparse_vector", None)
+                summary["record_count"] = len(result)
+                summary["batch_count"] = ceil(len(result) / max(1, int(self.settings.ingestion.batch_size)))
+                summary["dense_dim"] = len(dense_vector) if isinstance(dense_vector, list) else 0
+                summary["sparse_term_count"] = len(sparse_vector) if isinstance(sparse_vector, dict) else 0
+            elif stage_name == "store.vector_upsert":
+                summary["upsert_count"] = len(result)
+            return summary
 
         if isinstance(result, tuple):
-            return {"result_type": "tuple", "count": len(result)}
+            summary = {"result_type": "tuple", "count": len(result)}
+            if stage_name == "store.images" and result and isinstance(result[0], int):
+                summary["image_count"] = int(result[0])
+            return summary
 
         if isinstance(result, dict):
             summary: dict[str, object] = {"result_type": "dict", "keys": sorted(result.keys())[:8]}
@@ -651,6 +714,7 @@ class IngestionPipeline:
         trace: TraceContext,
         stage_name: str,
         elapsed_ms: float,
+        result: Any,
         summary: dict[str, object],
         status: str = "ok",
     ) -> None:
@@ -672,7 +736,7 @@ class IngestionPipeline:
         失败路径：
         - 未命中 F4 关注的阶段时直接跳过，不抛错；这样不会把非 F4 阶段强行塞进统一模型。
         """
-        mapped = self._map_f4_stage(stage_name=stage_name, summary=summary)
+        mapped = self._map_f4_stage(stage_name=stage_name, result=result, summary=summary)
         if mapped is None:
             return
 
@@ -692,6 +756,7 @@ class IngestionPipeline:
         self,
         *,
         stage_name: str,
+        result: Any,
         summary: dict[str, object],
     ) -> dict[str, object] | None:
         """把 pipeline 内部阶段映射为 F4 统一 ingestion 阶段。
@@ -708,7 +773,10 @@ class IngestionPipeline:
                 "provider": type(self.loader).__name__,
                 "details": {
                     "result_type": summary.get("result_type", "Document"),
-                    "document_id": getattr(summary, "document_id", None),
+                    "document_id": summary.get("document_id"),
+                    "text_length": summary.get("text_length", 0),
+                    "doc_type": summary.get("doc_type", "-"),
+                    "image_count": summary.get("image_count", 0),
                     **summary,
                 },
             }
@@ -721,6 +789,9 @@ class IngestionPipeline:
                 "details": {
                     "chunk_size": int(self.settings.ingestion.chunk_size),
                     "chunk_overlap": int(self.settings.ingestion.chunk_overlap),
+                    "chunk_count": summary.get("chunk_count", summary.get("count", 0)),
+                    "avg_chunk_length": summary.get("avg_chunk_length", "-"),
+                    "max_chunk_length": summary.get("max_chunk_length", "-"),
                     **summary,
                 },
             }
@@ -733,6 +804,7 @@ class IngestionPipeline:
                 "provider": transform_name,
                 "details": {
                     "transform_name": transform_name,
+                    "chunk_count": summary.get("chunk_count", summary.get("count", 0)),
                     **summary,
                 },
             }
@@ -745,6 +817,21 @@ class IngestionPipeline:
                 "details": {
                     "batch_size": int(self.settings.ingestion.batch_size),
                     "embedding_provider": self.settings.embedding.provider,
+                    "record_count": summary.get("record_count", summary.get("count", 0)),
+                    "batch_count": summary.get("batch_count", 0),
+                    "dense_dim": summary.get("dense_dim", 0),
+                    "sparse_term_count": summary.get("sparse_term_count", 0),
+                    **summary,
+                },
+            }
+
+        if stage_name == "store.images":
+            return {
+                "stage_name": "upsert",
+                "method": "image_storage_save",
+                "provider": type(self.image_storage).__name__,
+                "details": {
+                    "image_count": summary.get("image_count", 0),
                     **summary,
                 },
             }
@@ -756,6 +843,19 @@ class IngestionPipeline:
                 "provider": self.settings.vector_store.provider,
                 "details": {
                     "vector_store_provider": self.settings.vector_store.provider,
+                    "upsert_count": summary.get("upsert_count", summary.get("count", 0)),
+                    **summary,
+                },
+            }
+
+        if stage_name == "store.bm25":
+            return {
+                "stage_name": "upsert",
+                "method": "bm25_build",
+                "provider": type(self.bm25_indexer).__name__,
+                "details": {
+                    "bm25_terms": summary.get("terms", 0),
+                    "bm25_doc_count": summary.get("doc_count", 0),
                     **summary,
                 },
             }

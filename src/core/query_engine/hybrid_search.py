@@ -15,6 +15,27 @@ from core.trace.trace_context import TraceContext
 from core.types import RetrievalResult
 
 
+def _build_results_preview(results: list[RetrievalResult], limit: int = 5) -> list[dict[str, Any]]:
+    """构建融合结果的轻量预览。
+
+    Query 追踪页需要展示“融合前后的排名变化”，
+    因此这里把前几个候选的顺序、分数和来源路径一起记进 trace。
+    """
+    preview: list[dict[str, Any]] = []
+    for index, item in enumerate(results[:limit], start=1):
+        preview.append(
+            {
+                "rank": index,
+                "chunk_id": item.chunk_id,
+                "score": float(item.score),
+                "source_path": str(item.metadata.get("source_path", "-")),
+                "collection": str(item.metadata.get("collection", "-")),
+                "text": str(item.text),
+            }
+        )
+    return preview
+
+
 class HybridSearch:
     """混合检索编排器。
 
@@ -151,6 +172,7 @@ class HybridSearch:
                     "sparse_count": len(sparse_results),
                     "fused_count": len(fused_results),
                     "degraded_routes": sorted(route_errors.keys()),
+                    "results_preview": _build_results_preview(fused_results),
                 },
                 elapsed_ms=fusion_elapsed_ms,
             )
@@ -176,6 +198,7 @@ class HybridSearch:
                     "fused_count": len(fused_results),
                     "filtered_count": len(final_results),
                     "degraded_routes": sorted(route_errors.keys()),
+                    "results_preview": _build_results_preview(final_results),
                 },
                 elapsed_ms=(perf_counter() - started) * 1000.0,
             )

@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from observability.dashboard.pages._table_utils import render_wrapped_dataframe
 from observability.dashboard.services.data_service import BrowserChunk, BrowserImage, DataBrowserSnapshot, DataService
 
 
@@ -78,7 +79,7 @@ def _render_document_table(st: Any, snapshot: DataBrowserSnapshot) -> None:
         }
         for item in snapshot.documents
     ]
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    render_wrapped_dataframe(st, rows)
 
 
 def _render_document_picker(st: Any, snapshot: DataBrowserSnapshot) -> str:
