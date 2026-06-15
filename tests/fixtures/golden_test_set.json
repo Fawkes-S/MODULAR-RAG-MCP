@@ -1,0 +1,30 @@
+{
+  "test_cases": [
+    {
+      "query": "如何配置 Azure OpenAI？",
+      "expected_chunk_ids": [
+        "chunk_config_001"
+      ],
+      "expected_sources": [
+        "config_guide.pdf"
+      ],
+      "filters": {
+        "collection": "default"
+      },
+      "ground_truth": "配置 Azure OpenAI 时，需要提供 endpoint、deployment name 和 api key。"
+    },
+    {
+      "query": "RRF 融合是做什么的？",
+      "expected_chunk_ids": [
+        "chunk_retrieval_001"
+      ],
+      "expected_sources": [
+        "retrieval_design.pdf"
+      ],
+      "filters": {
+        "collection": "default"
+      },
+      "ground_truth": "RRF 会把 dense 和 sparse 两路召回结果按排名倒数融合，得到统一排序。"
+    }
+  ]
+}

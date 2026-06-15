@@ -98,10 +98,17 @@ class RerankSettings:
 
 
 @dataclass(frozen=True)
+class RagasEvaluationSettings:
+    llm_profile: str = ""
+
+
+@dataclass(frozen=True)
 class EvaluationSettings:
     provider: str
     enabled: bool = False
     backends: tuple[str, ...] = ()
+    golden_test_set: str = "tests/fixtures/golden_test_set.json"
+    ragas: RagasEvaluationSettings = field(default_factory=RagasEvaluationSettings)
 
 
 @dataclass(frozen=True)
@@ -344,6 +351,12 @@ def validate_settings(settings: Settings) -> None:
         raise ValueError("Missing required setting: evaluation.provider or evaluation.backends")
     if any(not backend.strip() for backend in settings.evaluation.backends):
         raise ValueError("Invalid setting: evaluation.backends must not contain empty provider names")
+    if not settings.evaluation.golden_test_set.strip():
+        raise ValueError("Missing required setting: evaluation.golden_test_set")
+    if settings.evaluation.ragas.llm_profile and settings.evaluation.ragas.llm_profile not in settings.llm.profiles:
+        raise ValueError(
+            "Invalid setting: evaluation.ragas.llm_profile must reference an existing llm.profiles key"
+        )
     if not settings.observability.log_level:
         raise ValueError("Missing required setting: observability.log_level")
     if settings.dashboard.port <= 0 or settings.dashboard.port > 65535:
@@ -404,6 +417,7 @@ def load_settings(path: str) -> Settings:
     retrieval_cfg = _as_dict(raw.get("retrieval"))
     rerank_cfg = _as_dict(raw.get("rerank"))
     evaluation_cfg = _as_dict(raw.get("evaluation"))
+    evaluation_ragas_cfg = _as_dict(evaluation_cfg.get("ragas"))
     observability_cfg = _as_dict(raw.get("observability"))
     dashboard_cfg = _as_dict(raw.get("dashboard"))
     vision_cfg = _merge_section_profile("vision_llm", _as_dict(raw.get("vision_llm")))
@@ -487,6 +501,12 @@ def load_settings(path: str) -> Settings:
                 str(item).strip()
                 for item in evaluation_cfg.get("backends", [])
                 if isinstance(item, str) and str(item).strip()
+            ),
+            golden_test_set=str(
+                evaluation_cfg.get("golden_test_set", "tests/fixtures/golden_test_set.json")
+            ),
+            ragas=RagasEvaluationSettings(
+                llm_profile=str(evaluation_ragas_cfg.get("llm_profile", "")),
             ),
         ),
         observability=ObservabilitySettings(

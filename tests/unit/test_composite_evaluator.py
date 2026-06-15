@@ -183,3 +183,69 @@ def test_factory_reads_backends_from_settings_object(isolated_registry: dict[str
     result = evaluator.evaluate([{"query": "q"}])
     assert result["faithfulness"] == pytest.approx(0.88)
     assert result["hit_rate"] == pytest.approx(0.75)
+
+
+def test_composite_evaluator_degrades_when_optional_backend_missing_dependency() -> None:
+    """
+    Given:
+        两个评估后端里，一个正常返回 retrieval 指标，
+        另一个因为可选依赖缺失抛出 `ImportError`（例如 ragas 环境不完整）。
+
+    When:
+        执行 `CompositeEvaluator.evaluate(samples)`。
+
+    Then:
+        组合评估不应整次失败，而应保留可用后端结果继续返回，
+        同时把失败后端写入 `backend_errors`，让 CLI/Dashboard 知道发生了什么降级。
+    """
+
+    class _MissingDependencyEvaluator(BaseEvaluator):
+        def evaluate(self, samples: list[dict[str, Any]], trace: Any | None = None) -> dict[str, Any]:
+            raise ImportError("install `ragas` and `datasets` first")
+
+    evaluator = CompositeEvaluator(
+        evaluators=[
+            _MissingDependencyEvaluator(),
+            _StubEvaluator({"hit_rate": 1.0, "mrr": 0.5}),
+        ]
+    )
+
+    result = evaluator.evaluate([{"query": "q"}])
+
+    assert result["hit_rate"] == pytest.approx(1.0)
+    assert result["mrr"] == pytest.approx(0.5)
+    assert "backend_errors" in result
+    assert "_missingdependency" in result["backend_errors"]
+
+
+def test_composite_evaluator_degrades_when_ragas_backend_is_misconfigured() -> None:
+    """
+    Given:
+        一个外部评估后端因为缺少 API Key 抛出 `ValueError`，
+        另一个本地 custom 后端仍可正常返回指标。
+
+    When:
+        执行组合评估。
+
+    Then:
+        组合器应保留 custom 指标并记录外部后端错误，
+        防止“Ragas 未真实运行”被误判为评估成功。
+    """
+
+    class _MisconfiguredRagasEvaluator(BaseEvaluator):
+        def evaluate(self, samples: list[dict[str, Any]], trace: Any | None = None) -> dict[str, Any]:
+            raise ValueError("RagasEvaluator requires llm.api_key")
+
+    evaluator = CompositeEvaluator(
+        evaluators=[
+            _MisconfiguredRagasEvaluator(),
+            _StubEvaluator({"hit_rate": 0.5, "mrr": 0.25}),
+        ]
+    )
+
+    result = evaluator.evaluate([{"query": "q"}])
+
+    assert result["hit_rate"] == pytest.approx(0.5)
+    assert result["mrr"] == pytest.approx(0.25)
+    assert "_misconfiguredragas" in result["backend_errors"]
+    assert "llm.api_key" in result["backend_errors"]["_misconfiguredragas"]

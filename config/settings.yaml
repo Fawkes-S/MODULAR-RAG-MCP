@@ -29,6 +29,12 @@ llm:
       base_url: ${DEEPSEEK_LLM_BASE_URL:-https://api.deepseek.com/v1}
       api_key: ${DEEPSEEK_LLM_API_KEY:-}
       proxy: ${DEEPSEEK_LLM_PROXY:-}
+    deepseek_chat:
+      provider: deepseek
+      model: deepseek-chat
+      base_url: ${DEEPSEEK_LLM_BASE_URL:-https://api.deepseek.com/v1}
+      api_key: ${DEEPSEEK_LLM_API_KEY:-}
+      proxy: ${DEEPSEEK_LLM_PROXY:-}
     openai:
       provider: openai
       model: gpt-4o-mini
@@ -106,6 +112,11 @@ evaluation:
   backends:
     - ragas
     - custom
+  golden_test_set: tests/fixtures/golden_test_set.json
+  ragas:
+    # Ragas 需要稳定的 JSON 结构化输出；主聊天模型可以继续用 minimax，
+    # 评估打分单独用更适合结构化评估的 profile。
+    llm_profile: deepseek_chat
 
 # =============================================================================
 # Observability Configuration

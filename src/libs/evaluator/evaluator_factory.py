@@ -9,7 +9,7 @@ from libs.evaluator.base_evaluator import BaseEvaluator
 from libs.evaluator.custom_evaluator import CustomEvaluator
 
 
-def _build_ragas_evaluator() -> BaseEvaluator:
+def _build_ragas_evaluator(settings: Any | None = None) -> BaseEvaluator:
     """懒加载构造 `RagasEvaluator`。
 
     做什么：
@@ -22,7 +22,7 @@ def _build_ragas_evaluator() -> BaseEvaluator:
     """
     from observability.evaluation.ragas_evaluator import RagasEvaluator
 
-    return RagasEvaluator()
+    return RagasEvaluator(settings=settings)
 
 
 class EvaluatorFactory:
@@ -30,7 +30,7 @@ class EvaluatorFactory:
 
     _registry: dict[str, Callable[..., BaseEvaluator]] = {
         "custom": lambda **_: CustomEvaluator(),
-        "ragas": lambda **_: _build_ragas_evaluator(),
+        "ragas": lambda **kwargs: _build_ragas_evaluator(settings=kwargs.get("settings")),
     }
 
     @classmethod
@@ -51,7 +51,7 @@ class EvaluatorFactory:
         """
         backends = cls._extract_backends(settings)
         if backends:
-            evaluators = [cls._create_single(provider) for provider in backends]
+            evaluators = [cls._create_single(provider, settings=settings) for provider in backends]
             if len(evaluators) == 1:
                 return evaluators[0]
 
@@ -60,7 +60,7 @@ class EvaluatorFactory:
             return CompositeEvaluator(evaluators=evaluators)
 
         provider = cls._extract_provider(settings)
-        return cls._create_single(provider)
+        return cls._create_single(provider, settings=settings)
 
     @staticmethod
     def _extract_provider(settings: Any) -> str:
@@ -80,13 +80,17 @@ class EvaluatorFactory:
         raise ValueError("Missing required setting: evaluation.provider")
 
     @classmethod
-    def _create_single(cls, provider: str) -> BaseEvaluator:
-        """创建单个评估器实例，并复用统一的 provider 校验逻辑。"""
+    def _create_single(cls, provider: str, settings: Any | None = None) -> BaseEvaluator:
+        """创建单个评估器实例，并复用统一的 provider 校验逻辑。
+
+        `settings` 会透传给具体 provider。Ragas 这类真实后端需要读取 LLM/Embedding
+        配置来创建第三方客户端；custom 后端会忽略该参数，保持轻量纯本地计算。
+        """
         key = provider.strip().lower()
         if key not in cls._registry:
             available = ", ".join(sorted(cls._registry)) or "<none>"
             raise ValueError(f"Unknown evaluation provider: {provider}. Available: {available}")
-        return cls._registry[key]()
+        return cls._registry[key](settings=settings)
 
     @staticmethod
     def _extract_backends(settings: Any) -> list[str]:

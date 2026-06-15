@@ -59,22 +59,43 @@ class CompositeEvaluator(BaseEvaluator):
                 "details_by_backend": {self._backend_name(self._evaluators[0]): dict(single_result)},
             }
 
+        backend_errors: dict[str, str] = {}
         with ThreadPoolExecutor(max_workers=len(self._evaluators)) as executor:
             futures = [
-                executor.submit(evaluator.evaluate, samples, trace)
+                (evaluator, executor.submit(evaluator.evaluate, samples, trace))
                 for evaluator in self._evaluators
             ]
-            results = [future.result() for future in futures]
+
+            successful_results: list[tuple[BaseEvaluator, dict[str, Any]]] = []
+            for evaluator, future in futures:
+                try:
+                    # 只要还有其它 evaluator 可用，就不要让可选外部后端的依赖、
+                    # 配置或网络错误拖垮整次评估；失败原因会进入 backend_errors，
+                    # 调用方可以清楚看到 Ragas 并没有真实产出指标。
+                    successful_results.append((evaluator, future.result()))
+                except Exception as exc:  # noqa: BLE001
+                    backend_errors[self._backend_name(evaluator)] = f"{type(exc).__name__}: {exc}"
+
+            if not successful_results:
+                error_summary = "; ".join(
+                    f"{backend}={message}" for backend, message in sorted(backend_errors.items())
+                )
+                raise RuntimeError(
+                    "CompositeEvaluator could not run any backend"
+                    + (f" ({error_summary})" if error_summary else "")
+                )
 
         merged: dict[str, Any] = {
             "total": len(samples),
             "details": [],
             "details_by_backend": {},
         }
+        if backend_errors:
+            merged["backend_errors"] = dict(backend_errors)
 
         used_backend_names: set[str] = set()
 
-        for evaluator, result in zip(self._evaluators, results, strict=True):
+        for evaluator, result in successful_results:
             backend_name = self._allocate_backend_name(
                 base_name=self._backend_name(evaluator),
                 used_names=used_backend_names,

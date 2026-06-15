@@ -24,6 +24,7 @@ from core.settings import (
     LLMSettings,
     MetadataEnricherSettings,
     ObservabilitySettings,
+    RagasEvaluationSettings,
     RerankSettings,
     RetrievalSettings,
     Settings,
@@ -112,6 +113,8 @@ def test_load_settings_success() -> None:
     assert settings.ingestion.chunk_refiner.use_llm is True
     assert settings.ingestion.metadata_enricher.use_llm is True
     assert settings.evaluation.backends == ("ragas", "custom")
+    assert settings.evaluation.golden_test_set == "tests/fixtures/golden_test_set.json"
+    assert settings.evaluation.ragas.llm_profile == "deepseek_chat"
 
 
 def test_settings_yaml_keys_are_mapped_by_settings_dataclasses() -> None:
@@ -161,6 +164,16 @@ def test_settings_yaml_keys_are_mapped_by_settings_dataclasses() -> None:
             "ingestion.metadata_enricher",
             metadata_enricher,
             MetadataEnricherSettings,
+        )
+
+    evaluation = raw.get("evaluation")
+    assert isinstance(evaluation, dict)
+    evaluation_ragas = evaluation.get("ragas")
+    if isinstance(evaluation_ragas, dict):
+        _assert_yaml_keys_are_covered(
+            "evaluation.ragas",
+            evaluation_ragas,
+            RagasEvaluationSettings,
         )
 
 
@@ -494,6 +507,7 @@ vision_llm:
 
     assert settings.evaluation.provider == ""
     assert settings.evaluation.backends == ("ragas", "custom")
+    assert settings.evaluation.golden_test_set == "tests/fixtures/golden_test_set.json"
 
 
 def test_load_settings_vision_enabled_requires_provider() -> None:
