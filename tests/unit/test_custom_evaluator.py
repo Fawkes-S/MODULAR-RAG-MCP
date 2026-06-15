@@ -94,7 +94,7 @@ def test_factory_routes_registered_provider(isolated_registry: dict[str, object]
 
 
 def test_factory_missing_provider_path_raises_readable_error(isolated_registry: dict[str, object]) -> None:
-    """验证缺少 `evaluation.provider` 时错误信息可直接定位配置字段。"""
+    """验证缺少评估器入口配置时错误信息可直接定位 evaluation 段。"""
     with pytest.raises(ValueError, match="evaluation.provider"):
         EvaluatorFactory.create({"evaluation": {}})
 

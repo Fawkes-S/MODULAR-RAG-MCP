@@ -103,6 +103,9 @@ vision_llm:
 evaluation:
   provider: ragas
   enabled: false
+  backends:
+    - ragas
+    - custom
 
 # =============================================================================
 # Observability Configuration

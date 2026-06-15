@@ -2046,7 +2046,7 @@ dashboard:
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | H1 | RagasEvaluator 实现 | [x] | 2026-06-14 | RagasEvaluator(lazy import + standardized metrics) + tests/unit/test_ragas_evaluator.py passed |
-| H2 | CompositeEvaluator 实现 | [ ] | | |
+| H2 | CompositeEvaluator 实现 | [x] | 2026-06-14 | CompositeEvaluator(parallel merge + evaluation.backends routing) + tests/unit/test_composite_evaluator.py passed |
 | H3 | EvalRunner + Golden Test Set | [ ] | | |
 | H4 | 评估面板页面 | [ ] | | |
 | H5 | Recall 回归测试（E2E） | [ ] | | |

@@ -106,9 +106,13 @@ class ConfigService:
             ),
             ComponentCard(
                 title="Evaluator",
-                summary=settings.evaluation.provider,
+                summary=self._join_non_empty(
+                    ", ".join(settings.evaluation.backends) if settings.evaluation.backends else settings.evaluation.provider,
+                    "(composite)" if len(settings.evaluation.backends) > 1 else "",
+                ),
                 details=(
                     f"enabled: {settings.evaluation.enabled}",
+                    f"backends: {', '.join(settings.evaluation.backends) if settings.evaluation.backends else '-'}",
                     f"trace_file: {settings.observability.trace_file}",
                 ),
             ),

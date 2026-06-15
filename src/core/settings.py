@@ -101,6 +101,7 @@ class RerankSettings:
 class EvaluationSettings:
     provider: str
     enabled: bool = False
+    backends: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -167,6 +168,20 @@ def _read_nested(data: dict[str, Any], path: str) -> Any:
 def _as_dict(raw: Any) -> dict[str, Any]:
     """将 section 标准化为 dict；缺失或类型错误时返回空 dict。"""
     return dict(raw) if isinstance(raw, dict) else {}
+
+
+def _read_optional_string(data: dict[str, Any], path: str, default: str = "") -> str:
+    """读取可选字符串字段；缺失时返回默认值而不是抛错。
+
+    这里专门用于“旧字段仍兼容，但新配置允许改走别的入口”的场景，
+    例如 H2 中 `evaluation.provider` 与 `evaluation.backends` 并存。
+    """
+    current: Any = data
+    for key in path.split("."):
+        if not isinstance(current, dict) or key not in current:
+            return default
+        current = current[key]
+    return str(current) if current is not None else default
 
 
 def _merge_section_profile(section_name: str, section_cfg: dict[str, Any]) -> dict[str, Any]:
@@ -325,8 +340,10 @@ def validate_settings(settings: Settings) -> None:
         raise ValueError("Invalid setting: retrieval.top_k must be > 0")
     if not settings.rerank.provider:
         raise ValueError("Missing required setting: rerank.provider")
-    if not settings.evaluation.provider:
-        raise ValueError("Missing required setting: evaluation.provider")
+    if not settings.evaluation.provider and not settings.evaluation.backends:
+        raise ValueError("Missing required setting: evaluation.provider or evaluation.backends")
+    if any(not backend.strip() for backend in settings.evaluation.backends):
+        raise ValueError("Invalid setting: evaluation.backends must not contain empty provider names")
     if not settings.observability.log_level:
         raise ValueError("Missing required setting: observability.log_level")
     if settings.dashboard.port <= 0 or settings.dashboard.port > 65535:
@@ -464,8 +481,13 @@ def load_settings(path: str) -> Settings:
             timeout=_to_float(rerank_cfg.get("timeout", 10.0), 10.0),
         ),
         evaluation=EvaluationSettings(
-            provider=str(_read_nested(raw, "evaluation.provider")),
+            provider=_read_optional_string(raw, "evaluation.provider", ""),
             enabled=bool(evaluation_cfg.get("enabled", False)),
+            backends=tuple(
+                str(item).strip()
+                for item in evaluation_cfg.get("backends", [])
+                if isinstance(item, str) and str(item).strip()
+            ),
         ),
         observability=ObservabilitySettings(
             log_level=str(_read_nested(raw, "observability.log_level")),

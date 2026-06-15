@@ -111,6 +111,7 @@ def test_load_settings_success() -> None:
     assert settings.ingestion.chunk_size > 0
     assert settings.ingestion.chunk_refiner.use_llm is True
     assert settings.ingestion.metadata_enricher.use_llm is True
+    assert settings.evaluation.backends == ("ragas", "custom")
 
 
 def test_settings_yaml_keys_are_mapped_by_settings_dataclasses() -> None:
@@ -447,6 +448,52 @@ observability:
 
     with pytest.raises(ValueError, match="embedding.provider"):
         load_settings(str(bad_settings))
+
+
+def test_load_settings_allows_evaluation_backends_without_provider() -> None:
+    """
+    Given:
+        一份只配置 `evaluation.backends`，不配置旧字段 `evaluation.provider` 的 settings。
+
+    When:
+        调用 `load_settings()`。
+
+    Then:
+        配置应成功加载，并把 `backends` 映射到强类型 `Settings.evaluation.backends`，
+        以支持 H2 的组合评估器配置驱动入口。
+    """
+    tmp_dir = PROJECT_ROOT / "tests" / ".tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    settings_path = tmp_dir / "settings_evaluation_backends.yaml"
+    settings_path.write_text(
+        """
+llm:
+  provider: openai
+embedding:
+  provider: openai
+vector_store:
+  provider: chroma
+retrieval:
+  top_k: 8
+rerank:
+  provider: none
+evaluation:
+  enabled: false
+  backends:
+    - ragas
+    - custom
+observability:
+  log_level: INFO
+vision_llm:
+  enabled: false
+""".strip(),
+        encoding="utf-8",
+    )
+
+    settings = load_settings(str(settings_path))
+
+    assert settings.evaluation.provider == ""
+    assert settings.evaluation.backends == ("ragas", "custom")
 
 
 def test_load_settings_vision_enabled_requires_provider() -> None:

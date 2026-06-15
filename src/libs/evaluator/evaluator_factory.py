@@ -43,13 +43,24 @@ class EvaluatorFactory:
 
     @classmethod
     def create(cls, settings: Any) -> BaseEvaluator:
-        """根据配置创建评估器实例。"""
+        """根据配置创建单评估器或组合评估器。
+
+        路由规则：
+        - 若配置了 `evaluation.backends`，优先走多后端组合模式；
+        - 否则回退到旧的 `evaluation.provider` 单后端模式，保持兼容。
+        """
+        backends = cls._extract_backends(settings)
+        if backends:
+            evaluators = [cls._create_single(provider) for provider in backends]
+            if len(evaluators) == 1:
+                return evaluators[0]
+
+            from observability.evaluation.composite_evaluator import CompositeEvaluator
+
+            return CompositeEvaluator(evaluators=evaluators)
+
         provider = cls._extract_provider(settings)
-        key = provider.strip().lower()
-        if key not in cls._registry:
-            available = ", ".join(sorted(cls._registry)) or "<none>"
-            raise ValueError(f"Unknown evaluation provider: {provider}. Available: {available}")
-        return cls._registry[key]()
+        return cls._create_single(provider)
 
     @staticmethod
     def _extract_provider(settings: Any) -> str:
@@ -67,3 +78,32 @@ class EvaluatorFactory:
         if isinstance(provider, str) and provider.strip():
             return provider
         raise ValueError("Missing required setting: evaluation.provider")
+
+    @classmethod
+    def _create_single(cls, provider: str) -> BaseEvaluator:
+        """创建单个评估器实例，并复用统一的 provider 校验逻辑。"""
+        key = provider.strip().lower()
+        if key not in cls._registry:
+            available = ", ".join(sorted(cls._registry)) or "<none>"
+            raise ValueError(f"Unknown evaluation provider: {provider}. Available: {available}")
+        return cls._registry[key]()
+
+    @staticmethod
+    def _extract_backends(settings: Any) -> list[str]:
+        """提取 `evaluation.backends`。
+
+        兼容 dict 配置和 `Settings` 对象。空列表表示调用方未启用多后端模式。
+        """
+        if isinstance(settings, dict):
+            evaluation_cfg = settings.get("evaluation")
+            if isinstance(evaluation_cfg, dict):
+                backends = evaluation_cfg.get("backends")
+                if isinstance(backends, list):
+                    return [str(item).strip() for item in backends if str(item).strip()]
+            return []
+
+        evaluation_obj = getattr(settings, "evaluation", None)
+        backends = getattr(evaluation_obj, "backends", ())
+        if isinstance(backends, (list, tuple)):
+            return [str(item).strip() for item in backends if str(item).strip()]
+        return []
