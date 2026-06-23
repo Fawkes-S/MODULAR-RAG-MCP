@@ -1,729 +1,729 @@
-## 6. 椤圭洰鎺掓湡
+﻿## 6. 妞ゅ湱娲伴幒鎺撴埂
 
-> **鎺掓湡鍘熷垯锛堜弗鏍煎榻愭湰 DEV_SPEC 鐨勬灦鏋勫垎灞備笌鐩綍缁撴瀯锛?*
+> **閹烘帗婀￠崢鐔峰灟閿涘牅寮楅弽鐓庮嚠姒绘劖婀?DEV_SPEC 閻ㄥ嫭鐏﹂弸鍕瀻鐏炲倷绗岄惄顔肩秿缂佹挻鐎敍?*
 > 
-> - **鍙寜鏈枃妗ｈ璁¤惤鍦?*锛氫互绗?5.2 鑺傜洰褰曟爲涓衡€滀氦浠樻竻鍗曗€濓紝姣忎竴姝ラ兘瑕佸湪鏂囦欢绯荤粺涓婁骇鐢熷彲瑙佸彉鍖栥€?
-> - **1 灏忔椂涓€涓彲楠屾敹澧為噺**锛氭瘡涓皬闃舵锛堚増1h锛夐兘蹇呴』鍚屾椂缁欏嚭鈥滈獙鏀舵爣鍑?+ 娴嬭瘯鏂规硶鈥濓紝灏介噺鍋氬埌 TDD銆?
-> - **鍏堟墦閫氫富闂幆锛屽啀琛ラ綈榛樿瀹炵幇**锛氫紭鍏堝仛鈥滃彲璺戦€氱殑绔埌绔矾寰勶紙Ingestion 鈫?Retrieval 鈫?MCP Tool锛夆€濓紝骞跺湪 Libs 灞傝ˉ榻愬彲杩愯鐨勯粯璁ゅ悗绔疄鐜帮紝閬垮厤鍑虹幇鈥滃彧鏈夋帴鍙ｆ病鏈夊疄鐜扳€濈殑绌鸿浆銆?
-> - **澶栭儴渚濊禆鍙浛鎹?鍙?Mock**锛歀LM/Embedding/Vision/VectorStore 鐨勭湡瀹炶皟鐢ㄥ湪鍗曞厓娴嬭瘯涓竴寰嬬敤 Fake/Mock锛岄泦鎴愭祴璇曞啀寮€鐪熷疄鍚庣锛堝彲閫夛級銆?
+> - **閸欘亝瀵滈張顒佹瀮濡楋綀顔曠拋陇鎯ら崷?*閿涙矮浜掔粭?5.2 閼哄倻娲拌ぐ鏇熺埐娑撹　鈧粈姘︽禒妯荤閸楁洍鈧繐绱濆В蹇庣濮濄儵鍏樼憰浣告躬閺傚洣娆㈢化鑽ょ埠娑撳﹣楠囬悽鐔峰讲鐟欎礁褰夐崠鏍モ偓?
+> - **1 鐏忓繑妞傛稉鈧稉顏勫讲妤犲本鏁规晶鐐哄櫤**閿涙碍鐦℃稉顏勭毈闂冭埖顔岄敍鍫氬1h閿涘鍏樿箛鍛淬€忛崥灞炬缂佹瑥鍤垾婊堢崣閺€鑸电垼閸?+ 濞村鐦弬瑙勭《閳ユ繐绱濈亸浠嬪櫤閸嬫艾鍩?TDD閵?
+> - **閸忓牊澧﹂柅姘瘜闂傤厾骞嗛敍灞藉晙鐞涖儵缍堟妯款吇鐎圭偟骞?*閿涙矮绱崗鍫濅粵閳ユ粌褰茬捄鎴︹偓姘辨畱缁旑垰鍩岀粩顖濈熅瀵板嫸绱橧ngestion 閳?Retrieval 閳?MCP Tool閿涘鈧繐绱濋獮璺烘躬 Libs 鐏炲倽藟姒绘劕褰叉潻鎰攽閻ㄥ嫰绮拋銈呮倵缁旑垰鐤勯悳甯礉闁灝鍘ら崙铏瑰箛閳ユ粌褰ч張澶嬪复閸欙絾鐥呴張澶婄杽閻滄壋鈧繄娈戠粚楦挎祮閵?
+> - **婢舵牠鍎存笟婵婄閸欘垱娴涢幑?閸?Mock**閿涙瓈LM/Embedding/Vision/VectorStore 閻ㄥ嫮婀＄€圭偠鐨熼悽銊ユ躬閸楁洖鍘撳ù瀣槸娑擃厺绔村瀣暏 Fake/Mock閿涘矂娉﹂幋鎰ゴ鐠囨洖鍟€瀵偓閻喎鐤勯崥搴ｎ伂閿涘牆褰查柅澶涚礆閵?
 
-### 闃舵鎬昏锛堝ぇ闃舵 鈫?鐩殑锛?
+### 闂冭埖顔岄幀鏄忣潔閿涘牆銇囬梼鑸殿唽 閳?閻╊喚娈戦敍?
 
-1. **闃舵 A锛氬伐绋嬮鏋朵笌娴嬭瘯鍩哄骇**
-   - 鐩殑锛氬缓绔嬪彲杩愯銆佸彲閰嶇疆銆佸彲娴嬭瘯鐨勫伐绋嬮鏋讹紱鍚庣画鎵€鏈夋ā鍧楅兘鑳戒互 TDD 鏂瑰紡钀藉湴銆?
-2. **闃舵 B锛歀ibs 鍙彃鎷斿眰锛團actory + Base 鎺ュ彛 + 榛樿鍙繍琛屽疄鐜帮級**
-  - 鐩殑锛氭妸鈥滃彲鏇挎崲鈥濆彉鎴愪唬鐮佷簨瀹烇紱骞惰ˉ榻愬彲杩愯鐨勯粯璁ゅ悗绔疄鐜帮紝纭繚 Core / Ingestion 涓嶄粎鈥滃彲缂栬瘧鈥濓紝杩樺彲鍦ㄧ湡瀹炵幆澧冭窇閫氥€?
-3. **闃舵 C锛欼ngestion Pipeline锛圥DF鈫扢D鈫扖hunk鈫扙mbedding鈫扷psert锛?*
-  - 鐩殑锛氱绾挎憚鍙栭摼璺窇閫氾紝鑳芥妸鏍蜂緥鏂囨。鍐欏叆鍚戦噺搴?BM25 绱㈠紩骞舵敮鎸佸閲忋€?
-4. **闃舵 D锛歊etrieval锛圖ense + Sparse + RRF + 鍙€?Rerank锛?*
-  - 鐩殑锛氬湪绾挎煡璇㈤摼璺窇閫氾紝寰楀埌 Top-K chunks锛堝惈寮曠敤淇℃伅锛夛紝骞跺叿澶囩ǔ瀹氬洖閫€绛栫暐銆?
-5. **闃舵 E锛歁CP Server 灞備笌 Tools 钀藉湴**
-   - 鐩殑锛氭寜 MCP 鏍囧噯鏆撮湶 tools锛岃 Copilot/Claude 鍙洿鎺ヨ皟鐢ㄦ煡璇㈣兘鍔涖€?
-6. **闃舵 F锛歍race 鍩虹璁炬柦涓庢墦鐐?*
-   - 鐩殑锛氬寮?TraceContext锛屽疄鐜扮粨鏋勫寲鏃ュ織鎸佷箙鍖栵紝鍦?Ingestion + Query 鍙岄摼璺墦鐐癸紝娣诲姞 Pipeline 杩涘害鍥炶皟銆?
-7. **闃舵 G锛氬彲瑙嗗寲绠＄悊骞冲彴 Dashboard**
-   - 鐩殑锛氭惌寤?Streamlit 鍏〉闈㈢鐞嗗钩鍙帮紙绯荤粺鎬昏 / 鏁版嵁娴忚 / Ingestion 绠＄悊 / Ingestion 杩借釜 / Query 杩借釜 / 璇勪及鍗犱綅锛夛紝瀹炵幇 DocumentManager 璺ㄥ瓨鍌ㄥ崗璋冦€?
-8. **闃舵 H锛氳瘎浼颁綋绯?*
-   - 鐩殑锛氬疄鐜?RagasEvaluator + CompositeEvaluator + EvalRunner锛屽惎鐢ㄨ瘎浼伴潰鏉块〉闈紝寤虹珛 golden test set 鍥炲綊鍩虹嚎銆?
-9. **闃舵 I锛氱鍒扮楠屾敹涓庢枃妗ｆ敹鍙?*
-   - 鐩殑锛氳ˉ榻?E2E 娴嬭瘯锛圡CP Client 妯℃嫙 + Dashboard 鍐掔儫锛夛紝瀹屽杽 README锛屽叏閾捐矾楠屾敹锛岀‘淇濃€滃紑绠卞嵆鐢?+ 鍙鐜扳€濄€?
+1. **闂冭埖顔?A閿涙艾浼愮粙瀣€囬弸鏈电瑢濞村鐦崺鍝勯獓**
+   - 閻╊喚娈戦敍姘紦缁斿褰叉潻鎰攽閵嗕礁褰查柊宥囩枂閵嗕礁褰插ù瀣槸閻ㄥ嫬浼愮粙瀣€囬弸璁圭幢閸氬海鐢婚幍鈧張澶嬆侀崸妤呭厴閼虫垝浜?TDD 閺傜懓绱￠拃钘夋勾閵?
+2. **闂冭埖顔?B閿涙瓈ibs 閸欘垱褰冮幏鏂跨湴閿涘湗actory + Base 閹恒儱褰?+ 姒涙顓婚崣顖濈箥鐞涘苯鐤勯悳甯礆**
+  - 閻╊喚娈戦敍姘Ω閳ユ粌褰查弴鎸庡床閳ユ繂褰夐幋鎰敩閻椒绨ㄧ€圭儑绱遍獮鎯八夋鎰讲鏉╂劘顢戦惃鍕帛鐠併倕鎮楃粩顖氱杽閻滃府绱濈涵顔荤箽 Core / Ingestion 娑撳秳绮庨垾婊冨讲缂傛牞鐦ч垾婵撶礉鏉╂ê褰查崷銊ф埂鐎圭偟骞嗘晶鍐獓闁哎鈧?
+3. **闂冭埖顔?C閿涙ngestion Pipeline閿涘湧DF閳墷D閳墫hunk閳墮mbedding閳壏psert閿?*
+  - 閻╊喚娈戦敍姘鳖瀲缁炬寧鎲氶崣鏍懠鐠侯垵绐囬柅姘剧礉閼宠姤濡搁弽铚傜伐閺傚洦銆傞崘娆忓弳閸氭垿鍣烘惔?BM25 缁便垹绱╅獮鑸垫暜閹镐礁顤冮柌蹇嬧偓?
+4. **闂冭埖顔?D閿涙瓓etrieval閿涘湒ense + Sparse + RRF + 閸欘垶鈧?Rerank閿?*
+  - 閻╊喚娈戦敍姘躬缁炬寧鐓＄拠銏ゆ懠鐠侯垵绐囬柅姘剧礉瀵版鍩?Top-K chunks閿涘牆鎯堝鏇犳暏娣団剝浼呴敍澶涚礉楠炶泛鍙挎径鍥┣旂€规艾娲栭柅鈧粵鏍殣閵?
+5. **闂冭埖顔?E閿涙瓉CP Server 鐏炲倷绗?Tools 閽€钘夋勾**
+   - 閻╊喚娈戦敍姘瘻 MCP 閺嶅洤鍣弳鎾苟 tools閿涘矁顔€ Copilot/Claude 閸欘垳娲块幒銉ㄧ殶閻劍鐓＄拠銏ｅ厴閸旀稏鈧?
+6. **闂冭埖顔?F閿涙瓖race 閸╄櫣顢呯拋鐐煢娑撳孩澧﹂悙?*
+   - 閻╊喚娈戦敍姘杻瀵?TraceContext閿涘苯鐤勯悳鎵波閺嬪嫬瀵查弮銉ョ箶閹镐椒绠欓崠鏍电礉閸?Ingestion + Query 閸欏矂鎽肩捄顖涘ⅵ閻愮櫢绱濆ǎ璇插 Pipeline 鏉╂稑瀹抽崶鐐剁殶閵?
+7. **闂冭埖顔?G閿涙艾褰茬憴鍡楀缁狅紕鎮婇獮鍐插酱 Dashboard**
+   - 閻╊喚娈戦敍姘儗瀵?Streamlit 閸忣參銆夐棃銏㈩吀閻炲棗閽╅崣甯礄缁崵绮洪幀鏄忣潔 / 閺佺増宓佸ù蹇氼潔 / Ingestion 缁狅紕鎮?/ Ingestion 鏉╁€熼嚋 / Query 鏉╁€熼嚋 / 鐠囧嫪鍙婇崡鐘辩秴閿涘绱濈€圭偟骞?DocumentManager 鐠恒劌鐡ㄩ崒銊ュ礂鐠嬪啨鈧?
+8. **闂冭埖顔?H閿涙俺鐦庢导棰佺秼缁?*
+   - 閻╊喚娈戦敍姘杽閻?RagasEvaluator + CompositeEvaluator + EvalRunner閿涘苯鎯庨悽銊ㄧ槑娴间即娼伴弶鍧椼€夐棃顫礉瀵よ櫣鐝?golden test set 閸ョ偛缍婇崺铏瑰殠閵?
+9. **闂冭埖顔?I閿涙氨顏崚鎵伂妤犲本鏁规稉搴㈡瀮濡楋絾鏁归崣?*
+   - 閻╊喚娈戦敍姘乘夋?E2E 濞村鐦敍鍦P Client 濡剝瀚?+ Dashboard 閸愭帞鍎敍澶涚礉鐎瑰苯鏉?README閿涘苯鍙忛柧鎹愮熅妤犲本鏁归敍宀€鈥樻穱婵冣偓婊冪磻缁犲崬宓嗛悽?+ 閸欘垰顦查悳鎵斥偓婵勨偓?
 
 
 ---
 
-### 馃搳 杩涘害璺熻釜琛?(Progress Tracking)
+### 棣冩惓 鏉╂稑瀹崇捄鐔婚嚋鐞?(Progress Tracking)
 
-> **鐘舵€佽鏄?*锛歚[ ]` 鏈紑濮?| `[~]` 杩涜涓?| `[x]` 宸插畬鎴?
+> **閻樿埖鈧浇顕╅弰?*閿涙瓪[ ]` 閺堫亜绱戞慨?| `[~]` 鏉╂稖顢戞稉?| `[x]` 瀹告彃鐣幋?
 > 
-> **鏇存柊鏃堕棿**锛氭瘡瀹屾垚涓€涓瓙浠诲姟鍚庢洿鏂板搴旂姸鎬?
+> **閺囧瓨鏌婇弮鍫曟？**閿涙碍鐦＄€瑰本鍨氭稉鈧稉顏勭摍娴犺濮熼崥搴㈡纯閺傛澘顕惔鏃傚Ц閹?
 
-#### 闃舵 A锛氬伐绋嬮鏋朵笌娴嬭瘯鍩哄骇
+#### 闂冭埖顔?A閿涙艾浼愮粙瀣€囬弸鏈电瑢濞村鐦崺鍝勯獓
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| A1 | 鍒濆鍖栫洰褰曟爲涓庢渶灏忓彲杩愯鍏ュ彛 | [x] | 2026-03-20 | compileall/import checks passed |
-| A2 | 寮曞叆 pytest 骞跺缓绔嬫祴璇曠洰褰曠害瀹?| [x] | 2026-03-20 | pytest smoke and full run passed |
-| A3 | 閰嶇疆鍔犺浇涓庢牎楠岋紙Settings锛?| [x] | 2026-03-20 | settings loader/validation + tests passed |
+| A1 | 閸掓繂顫愰崠鏍窗瑜版洘鐖叉稉搴㈡付鐏忓繐褰叉潻鎰攽閸忋儱褰?| [x] | 2026-03-20 | compileall/import checks passed |
+| A2 | 瀵洖鍙?pytest 楠炶泛缂撶粩瀣ゴ鐠囨洜娲拌ぐ鏇犲鐎?| [x] | 2026-03-20 | pytest smoke and full run passed |
+| A3 | 闁板秶鐤嗛崝鐘烘祰娑撳孩鐗庢宀嬬礄Settings閿?| [x] | 2026-03-20 | settings loader/validation + tests passed |
 
-#### 闃舵 B锛歀ibs 鍙彃鎷斿眰
+#### 闂冭埖顔?B閿涙瓈ibs 閸欘垱褰冮幏鏂跨湴
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| B1 | LLM 鎶借薄鎺ュ彛涓庡伐鍘?| [x] | 2026-03-20 | BaseLLM + LLMFactory + fake-provider tests passed |
-| B2 | Embedding 鎶借薄鎺ュ彛涓庡伐鍘?| [x] | 2026-03-20 | BaseEmbedding + EmbeddingFactory + stable fake-vector tests passed |
-| B3 | Splitter 鎶借薄鎺ュ彛涓庡伐鍘?| [x] | 2026-03-20 | BaseSplitter + SplitterFactory + provider routing tests passed |
-| B4 | VectorStore 鎶借薄鎺ュ彛涓庡伐鍘?| [x] | 2026-03-20 | BaseVectorStore + VectorStoreFactory + contract tests passed |
-| B5 | Reranker 鎶借薄鎺ュ彛涓庡伐鍘傦紙鍚?None 鍥為€€锛?| [x] | 2026-03-20 | BaseReranker + NoneReranker + RerankerFactory + tests passed |
-| B6 | Evaluator 鎶借薄鎺ュ彛涓庡伐鍘?| [x] | 2026-03-20 | BaseEvaluator + EvaluatorFactory + CustomEvaluator + tests passed |
-| B7.1 | OpenAI-Compatible LLM 瀹炵幇 | [x] | 2026-03-22 | OpenAI/Azure/DeepSeek providers + mock-http smoke tests passed |
-| B7.2 | Ollama LLM 瀹炵幇 | [x] | 2026-03-22 | OllamaLLM + factory routing + mock-http tests passed |
-| B7.3 | OpenAI & Azure Embedding 瀹炵幇 | [x] | 2026-03-22 | OpenAIEmbedding/AzureEmbedding + factory routing + mock-http tests passed |
-| B7.4 | Ollama Embedding 瀹炵幇 | [x] | 2026-03-24 | OllamaEmbedding + factory routing + mock-http tests passed |
-| B7.5 | Recursive Splitter 榛樿瀹炵幇 | [x] | 2026-03-24 | RecursiveSplitter + factory routing + markdown-structure tests passed |
-| B7.6 | ChromaStore 榛樿瀹炵幇 | [x] | 2026-03-24 | ChromaStore + factory routing + roundtrip integration tests passed锛堝惈鍙楅檺鐜鑷姩闄嶇骇锛?|
-| B7.7 | LLM Reranker 瀹炵幇 | [x] | 2026-03-24 | LLMReranker + prompt loading + fallback signal + schema validation + tests passed |
-| B7.8 | Cross-Encoder Reranker 瀹炵幇 | [x] | 2026-03-25 | CrossEncoderReranker + fallback signal + factory routing + mock-scorer tests passed |
-| B8 | Vision LLM 鎶借薄鎺ュ彛涓庡伐鍘傞泦鎴?| [x] | 2026-03-25 | BaseVisionLLM + LLMFactory.create_vision_llm + routing tests passed |
-| B9 | Azure Vision LLM 瀹炵幇 | [x] | 2026-03-25 | AzureVisionLLM + image path/base64 + compression hook + error-code tests passed |
-| B9.1 | DashScope Vision LLM锛圦wen3.5-Plus锛夊疄鐜?| [x] | 2026-03-25 | DashScopeVisionLLM + factory routing + image path/base64 + compression/error tests passed |
+| B1 | LLM 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?| [x] | 2026-03-20 | BaseLLM + LLMFactory + fake-provider tests passed |
+| B2 | Embedding 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?| [x] | 2026-03-20 | BaseEmbedding + EmbeddingFactory + stable fake-vector tests passed |
+| B3 | Splitter 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?| [x] | 2026-03-20 | BaseSplitter + SplitterFactory + provider routing tests passed |
+| B4 | VectorStore 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?| [x] | 2026-03-20 | BaseVectorStore + VectorStoreFactory + contract tests passed |
+| B5 | Reranker 閹跺€熻杽閹恒儱褰涙稉搴′紣閸樺偊绱欓崥?None 閸ョ偤鈧偓閿?| [x] | 2026-03-20 | BaseReranker + NoneReranker + RerankerFactory + tests passed |
+| B6 | Evaluator 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?| [x] | 2026-03-20 | BaseEvaluator + EvaluatorFactory + CustomEvaluator + tests passed |
+| B7.1 | OpenAI-Compatible LLM 鐎圭偟骞?| [x] | 2026-03-22 | OpenAI/Azure/DeepSeek providers + mock-http smoke tests passed |
+| B7.2 | Ollama LLM 鐎圭偟骞?| [x] | 2026-03-22 | OllamaLLM + factory routing + mock-http tests passed |
+| B7.3 | OpenAI & Azure Embedding 鐎圭偟骞?| [x] | 2026-03-22 | OpenAIEmbedding/AzureEmbedding + factory routing + mock-http tests passed |
+| B7.4 | Ollama Embedding 鐎圭偟骞?| [x] | 2026-03-24 | OllamaEmbedding + factory routing + mock-http tests passed |
+| B7.5 | Recursive Splitter 姒涙顓荤€圭偟骞?| [x] | 2026-03-24 | RecursiveSplitter + factory routing + markdown-structure tests passed |
+| B7.6 | ChromaStore 姒涙顓荤€圭偟骞?| [x] | 2026-03-24 | ChromaStore + factory routing + roundtrip integration tests passed閿涘牆鎯堥崣妤呮閻滎垰顣ㄩ懛顏勫З闂勫秶楠囬敍?|
+| B7.7 | LLM Reranker 鐎圭偟骞?| [x] | 2026-03-24 | LLMReranker + prompt loading + fallback signal + schema validation + tests passed |
+| B7.8 | Cross-Encoder Reranker 鐎圭偟骞?| [x] | 2026-03-25 | CrossEncoderReranker + fallback signal + factory routing + mock-scorer tests passed |
+| B8 | Vision LLM 閹跺€熻杽閹恒儱褰涙稉搴′紣閸樺倿娉﹂幋?| [x] | 2026-03-25 | BaseVisionLLM + LLMFactory.create_vision_llm + routing tests passed |
+| B9 | Azure Vision LLM 鐎圭偟骞?| [x] | 2026-03-25 | AzureVisionLLM + image path/base64 + compression hook + error-code tests passed |
+| B9.1 | DashScope Vision LLM閿涘湨wen3.5-Plus閿涘鐤勯悳?| [x] | 2026-03-25 | DashScopeVisionLLM + factory routing + image path/base64 + compression/error tests passed |
 
-#### 闃舵 C锛欼ngestion Pipeline MVP
+#### 闂冭埖顔?C閿涙ngestion Pipeline MVP
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| C1 | 瀹氫箟鏍稿績鏁版嵁绫诲瀷/濂戠害锛圖ocument/Chunk/ChunkRecord锛?| [x] | 2026-03-26 | core.types contracts + metadata/images validation + serialization tests passed |
-| C2 | 鏂囦欢瀹屾暣鎬ф鏌ワ紙SHA256锛?| [x] | 2026-03-26 | SQLiteIntegrityChecker + WAL + skip鍒ゅ畾 + 骞跺彂鍐欏叆 tests passed |
-| C3 | Loader 鎶借薄鍩虹被涓?PDF Loader | [x] | 2026-03-26 | BaseLoader + PdfLoader + image extraction/placeholder + degrade path tests passed |
-| C4 | Splitter 闆嗘垚锛堣皟鐢?Libs锛?| [x] | 2026-03-27 | DocumentChunker 閫傞厤灞?+ 鍥剧墖鎸夐渶鍒嗗彂 + 閰嶇疆椹卞姩鍒囧垎 + 鍚堝悓娴嬭瘯閫氳繃 |
-| C5 | Transform 鍩虹被 + ChunkRefiner | [x] | 2026-03-29 | BaseTransform + ChunkRefiner(rule+LLM+fallback) + TraceContext(min) + 27 unit tests passed; real-LLM integration tests added (env key required) |
-| C6 | MetadataEnricher | [x] | 2026-03-30 | MetadataEnricher(rule+LLM+fallback) + trace缁熻 + contract tests(鍚湡瀹濴LM鐢ㄤ緥) |
+| C1 | 鐎规矮绠熼弽绋跨妇閺佺増宓佺猾璇茬€?婵傛垹瀹抽敍鍦杘cument/Chunk/ChunkRecord閿?| [x] | 2026-03-26 | core.types contracts + metadata/images validation + serialization tests passed |
+| C2 | 閺傚洣娆㈢€瑰本鏆ｉ幀褎顥呴弻銉礄SHA256閿?| [x] | 2026-03-26 | SQLiteIntegrityChecker + WAL + skip閸掋倕鐣?+ 楠炶泛褰傞崘娆忓弳 tests passed |
+| C3 | Loader 閹跺€熻杽閸╄櫣琚稉?PDF Loader | [x] | 2026-03-26 | BaseLoader + PdfLoader + image extraction/placeholder + degrade path tests passed |
+| C4 | Splitter 闂嗗棙鍨氶敍鍫ｇ殶閻?Libs閿?| [x] | 2026-03-27 | DocumentChunker 闁倿鍘ょ仦?+ 閸ュ墽澧栭幐澶愭付閸掑棗褰?+ 闁板秶鐤嗘す鍗炲З閸掑洤鍨?+ 閸氬牆鎮撳ù瀣槸闁俺绻?|
+| C5 | Transform 閸╄櫣琚?+ ChunkRefiner | [x] | 2026-03-29 | BaseTransform + ChunkRefiner(rule+LLM+fallback) + TraceContext(min) + 27 unit tests passed; real-LLM integration tests added (env key required) |
+| C6 | MetadataEnricher | [x] | 2026-03-30 | MetadataEnricher(rule+LLM+fallback) + trace缂佺喕顓?+ contract tests(閸氼偆婀＄€规看LM閻劋绶? |
 | C7 | ImageCaptioner | [x] | 2026-03-30 | ImageCaptioner + fallback + prompt + tests passed |
 | C8 | DenseEncoder | [x] | 2026-03-30 | DenseEncoder(batch encode + contract checks + tests passed) |
 | C9 | SparseEncoder | [x] | 2026-03-31 | SparseEncoder(BM25 term weights + empty-text contract + tests passed) |
 | C10 | BatchProcessor | [x] | 2026-04-03 | BatchProcessor(batch split + dense/sparse orchestration + per-batch timing + tests passed) |
-| C11 | BM25Indexer锛堝€掓帓绱㈠紩+IDF璁＄畻锛?| [x] | 2026-04-03 | BM25Indexer(build/load/query + IDF formula + incremental/rebuild + tests passed) |
-| C12 | VectorUpserter锛堝箓绛塽psert锛?| [x] | 2026-04-03 | VectorUpserter(stable id + idempotent upsert + trace stage) + tests passed |
-| C13 | ImageStorage锛堝浘鐗囧瓨鍌?SQLite绱㈠紩锛?| [x] | 2026-04-04 | ImageStorage(file save + SQLite index + WAL + collection/doc_hash filters) + tests passed |
-| C14 | Pipeline 缂栨帓锛圡VP 涓茶捣鏉ワ級 | [x] | 2026-04-04 | IngestionPipeline(end-to-end orchestration + stage error wrapping + incremental skip/force) + integration tests passed |
-| C15 | 鑴氭湰鍏ュ彛 ingest.py | [x] | 2026-04-04 | scripts/ingest.py(cli path/collection/force + dir batch pdf) + tests/e2e/test_data_ingestion.py passed |
+| C11 | BM25Indexer閿涘牆鈧帗甯撶槐銏犵穿+IDF鐠侊紕鐣婚敍?| [x] | 2026-04-03 | BM25Indexer(build/load/query + IDF formula + incremental/rebuild + tests passed) |
+| C12 | VectorUpserter閿涘牆绠撶粵濉絧sert閿?| [x] | 2026-04-03 | VectorUpserter(stable id + idempotent upsert + trace stage) + tests passed |
+| C13 | ImageStorage閿涘牆娴橀悧鍥х摠閸?SQLite缁便垹绱╅敍?| [x] | 2026-04-04 | ImageStorage(file save + SQLite index + WAL + collection/doc_hash filters) + tests passed |
+| C14 | Pipeline 缂傛牗甯撻敍鍦P 娑撹尪鎹ｉ弶銉礆 | [x] | 2026-04-04 | IngestionPipeline(end-to-end orchestration + stage error wrapping + incremental skip/force) + integration tests passed |
+| C15 | 閼存碍婀伴崗銉ュ經 ingest.py | [x] | 2026-04-04 | scripts/ingest.py(cli path/collection/force + dir batch pdf) + tests/e2e/test_data_ingestion.py passed |
 
-#### 闃舵 D锛歊etrieval MVP
+#### 闂冭埖顔?D閿涙瓓etrieval MVP
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| D1 | QueryProcessor锛堝叧閿瘝鎻愬彇 + filters锛?| [x] | 2026-04-04 | QueryProcessor(瑙勫垯鍒嗚瘝+鍋滅敤璇?鍐呰仈filters瑙ｆ瀽) + tests/unit/test_query_processor.py passed |
-| D2 | DenseRetriever锛堣皟鐢?VectorStore.query锛?| [x] | 2026-04-05 | RetrievalResult + DenseRetriever(embed->query缂栨帓) + tests/unit/test_dense_retriever.py passed |
-| D3 | SparseRetriever锛圔M25 鏌ヨ锛?| [x] | 2026-05-27 | Base/Chroma get_by_ids + SparseRetriever(BM25->姝ｆ枃鍥炲～) + tests/unit/test_sparse_retriever.py passed |
+| D1 | QueryProcessor閿涘牆鍙ч柨顔跨槤閹绘劕褰?+ filters閿?| [x] | 2026-04-04 | QueryProcessor(鐟欏嫬鍨崚鍡氱槤+閸嬫粎鏁ょ拠?閸愬懓浠坒ilters鐟欙絾鐎? + tests/unit/test_query_processor.py passed |
+| D2 | DenseRetriever閿涘牐鐨熼悽?VectorStore.query閿?| [x] | 2026-04-05 | RetrievalResult + DenseRetriever(embed->query缂傛牗甯? + tests/unit/test_dense_retriever.py passed |
+| D3 | SparseRetriever閿涘湐M25 閺屻儴顕楅敍?| [x] | 2026-05-27 | Base/Chroma get_by_ids + SparseRetriever(BM25->濮濓絾鏋冮崶鐐诧綖) + tests/unit/test_sparse_retriever.py passed |
 | D4 | RRF Fusion | [x] | 2026-05-29 | RRFFusion(deterministic + configurable k) + tests/unit/test_fusion_rrf.py passed |
-| D5 | HybridSearch 缂栨帓 | [x] | 2026-05-30 | HybridSearch(query->dense/sparse->RRF->post-filter) + tests/integration/test_hybrid_search.py passed |
-| D6 | Reranker锛圕ore 灞傜紪鎺?+ Fallback锛?| [x] | 2026-05-31 | Core Reranker(fallback=true + reason) + tests/unit/test_reranker_fallback.py passed |
-| D7 | 鑴氭湰鍏ュ彛 query.py锛堟煡璇㈠彲鐢級 | [x] | 2026-05-31 | scripts/query.py(cli + verbose + no-rerank + friendly-empty) verified |
+| D5 | HybridSearch 缂傛牗甯?| [x] | 2026-05-30 | HybridSearch(query->dense/sparse->RRF->post-filter) + tests/integration/test_hybrid_search.py passed |
+| D6 | Reranker閿涘湑ore 鐏炲倻绱幒?+ Fallback閿?| [x] | 2026-05-31 | Core Reranker(fallback=true + reason) + tests/unit/test_reranker_fallback.py passed |
+| D7 | 閼存碍婀伴崗銉ュ經 query.py閿涘牊鐓＄拠銏犲讲閻㈩煉绱?| [x] | 2026-05-31 | scripts/query.py(cli + verbose + no-rerank + friendly-empty) verified |
 
-#### 闃舵 E锛歁CP Server 灞備笌 Tools
+#### 闂冭埖顔?E閿涙瓉CP Server 鐏炲倷绗?Tools
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| E1 | MCP Server 鍏ュ彛涓?Stdio 绾︽潫 | [x] | 2026-06-05 | minimal stdio JSON-RPC server + initialize integration test passed |
-| E2 | Protocol Handler 鍗忚瑙ｆ瀽涓庤兘鍔涘崗鍟?| [x] | 2026-06-06 | ProtocolHandler(initialize/tools/list/tools/call + JSON-RPC errors) + tests/unit/test_protocol_handler.py passed |
+| E1 | MCP Server 閸忋儱褰涙稉?Stdio 缁撅附娼?| [x] | 2026-06-05 | minimal stdio JSON-RPC server + initialize integration test passed |
+| E2 | Protocol Handler 閸楀繗顔呯憴锝嗙€芥稉搴ゅ厴閸旀稑宕楅崯?| [x] | 2026-06-06 | ProtocolHandler(initialize/tools/list/tools/call + JSON-RPC errors) + tests/unit/test_protocol_handler.py passed |
 | E3 | query_knowledge_hub Tool | [x] | 2026-06-06 | query tool + response builder + citations + mcp integration tests passed |
 | E4 | list_collections Tool | [x] | 2026-06-06 | list_collections directory scan tool + unit tests passed |
 | E5 | get_document_summary Tool | [x] | 2026-06-06 | cache-backed summary tool + MCP integration tests passed |
-| E6 | 澶氭ā鎬佽繑鍥炵粍瑁咃紙Text + Image锛?| [x] | 2026-06-07 | multimodal assembler + MCP image content integration test passed |
+| E6 | 婢舵碍膩閹浇绻戦崶鐐电矋鐟佸拑绱橳ext + Image閿?| [x] | 2026-06-07 | multimodal assembler + MCP image content integration test passed |
 
-#### 闃舵 F锛歍race 鍩虹璁炬柦涓庢墦鐐?
+#### 闂冭埖顔?F閿涙瓖race 閸╄櫣顢呯拋鐐煢娑撳孩澧﹂悙?
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| F1 | TraceContext 澧炲己锛坒inish + 鑰楁椂缁熻 + trace_type锛?| [x] | 2026-06-07 | TraceContext(finish/elapsed/trace_type/to_dict) + tests/unit/test_trace_context.py passed |
-| F2 | 缁撴瀯鍖栨棩蹇?logger锛圝SON Lines锛?| [x] | 2026-06-07 | JSONL logger + TraceCollector + tests/unit/test_jsonl_logger.py passed |
-| F3 | 鍦?Query 閾捐矾鎵撶偣 | [x] | 2026-06-07 | query trace stages/method-provider fields + integration/unit tests passed |
-| F4 | 鍦?Ingestion 閾捐矾鎵撶偣 | [x] | 2026-06-08 | ingestion trace stages/method-provider fields + integration tests passed |
-| F5 | Pipeline 杩涘害鍥炶皟 (on_progress) | [x] | 2026-06-09 | pipeline on_progress callback + unit tests passed |
+| F1 | TraceContext 婢х偛宸遍敍鍧抜nish + 閼版妞傜紒鐔活吀 + trace_type閿?| [x] | 2026-06-07 | TraceContext(finish/elapsed/trace_type/to_dict) + tests/unit/test_trace_context.py passed |
+| F2 | 缂佹挻鐎崠鏍ㄦ）韫?logger閿涘湞SON Lines閿?| [x] | 2026-06-07 | JSONL logger + TraceCollector + tests/unit/test_jsonl_logger.py passed |
+| F3 | 閸?Query 闁炬崘鐭鹃幍鎾跺仯 | [x] | 2026-06-07 | query trace stages/method-provider fields + integration/unit tests passed |
+| F4 | 閸?Ingestion 闁炬崘鐭鹃幍鎾跺仯 | [x] | 2026-06-08 | ingestion trace stages/method-provider fields + integration tests passed |
+| F5 | Pipeline 鏉╂稑瀹抽崶鐐剁殶 (on_progress) | [x] | 2026-06-09 | pipeline on_progress callback + unit tests passed |
 
-#### 闃舵 G锛氬彲瑙嗗寲绠＄悊骞冲彴 Dashboard
+#### 闂冭埖顔?G閿涙艾褰茬憴鍡楀缁狅紕鎮婇獮鍐插酱 Dashboard
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| G1 | Dashboard 鍩虹鏋舵瀯涓庣郴缁熸€昏椤?| [x] | 2026-06-09 | Streamlit澶氶〉闈㈤鏋?+ Overview閰嶇疆/缁熻椤?+ start_dashboard鑴氭湰 + tests passed |
-| G2 | DocumentManager 瀹炵幇 | [x] | 2026-06-09 | DocumentManager(list/detail/delete/stats) + Chroma metadata read/delete + tests passed |
-| G3 | 鏁版嵁娴忚鍣ㄩ〉闈?| [x] | 2026-06-10 | data_browser 椤甸潰 + DataService 鏂囨。/chunk/鍥剧墖娴忚 + dashboard tests passed |
-| G4 | Ingestion 绠＄悊椤甸潰 | [x] | 2026-06-10 | ingestion_manager 椤甸潰 + PDF 涓婁紶鎽勫彇 + on_progress 瀹炴椂杩涘害 + 鏂囨。鍒犻櫎 + dashboard tests passed |
-| G5 | Ingestion 杩借釜椤甸潰 | [x] | 2026-06-11 | ingestion_traces 椤甸潰 + TraceService(JSONL瑙ｆ瀽/闃舵鑱氬悎) + dashboard tests passed |
-| G6 | Query 杩借釜椤甸潰 | [x] | 2026-06-12 | query_traces 椤甸潰 + query trace鎸佷箙鍖?鍊欓€夐瑙?+ dashboard tests passed |
+| G1 | Dashboard 閸╄櫣顢呴弸鑸电€稉搴ｉ兇缂佺喐鈧槒顫嶆い?| [x] | 2026-06-09 | Streamlit婢舵岸銆夐棃銏ゎ€囬弸?+ Overview闁板秶鐤?缂佺喕顓告い?+ start_dashboard閼存碍婀?+ tests passed |
+| G2 | DocumentManager 鐎圭偟骞?| [x] | 2026-06-09 | DocumentManager(list/detail/delete/stats) + Chroma metadata read/delete + tests passed |
+| G3 | 閺佺増宓佸ù蹇氼潔閸ｃ劑銆夐棃?| [x] | 2026-06-10 | data_browser 妞ょ敻娼?+ DataService 閺傚洦銆?chunk/閸ュ墽澧栧ù蹇氼潔 + dashboard tests passed |
+| G4 | Ingestion 缁狅紕鎮婃い鐢告桨 | [x] | 2026-06-10 | ingestion_manager 妞ょ敻娼?+ PDF 娑撳﹣绱堕幗鍕絿 + on_progress 鐎圭偞妞傛潻娑樺 + 閺傚洦銆傞崚鐘绘珟 + dashboard tests passed |
+| G5 | Ingestion 鏉╁€熼嚋妞ょ敻娼?| [x] | 2026-06-11 | ingestion_traces 妞ょ敻娼?+ TraceService(JSONL鐟欙絾鐎?闂冭埖顔岄懕姘値) + dashboard tests passed |
+| G6 | Query 鏉╁€熼嚋妞ょ敻娼?| [x] | 2026-06-12 | query_traces 妞ょ敻娼?+ query trace閹镐椒绠欓崠?閸婃瑩鈧顣╃憴?+ dashboard tests passed |
 
-#### 闃舵 H锛氳瘎浼颁綋绯?
+#### 闂冭埖顔?H閿涙俺鐦庢导棰佺秼缁?
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| H1 | RagasEvaluator 瀹炵幇 | [x] | 2026-06-14 | RagasEvaluator(lazy import + standardized metrics) + tests/unit/test_ragas_evaluator.py passed |
-| H2 | CompositeEvaluator 瀹炵幇 | [x] | 2026-06-14 | CompositeEvaluator(parallel merge + evaluation.backends routing) + tests/unit/test_composite_evaluator.py passed |
+| H1 | RagasEvaluator 鐎圭偟骞?| [x] | 2026-06-14 | RagasEvaluator(lazy import + standardized metrics) + tests/unit/test_ragas_evaluator.py passed |
+| H2 | CompositeEvaluator 鐎圭偟骞?| [x] | 2026-06-14 | CompositeEvaluator(parallel merge + evaluation.backends routing) + tests/unit/test_composite_evaluator.py passed |
 | H3 | EvalRunner + Golden Test Set | [x] | 2026-06-15 | EvalRunner(golden set + retrieval metrics + evaluator adaptation) + scripts/evaluate.py + unit tests passed |
-| H4 | 璇勪及闈㈡澘椤甸潰 | [x] | 2026-06-15 | evaluation_panel 椤甸潰 + Dashboard 鎺ュ叆 + unit tests passed |
-| H5 | Recall 鍥炲綊娴嬭瘯锛圗2E锛?| [x] | 2026-06-23 | tests/e2e/test_recall.py + H5 evaluation regression suite passed |
+| H4 | 鐠囧嫪鍙婇棃銏℃緲妞ょ敻娼?| [x] | 2026-06-15 | evaluation_panel 妞ょ敻娼?+ Dashboard 閹恒儱鍙?+ unit tests passed |
+| H5 | Recall 閸ョ偛缍婂ù瀣槸閿涘湕2E閿?| [x] | 2026-06-23 | tests/e2e/test_recall.py + H5 evaluation regression suite passed |
 
-#### 闃舵 I锛氱鍒扮楠屾敹涓庢枃妗ｆ敹鍙?
+#### 闂冭埖顔?I閿涙氨顏崚鎵伂妤犲本鏁规稉搴㈡瀮濡楋絾鏁归崣?
 
-| 浠诲姟缂栧彿 | 浠诲姟鍚嶇О | 鐘舵€?| 瀹屾垚鏃ユ湡 | 澶囨敞 |
+| 娴犺濮熺紓鏍у娇 | 娴犺濮熼崥宥囆?| 閻樿埖鈧?| 鐎瑰本鍨氶弮銉︽埂 | 婢跺洦鏁?|
 |---------|---------|------|---------|------|
-| I1 | E2E锛歁CP Client 渚ц皟鐢ㄦā鎷?| [x] | 2026-06-23 | tests/e2e/test_mcp_client.py + real ingest + stdio MCP client flow passed |
-| I2 | E2E锛欴ashboard 鍐掔儫娴嬭瘯 | [x] | 2026-06-23 | tests/e2e/test_dashboard_smoke.py + Streamlit AppTest six-page smoke passed |
-| I3 | 瀹屽杽 README锛堣繍琛岃鏄?+ MCP + Dashboard锛?| [x] | 2026-06-23 | README rewritten as runnable guide for quick start, settings, MCP, Dashboard, evaluation, tests, troubleshooting |
-| I4 | 娓呯悊鎺ュ彛涓€鑷存€э紙濂戠害娴嬭瘯琛ラ綈锛?| [ ] | | |
-| I5 | 鍏ㄩ摼璺?E2E 楠屾敹 | [ ] | | |
+| I1 | E2E閿涙瓉CP Client 娓氀嗙殶閻劍膩閹?| [x] | 2026-06-23 | tests/e2e/test_mcp_client.py + real ingest + stdio MCP client flow passed |
+| I2 | E2E閿涙ashboard 閸愭帞鍎ù瀣槸 | [x] | 2026-06-23 | tests/e2e/test_dashboard_smoke.py + Streamlit AppTest six-page smoke passed |
+| I3 | 鐎瑰苯鏉?README閿涘牐绻嶇悰宀冾嚛閺?+ MCP + Dashboard閿?| [x] | 2026-06-23 | README rewritten as runnable guide for quick start, settings, MCP, Dashboard, evaluation, tests, troubleshooting |
+| I4 | 娓呯悊鎺ュ彛涓€鑷存€э紙濂戠害娴嬭瘯琛ラ綈锛?| [x] | 2026-06-23 | contract tests covered delete/filter/provider edges and evaluator input validation |
+| I5 | 閸忋劑鎽肩捄?E2E 妤犲本鏁?| [ ] | | |
 
 ---
 
-### 馃搱 鎬讳綋杩涘害
+### 棣冩惐 閹缍嬫潻娑樺
 
-| 闃舵 | 鎬讳换鍔℃暟 | 宸插畬鎴?| 杩涘害 |
+| 闂冭埖顔?| 閹鎹㈤崝鈩冩殶 | 瀹告彃鐣幋?| 鏉╂稑瀹?|
 |------|---------|--------|------|
-| 闃舵 A | 3 | 0 | 0% |
-| 闃舵 B | 16 | 0 | 0% |
-| 闃舵 C | 15 | 0 | 0% |
-| 闃舵 D | 7 | 0 | 0% |
-| 闃舵 E | 6 | 0 | 0% |
-| 闃舵 F | 5 | 0 | 0% |
-| 闃舵 G | 6 | 0 | 0% |
-| 闃舵 H | 5 | 0 | 0% |
-| 闃舵 I | 5 | 0 | 0% |
-| **鎬昏** | **68** | **0** | **0%** |
+| 闂冭埖顔?A | 3 | 0 | 0% |
+| 闂冭埖顔?B | 16 | 0 | 0% |
+| 闂冭埖顔?C | 15 | 0 | 0% |
+| 闂冭埖顔?D | 7 | 0 | 0% |
+| 闂冭埖顔?E | 6 | 0 | 0% |
+| 闂冭埖顔?F | 5 | 0 | 0% |
+| 闂冭埖顔?G | 6 | 0 | 0% |
+| 闂冭埖顔?H | 5 | 0 | 0% |
+| 闂冭埖顔?I | 5 | 0 | 0% |
+| **閹槒顓?* | **68** | **0** | **0%** |
 
 
 ---
 
-## 闃舵 A锛氬伐绋嬮鏋朵笌娴嬭瘯鍩哄骇锛堢洰鏍囷細鍏堝彲瀵煎叆锛屽啀鍙祴璇曪級
+## 闂冭埖顔?A閿涙艾浼愮粙瀣€囬弸鏈电瑢濞村鐦崺鍝勯獓閿涘牏娲伴弽鍥风窗閸忓牆褰茬€电厧鍙嗛敍灞藉晙閸欘垱绁寸拠鏇礆
 
-### A1锛氬垵濮嬪寲鐩綍鏍戜笌鏈€灏忓彲杩愯鍏ュ彛
-- **鐩爣**锛氬湪 repo 鏍圭洰褰曞垱寤虹 5.2 鑺傛墍杩扮洰褰曢鏋朵笌绌烘ā鍧楁枃浠讹紙鍙?import锛夈€?
-- **淇敼鏂囦欢**锛?
+### A1閿涙艾鍨垫慨瀣閻╊喖缍嶉弽鎴滅瑢閺堚偓鐏忓繐褰叉潻鎰攽閸忋儱褰?
+- **閻╊喗鐖?*閿涙艾婀?repo 閺嶅湱娲拌ぐ鏇炲灡瀵よ櫣顑?5.2 閼哄倹澧嶆潻鎵窗瑜版洟顎囬弸鏈电瑢缁岀儤膩閸ф鏋冩禒璁圭礄閸?import閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `main.py`
   - `pyproject.toml`
   - `README.md`
-  - `.gitignore`锛圥ython 椤圭洰鏍囧噯蹇界暐瑙勫垯锛歚__pycache__`銆乣.venv`銆乣.env`銆乣*.pyc`銆両DE 閰嶇疆绛夛級
-  - `src/**/__init__.py`锛堟寜鐩綍鏍戣ˉ榻愶級
-  - `config/settings.yaml`锛堟渶灏忓彲瑙ｆ瀽閰嶇疆锛?
-  - `config/prompts/image_captioning.txt`锛堝彲鍏堟斁鍗犱綅鍐呭锛屽悗缁樁娈佃ˉ鍏?Prompt锛?
-  - `config/prompts/chunk_refinement.txt`锛堝彲鍏堟斁鍗犱綅鍐呭锛屽悗缁樁娈佃ˉ鍏?Prompt锛?
-  - `config/prompts/rerank.txt`锛堝彲鍏堟斁鍗犱綅鍐呭锛屽悗缁樁娈佃ˉ鍏?Prompt锛?
-- **瀹炵幇绫?鍑芥暟**锛氭棤锛堜粎楠ㄦ灦锛夈€?
-- **瀹炵幇绫?鍑芥暟**锛氭棤锛堜粎楠ㄦ灦锛屼笉瀹炵幇涓氬姟閫昏緫锛夈€?
-- **瀹炵幇绫?鍑芥暟**锛氫负褰撳墠椤圭洰鍒涘缓涓€涓櫄鎷熺幆澧冩ā鍧椼€?
- - **楠屾敹鏍囧噯**锛?
-  - 鐩綍缁撴瀯涓?DEV_SPEC 5.2 涓€鑷达紙鑷冲皯鎶婂搴旂洰褰曞垱寤哄嚭鏉ワ級銆?
-  - `config/prompts/` 鐩綍瀛樺湪锛屼笖涓変釜 prompt 鏂囦欢鍙璇诲彇锛堝嵆浣垮彧鏄崰浣嶆枃鏈級銆?
-  - 鑳藉鍏ュ叧閿《灞傚寘锛堜笌鐩綍缁撴瀯涓€涓€瀵瑰簲锛夛細
+  - `.gitignore`閿涘湧ython 妞ゅ湱娲伴弽鍥у櫙韫囩晫鏆愮憴鍕灟閿涙瓪__pycache__`閵嗕梗.venv`閵嗕梗.env`閵嗕梗*.pyc`閵嗕浮DE 闁板秶鐤嗙粵澶涚礆
+  - `src/**/__init__.py`閿涘牊瀵滈惄顔肩秿閺嶆垼藟姒绘劧绱?
+  - `config/settings.yaml`閿涘牊娓剁亸蹇撳讲鐟欙絾鐎介柊宥囩枂閿?
+  - `config/prompts/image_captioning.txt`閿涘牆褰查崗鍫熸杹閸楃姳缍呴崘鍛啇閿涘苯鎮楃紒顓㈡▉濞堜絻藟閸?Prompt閿?
+  - `config/prompts/chunk_refinement.txt`閿涘牆褰查崗鍫熸杹閸楃姳缍呴崘鍛啇閿涘苯鎮楃紒顓㈡▉濞堜絻藟閸?Prompt閿?
+  - `config/prompts/rerank.txt`閿涘牆褰查崗鍫熸杹閸楃姳缍呴崘鍛啇閿涘苯鎮楃紒顓㈡▉濞堜絻藟閸?Prompt閿?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿涙碍妫ら敍鍫滅矌妤犮劍鐏﹂敍澶堚偓?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿涙碍妫ら敍鍫滅矌妤犮劍鐏﹂敍灞肩瑝鐎圭偟骞囨稉姘闁槒绶敍澶堚偓?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿涙矮璐熻ぐ鎾冲妞ゅ湱娲伴崚娑樼紦娑撯偓娑擃亣娅勯幏鐔哄箚婢у啯膩閸фぜ鈧?
+ - **妤犲本鏁归弽鍥у櫙**閿?
+  - 閻╊喖缍嶇紒鎾寸€稉?DEV_SPEC 5.2 娑撯偓閼疯揪绱欓懛鍐茬毌閹跺﹤顕惔鏃傛窗瑜版洖鍨卞鍝勫毉閺夈儻绱氶妴?
+  - `config/prompts/` 閻╊喖缍嶇€涙ê婀敍灞肩瑬娑撳閲?prompt 閺傚洣娆㈤崣顖濐潶鐠囪褰囬敍鍫濆祮娴ｅ灝褰ч弰顖氬窗娴ｅ秵鏋冮張顒婄礆閵?
+  - 閼宠棄顕遍崗銉ュ彠闁款噣銆婄仦鍌氬瘶閿涘牅绗岄惄顔肩秿缂佹挻鐎稉鈧稉鈧€电懓绨查敍澶涚窗
     - `python -c "import mcp_server; import core; import ingestion; import libs; import observability"`
-  - 鍙互鍚姩铏氭嫙鐜妯″潡
-- **娴嬭瘯鏂规硶**锛氳繍琛?`python -m compileall src`锛堜粎鍋氳娉?鍙鍏ユ€ф鏌ワ紱pytest 鍩哄骇鍦?A2 寤虹珛锛夈€?
+  - 閸欘垯浜掗崥顖氬З閾忔碍瀚欓悳顖氼暔濡€虫健
+- **濞村鐦弬瑙勭《**閿涙俺绻嶇悰?`python -m compileall src`閿涘牅绮庨崑姘愁嚔濞?閸欘垰顕遍崗銉︹偓褎顥呴弻銉幢pytest 閸╁搫楠囬崷?A2 瀵よ櫣鐝涢敍澶堚偓?
 
-### A2锛氬紩鍏?pytest 骞跺缓绔嬫祴璇曠洰褰曠害瀹?
-- **鐩爣**锛氬缓绔?`tests/unit|integration|e2e|fixtures` 鐩綍涓?pytest 杩愯鍩哄骇銆?
-- **淇敼鏂囦欢**锛?
-  - `pyproject.toml`锛堟坊鍔?pytest 閰嶇疆锛歵estpaths銆乵arkers 绛夛級
+### A2閿涙艾绱╅崗?pytest 楠炶泛缂撶粩瀣ゴ鐠囨洜娲拌ぐ鏇犲鐎?
+- **閻╊喗鐖?*閿涙艾缂撶粩?`tests/unit|integration|e2e|fixtures` 閻╊喖缍嶆稉?pytest 鏉╂劘顢戦崺鍝勯獓閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `pyproject.toml`閿涘牊鍧婇崝?pytest 闁板秶鐤嗛敍姝礶stpaths閵嗕沟arkers 缁涘绱?
   - `tests/unit/test_smoke_imports.py`
-  - `tests/fixtures/sample_documents/`锛堟斁 1 涓渶灏忔牱渚嬫枃妗ｅ崰浣嶏級
-- **瀹炵幇绫?鍑芥暟**锛氭棤銆?
-- **瀹炵幇绫?鍑芥暟**锛氭棤锛堟柊澧炵殑鏄祴璇曟枃浠朵笌 pytest 閰嶇疆锛夈€?
-- **楠屾敹鏍囧噯**锛?
-  - `pytest -q` 鍙繍琛屽苟閫氳繃銆?
-  - 鑷冲皯 1 涓啋鐑熸祴璇曪紙渚嬪 `tests/unit/test_smoke_imports.py` 鍙仛鍏抽敭鍖?import 鏍￠獙锛夈€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_smoke_imports.py`銆?
+  - `tests/fixtures/sample_documents/`閿涘牊鏂?1 娑擃亝娓剁亸蹇旂壉娓氬鏋冨锝呭窗娴ｅ稄绱?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿涙碍妫ら妴?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿涙碍妫ら敍鍫熸煀婢х偟娈戦弰顖涚ゴ鐠囨洘鏋冩禒鏈电瑢 pytest 闁板秶鐤嗛敍澶堚偓?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `pytest -q` 閸欘垵绻嶇悰灞借嫙闁俺绻冮妴?
+  - 閼峰啿鐨?1 娑擃亜鍟嬮悜鐔哥ゴ鐠囨洩绱欐笟瀣洤 `tests/unit/test_smoke_imports.py` 閸欘亜浠涢崗鎶芥暛閸?import 閺嶏繝鐛欓敍澶堚偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_smoke_imports.py`閵?
 
-### A3锛氶厤缃姞杞戒笌鏍￠獙锛圫ettings锛?
-- **鐩爣**锛氬疄鐜拌鍙?`config/settings.yaml` 鐨勯厤缃姞杞藉櫒锛屽苟鍦ㄥ惎鍔ㄦ椂鏍￠獙鍏抽敭瀛楁瀛樺湪銆?
-- **淇敼鏂囦欢**锛?
-  - `main.py`锛堝惎鍔ㄦ椂璋冪敤 `load_settings()`锛岀己瀛楁鐩存帴 fail-fast 閫€鍑猴級
-  - `src/observability/logger.py`锛堝厛鍗犱綅锛氭彁渚?get_logger锛宻tderr 杈撳嚭锛?
-  - `src/core/settings.py`锛堟柊澧烇細闆嗕腑鏀?Settings 鏁版嵁缁撴瀯涓庡姞杞?鏍￠獙閫昏緫锛?
-  - `config/settings.yaml`锛堣ˉ榻愬瓧娈碉細llm/embedding/vector_store/retrieval/rerank/evaluation/observability锛?
+### A3閿涙岸鍘ょ純顔煎鏉炴垝绗岄弽锟犵崣閿涘湯ettings閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳鎷岊嚢閸?`config/settings.yaml` 閻ㄥ嫰鍘ょ純顔煎鏉炶棄娅掗敍灞借嫙閸︺劌鎯庨崝銊︽閺嶏繝鐛欓崗鎶芥暛鐎涙顔岀€涙ê婀妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `main.py`閿涘牆鎯庨崝銊︽鐠嬪啰鏁?`load_settings()`閿涘瞼宸辩€涙顔岄惄瀛樺复 fail-fast 闁偓閸戠尨绱?
+  - `src/observability/logger.py`閿涘牆鍘涢崡鐘辩秴閿涙碍褰佹笟?get_logger閿涘tderr 鏉堟挸鍤敍?
+  - `src/core/settings.py`閿涘牊鏌婃晶鐑囩窗闂嗗棔鑵戦弨?Settings 閺佺増宓佺紒鎾寸€稉搴″鏉?閺嶏繝鐛欓柅鏄忕帆閿?
+  - `config/settings.yaml`閿涘牐藟姒绘劕鐡у▓纰夌窗llm/embedding/vector_store/retrieval/rerank/evaluation/observability閿?
   - `tests/unit/test_config_loading.py`
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `Settings`锛坉ataclass锛氬彧鍋氱粨鏋勪笌鏈€灏忔牎楠岋紱涓嶅湪杩欓噷鍋氫换浣曠綉缁?IO 鐨勨€滀笟鍔″垵濮嬪寲鈥濓級
-  - `load_settings(path: str) -> Settings`锛堣鍙?YAML -> 瑙ｆ瀽涓?Settings -> 鏍￠獙蹇呭～瀛楁锛?
-  - `validate_settings(settings: Settings) -> None`锛堟妸鈥滃繀濉瓧娈垫鏌モ€濋泦涓寲锛岄敊璇俊鎭寘鍚瓧娈佃矾寰勶紝渚嬪 `embedding.provider`锛?
-- **楠屾敹鏍囧噯**锛?
-  - `main.py` 鍚姩鏃惰兘鎴愬姛鍔犺浇 `config/settings.yaml` 骞舵嬁鍒?`Settings` 瀵硅薄銆?
-  - 鍒犻櫎/缂哄け鍏抽敭瀛楁鏃讹紙渚嬪 `embedding.provider`锛夛紝鍚姩鎴?`load_settings()` 鎶涘嚭鈥滃彲璇婚敊璇€濓紙鏄庣‘鎸囧嚭缂虹殑鏄摢涓瓧娈碉級銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_config_loading.py`銆?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `Settings`閿涘潐ataclass閿涙艾褰ч崑姘辩波閺嬪嫪绗岄張鈧亸蹇旂墡妤犲矉绱辨稉宥呮躬鏉╂瑩鍣烽崑姘崲娴ｆ洜缍夌紒?IO 閻ㄥ嫧鈧粈绗熼崝鈥冲灥婵瀵查垾婵撶礆
+  - `load_settings(path: str) -> Settings`閿涘牐顕伴崣?YAML -> 鐟欙絾鐎芥稉?Settings -> 閺嶏繝鐛欒箛鍛綖鐎涙顔岄敍?
+  - `validate_settings(settings: Settings) -> None`閿涘牊濡搁垾婊冪箑婵夘偄鐡у▓鍨梾閺屻儮鈧繈娉︽稉顓炲閿涘矂鏁婄拠顖欎繆閹垰瀵橀崥顐㈢摟濞堜絻鐭惧鍕剁礉娓氬顩?`embedding.provider`閿?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `main.py` 閸氼垰濮╅弮鎯板厴閹存劕濮涢崝鐘烘祰 `config/settings.yaml` 楠炶埖瀣侀崚?`Settings` 鐎电钖勯妴?
+  - 閸掔娀娅?缂傚搫銇戦崗鎶芥暛鐎涙顔岄弮璁圭礄娓氬顩?`embedding.provider`閿涘绱濋崥顖氬З閹?`load_settings()` 閹舵稑鍤垾婊冨讲鐠囧鏁婄拠顖椻偓婵撶礄閺勫海鈥橀幐鍥у毉缂傝櫣娈戦弰顖氭憿娑擃亜鐡у▓纰夌礆閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_config_loading.py`閵?
 
 ---
 
-## 闃舵 B锛歀ibs 鍙彃鎷斿眰锛堢洰鏍囷細Factory 鍙伐浣滐紝涓旇嚦灏戞湁鈥滈粯璁ゅ悗绔€濆彲璺戦€氱鍒扮锛?
+## 闂冭埖顔?B閿涙瓈ibs 閸欘垱褰冮幏鏂跨湴閿涘牏娲伴弽鍥风窗Factory 閸欘垰浼愭担婊愮礉娑撴棁鍤︾亸鎴炴箒閳ユ粓绮拋銈呮倵缁旑垪鈧繂褰茬捄鎴︹偓姘鳖伂閸掓壆顏敍?
 
-### B1锛歀LM 鎶借薄鎺ュ彛涓庡伐鍘?
-- **鐩爣**锛氬畾涔?`BaseLLM` 涓?`LLMFactory`锛屾敮鎸佹寜閰嶇疆閫夋嫨 provider銆?
-- **淇敼鏂囦欢**锛?
+### B1閿涙瓈LM 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseLLM` 娑?`LLMFactory`閿涘本鏁幐浣瑰瘻闁板秶鐤嗛柅澶嬪 provider閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/llm/base_llm.py`
   - `src/libs/llm/llm_factory.py`
   - `tests/unit/test_llm_factory.py`
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `BaseLLM.chat(messages) -> str`锛堟垨缁熶竴 response 瀵硅薄锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `BaseLLM.chat(messages) -> str`閿涘牊鍨ㄧ紒鐔剁 response 鐎电钖勯敍?
   - `LLMFactory.create(settings) -> BaseLLM`
-- **楠屾敹鏍囧噯**锛氬湪娴嬭瘯閲岀敤 Fake provider锛堟祴璇曞唴 stub锛夐獙璇佸伐鍘傝矾鐢遍€昏緫銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_llm_factory.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾婀ù瀣槸闁插瞼鏁?Fake provider閿涘牊绁寸拠鏇炲敶 stub閿涘鐛欑拠浣镐紣閸樺倽鐭鹃悽閬嶁偓鏄忕帆閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_llm_factory.py`閵?
 
-### B2锛欵mbedding 鎶借薄鎺ュ彛涓庡伐鍘?
-- **鐩爣**锛氬畾涔?`BaseEmbedding` 涓?`EmbeddingFactory`锛屾敮鎸佹壒閲?embed銆?
-- **淇敼鏂囦欢**锛?
+### B2閿涙mbedding 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseEmbedding` 娑?`EmbeddingFactory`閿涘本鏁幐浣瑰闁?embed閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/embedding/base_embedding.py`
   - `src/libs/embedding/embedding_factory.py`
   - `tests/unit/test_embedding_factory.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseEmbedding.embed(texts: list[str], trace: TraceContext | None = None) -> list[list[float]]`
   - `EmbeddingFactory.create(settings) -> BaseEmbedding`
-- **楠屾敹鏍囧噯**锛欶ake embedding 杩斿洖绋冲畾鍚戦噺锛屽伐鍘傛寜 provider 鍒嗘祦銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_embedding_factory.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙ake embedding 鏉╂柨娲栫粙鍐茬暰閸氭垿鍣洪敍灞戒紣閸樺倹瀵?provider 閸掑棙绁﹂妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_embedding_factory.py`閵?
 
-### B3锛歋plitter 鎶借薄鎺ュ彛涓庡伐鍘?
-- **鐩爣**锛氬畾涔?`BaseSplitter` 涓?`SplitterFactory`锛屾敮鎸佷笉鍚屽垏鍒嗙瓥鐣ワ紙Recursive/Semantic/Fixed锛夈€?
-- **淇敼鏂囦欢**锛?
+### B3閿涙瓔plitter 閹跺€熻杽閹恒儱褰涙稉搴′紣閸?
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseSplitter` 娑?`SplitterFactory`閿涘本鏁幐浣风瑝閸氬苯鍨忛崚鍡欑摜閻ｃ儻绱橰ecursive/Semantic/Fixed閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/splitter/base_splitter.py`
   - `src/libs/splitter/splitter_factory.py`
   - `tests/unit/test_splitter_factory.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseSplitter.split_text(text: str, trace: TraceContext | None = None) -> List[str]`
   - `SplitterFactory.create(settings) -> BaseSplitter`
-- **楠屾敹鏍囧噯**锛欶actory 鑳芥牴鎹厤缃繑鍥炰笉鍚岀被鍨嬬殑 Splitter 瀹炰緥锛堟祴璇曚腑鍙敤 Fake 瀹炵幇锛夈€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_splitter_factory.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙actory 閼宠姤鐗撮幑顕€鍘ょ純顔跨箲閸ョ偘绗夐崥宀€琚崹瀣畱 Splitter 鐎圭偘绶ラ敍鍫熺ゴ鐠囨洑鑵戦崣顖滄暏 Fake 鐎圭偟骞囬敍澶堚偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_splitter_factory.py`閵?
 
-### B4锛歏ectorStore 鎶借薄鎺ュ彛涓庡伐鍘傦紙鍏堝畾涔夊绾︼級
-- **鐩爣**锛氬畾涔?`BaseVectorStore` 涓?`VectorStoreFactory`锛屽厛涓嶆帴鐪熷疄 DB銆?
-- **淇敼鏂囦欢**锛?
+### B4閿涙瓘ectorStore 閹跺€熻杽閹恒儱褰涙稉搴′紣閸樺偊绱欓崗鍫濈暰娑斿顨栫痪锔肩礆
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseVectorStore` 娑?`VectorStoreFactory`閿涘苯鍘涙稉宥嗗复閻喎鐤?DB閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/vector_store/base_vector_store.py`
   - `src/libs/vector_store/vector_store_factory.py`
   - `tests/unit/test_vector_store_contract.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseVectorStore.upsert(records, trace: TraceContext | None = None)`
   - `BaseVectorStore.query(vector, top_k, filters, trace: TraceContext | None = None)`
-- **楠屾敹鏍囧噯**锛氬绾︽祴璇曪紙contract test锛夌害鏉熻緭鍏ヨ緭鍑?shape銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_vector_store_contract.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾顨栫痪锔界ゴ鐠囨洩绱檆ontract test閿涘瀹抽弶鐔荤翻閸忋儴绶崙?shape閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_vector_store_contract.py`閵?
 
-### B5锛歊eranker 鎶借薄鎺ュ彛涓庡伐鍘傦紙鍚?None 鍥為€€锛?
-- **鐩爣**锛氬疄鐜?`BaseReranker`銆乣RerankerFactory`锛屾彁渚?`NoneReranker` 浣滀负榛樿鍥為€€銆?
-- **淇敼鏂囦欢**锛?
+### B5閿涙瓓eranker 閹跺€熻杽閹恒儱褰涙稉搴′紣閸樺偊绱欓崥?None 閸ョ偤鈧偓閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`BaseReranker`閵嗕梗RerankerFactory`閿涘本褰佹笟?`NoneReranker` 娴ｆ粈璐熸妯款吇閸ョ偤鈧偓閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/reranker/base_reranker.py`
   - `src/libs/reranker/reranker_factory.py`
   - `tests/unit/test_reranker_factory.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseReranker.rerank(query, candidates, trace: TraceContext | None = None) -> ranked_candidates`
-  - `NoneReranker`锛堜繚鎸佸師椤哄簭锛?
-- **楠屾敹鏍囧噯**锛歜ackend=none 鏃朵笉浼氭敼鍙樻帓搴忥紱鏈煡 backend 鏄庣‘鎶ラ敊銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_reranker_factory.py`銆?
+  - `NoneReranker`閿涘牅绻氶幐浣稿斧妞ゅ搫绨敍?
+- **妤犲本鏁归弽鍥у櫙**閿涙瓬ackend=none 閺冩湹绗夋导姘暭閸欐ɑ甯撴惔蹇ョ幢閺堫亞鐓?backend 閺勫海鈥橀幎銉╂晩閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_reranker_factory.py`閵?
 
-### B6锛欵valuator 鎶借薄鎺ュ彛涓庡伐鍘傦紙鍏堝仛鑷畾涔夎交閲忔寚鏍囷級
-- **鐩爣**锛氬畾涔?`BaseEvaluator`銆乣EvaluatorFactory`锛屽疄鐜版渶灏?`CustomEvaluator`锛堜緥濡?hit_rate/mrr锛夈€?
-- **淇敼鏂囦欢**锛?
+### B6閿涙valuator 閹跺€熻杽閹恒儱褰涙稉搴′紣閸樺偊绱欓崗鍫濅粵閼奉亜鐣炬稊澶庝氦闁插繑瀵氶弽鍥风礆
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseEvaluator`閵嗕梗EvaluatorFactory`閿涘苯鐤勯悳鐗堟付鐏?`CustomEvaluator`閿涘牅绶ユ俊?hit_rate/mrr閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/evaluator/base_evaluator.py`
   - `src/libs/evaluator/evaluator_factory.py`
   - `src/libs/evaluator/custom_evaluator.py`
   - `tests/unit/test_custom_evaluator.py`
-- **楠屾敹鏍囧噯**锛氳緭鍏?query + retrieved_ids + golden_ids 鑳借緭鍑虹ǔ瀹?metrics銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_custom_evaluator.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙俺绶崗?query + retrieved_ids + golden_ids 閼冲€熺翻閸戣櫣菙鐎?metrics閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_custom_evaluator.py`閵?
 
-### B7锛氳ˉ榻?Libs 榛樿瀹炵幇锛堟媶鍒嗕负鈮?h鍙獙鏀跺閲忥級
+### B7閿涙俺藟姒?Libs 姒涙顓荤€圭偟骞囬敍鍫熷閸掑棔璐熼埉?h閸欘垶鐛欓弨璺侯杻闁插骏绱?
 
-> 璇存槑锛欱7 鍙ˉ榻愪笌绔埌绔富閾捐矾寮虹浉鍏崇殑榛樿瀹炵幇锛圠LM/Embedding/Splitter/VectorStore/Reranker锛夈€傚叾浣欏彲閫夋墿灞曪紙渚嬪棰濆 splitter 绛栫暐銆佹洿澶?vector store 鍚庣銆佹洿澶?evaluator 鍚庣绛夛級淇濇寔鍘熸帓鏈熶笉鎻愬墠銆?
+> 鐠囧瓨妲戦敍娆? 閸欘亣藟姒绘劒绗岀粩顖氬煂缁旑垯瀵岄柧鎹愮熅瀵櫣娴夐崗宕囨畱姒涙顓荤€圭偟骞囬敍鍦燣M/Embedding/Splitter/VectorStore/Reranker閿涘鈧倸鍙炬担娆忓讲闁澧跨仦鏇礄娓氬顩ф０婵嗩樆 splitter 缁涙牜鏆愰妴浣规纯婢?vector store 閸氬海顏妴浣规纯婢?evaluator 閸氬海顏粵澶涚礆娣囨繃瀵旈崢鐔稿笓閺堢喍绗夐幓鎰閵?
 
-### B7.1锛歄penAI-Compatible LLM锛圤penAI/Azure/DeepSeek锛?
-- **鐩爣**锛氳ˉ榻?OpenAI-compatible 鐨?LLM 瀹炵幇锛岀‘淇濋€氳繃 `LLMFactory` 鍙垱寤哄苟鍙 mock 娴嬭瘯銆?
-- **淇敼鏂囦欢**锛?
+### B7.1閿涙瓌penAI-Compatible LLM閿涘湦penAI/Azure/DeepSeek閿?
+- **閻╊喗鐖?*閿涙俺藟姒?OpenAI-compatible 閻?LLM 鐎圭偟骞囬敍宀€鈥樻穱婵嬧偓姘崇箖 `LLMFactory` 閸欘垰鍨卞鍝勮嫙閸欘垵顫?mock 濞村鐦妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/llm/openai_llm.py`
   - `src/libs/llm/azure_llm.py`
   - `src/libs/llm/deepseek_llm.py`
-  - `tests/unit/test_llm_providers_smoke.py`锛坢ock HTTP锛屼笉璧扮湡瀹炵綉缁滐級
-- **楠屾敹鏍囧噯**锛?
-  - 閰嶇疆涓嶅悓 `provider` 鏃跺伐鍘傝矾鐢辨纭€?
-  - `chat(messages)` 瀵硅緭鍏?shape 鏍￠獙娓呮櫚锛屽紓甯镐俊鎭彲璇伙紙鍖呭惈 provider 涓庨敊璇被鍨嬶級銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_llm_providers_smoke.py`銆?
+  - `tests/unit/test_llm_providers_smoke.py`閿涘潰ock HTTP閿涘奔绗夌挧鎵埂鐎圭偟缍夌紒婊愮礆
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 闁板秶鐤嗘稉宥呮倱 `provider` 閺冭泛浼愰崢鍌濈熅閻㈣鲸顒滅涵顔衡偓?
+  - `chat(messages)` 鐎电绶崗?shape 閺嶏繝鐛欏〒鍛珰閿涘苯绱撶敮闀愪繆閹垰褰茬拠浼欑礄閸栧懎鎯?provider 娑撳酣鏁婄拠顖滆閸ㄥ绱氶妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_llm_providers_smoke.py`閵?
 
-### B7.2锛歄llama LLM锛堟湰鍦板悗绔級
-- **鐩爣**锛氳ˉ榻?`ollama_llm.py`锛屾敮鎸佹湰鍦?HTTP endpoint锛堥粯璁?`base_url` + `model`锛夛紝骞跺彲琚?mock 娴嬭瘯銆?
-- **淇敼鏂囦欢**锛?
+### B7.2閿涙瓌llama LLM閿涘牊婀伴崷鏉挎倵缁旑垽绱?
+- **閻╊喗鐖?*閿涙俺藟姒?`ollama_llm.py`閿涘本鏁幐浣规拱閸?HTTP endpoint閿涘牓绮拋?`base_url` + `model`閿涘绱濋獮璺哄讲鐞?mock 濞村鐦妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/llm/ollama_llm.py`
-  - `tests/unit/test_ollama_llm.py`锛坢ock HTTP锛?
-- **楠屾敹鏍囧噯**锛?
-  - provider=ollama 鏃跺彲鐢?`LLMFactory` 鍒涘缓銆?
-  - 鍦ㄨ繛鎺ュけ璐?瓒呮椂绛夊満鏅笅锛屾姏鍑哄彲璇婚敊璇笖涓嶆硠闇叉晱鎰熼厤缃€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_ollama_llm.py`銆?
+  - `tests/unit/test_ollama_llm.py`閿涘潰ock HTTP閿?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=ollama 閺冭泛褰查悽?`LLMFactory` 閸掓稑缂撻妴?
+  - 閸︺劏绻涢幒銉ャ亼鐠?鐡掑懏妞傜粵澶婃簚閺咁垯绗呴敍灞惧閸戝搫褰茬拠濠氭晩鐠囶垯绗栨稉宥嗙闂囧弶鏅遍幇鐔煎帳缂冾喓鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_ollama_llm.py`閵?
 
-### B7.3锛歄penAI & Azure Embedding 瀹炵幇
-- **鐩爣**锛氳ˉ榻?`openai_embedding.py` 鍜?`azure_embedding.py`锛屾敮鎸?OpenAI 瀹樻柟 API 鍜?Azure OpenAI 鏈嶅姟鐨?Embedding 璋冪敤锛屾敮鎸佹壒閲?`embed(texts)`锛屽苟鍙 mock 娴嬭瘯銆?
-- **淇敼鏂囦欢**锛?
+### B7.3閿涙瓌penAI & Azure Embedding 鐎圭偟骞?
+- **閻╊喗鐖?*閿涙俺藟姒?`openai_embedding.py` 閸?`azure_embedding.py`閿涘本鏁幐?OpenAI 鐎规ɑ鏌?API 閸?Azure OpenAI 閺堝秴濮熼惃?Embedding 鐠嬪啰鏁ら敍灞炬暜閹镐焦澹掗柌?`embed(texts)`閿涘苯鑻熼崣顖濐潶 mock 濞村鐦妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/embedding/openai_embedding.py`
   - `src/libs/embedding/azure_embedding.py`
-  - `tests/unit/test_embedding_providers_smoke.py`锛坢ock HTTP锛屽寘鍚?OpenAI 鍜?Azure 娴嬭瘯鐢ㄤ緥锛?
-- **楠屾敹鏍囧噯**锛?
-  - provider=openai 鏃?`EmbeddingFactory` 鍙垱寤猴紝鏀寔 OpenAI 瀹樻柟 API 鐨?text-embedding-3-small/large 绛夋ā鍨嬨€?
-  - provider=azure 鏃?`EmbeddingFactory` 鍙垱寤猴紝姝ｇ‘澶勭悊 Azure 鐗规湁鐨?endpoint銆乤pi-version銆乤pi-key 閰嶇疆锛屾敮鎸?Azure 閮ㄧ讲鐨?text-embedding-ada-002 绛夋ā鍨嬨€?
-  - 绌鸿緭鍏ャ€佽秴闀胯緭鍏ユ湁鏄庣‘琛屼负锛堟姤閿欐垨鎴柇绛栫暐鐢遍厤缃喅瀹氾級銆?
-  - Azure 瀹炵幇澶嶇敤 OpenAI Embedding 鐨勬牳蹇冮€昏緫锛屼繚鎸佽涓轰竴鑷存€с€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_embedding_providers_smoke.py`銆?
+  - `tests/unit/test_embedding_providers_smoke.py`閿涘潰ock HTTP閿涘苯瀵橀崥?OpenAI 閸?Azure 濞村鐦悽銊ょ伐閿?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=openai 閺?`EmbeddingFactory` 閸欘垰鍨卞鐚寸礉閺€顖涘瘮 OpenAI 鐎规ɑ鏌?API 閻?text-embedding-3-small/large 缁涘膩閸ㄥ鈧?
+  - provider=azure 閺?`EmbeddingFactory` 閸欘垰鍨卞鐚寸礉濮濓絿鈥樻径鍕倞 Azure 閻楄婀侀惃?endpoint閵嗕工pi-version閵嗕工pi-key 闁板秶鐤嗛敍灞炬暜閹?Azure 闁劎璁查惃?text-embedding-ada-002 缁涘膩閸ㄥ鈧?
+  - 缁岄缚绶崗銉ｂ偓浣界Т闂€鑳翻閸忋儲婀侀弰搴ｂ€樼悰灞艰礋閿涘牊濮ら柨娆愬灗閹搭亝鏌囩粵鏍殣閻㈤亶鍘ょ純顔煎枀鐎规熬绱氶妴?
+  - Azure 鐎圭偟骞囨径宥囨暏 OpenAI Embedding 閻ㄥ嫭鐗宠箛鍐偓鏄忕帆閿涘奔绻氶幐浣筋攽娑撹桨绔撮懛瀛樷偓褋鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_embedding_providers_smoke.py`閵?
 
-### B7.4锛歄llama Embedding 瀹炵幇
-- **鐩爣**锛氳ˉ榻?`ollama_embedding.py`锛屾敮鎸侀€氳繃 Ollama HTTP API 璋冪敤鏈湴閮ㄧ讲鐨?Embedding 妯″瀷锛堝 `nomic-embed-text`銆乣mxbai-embed-large` 绛夛級锛屽疄鐜?`embed(texts)` 鎵归噺鍚戦噺鍖栧姛鑳姐€?
-- **淇敼鏂囦欢**锛?
+### B7.4閿涙瓌llama Embedding 鐎圭偟骞?
+- **閻╊喗鐖?*閿涙俺藟姒?`ollama_embedding.py`閿涘本鏁幐渚€鈧俺绻?Ollama HTTP API 鐠嬪啰鏁ら張顒€婀撮柈銊ц閻?Embedding 濡€崇€烽敍鍫濐洤 `nomic-embed-text`閵嗕梗mxbai-embed-large` 缁涘绱氶敍灞界杽閻?`embed(texts)` 閹靛綊鍣洪崥鎴﹀櫤閸栨牕濮涢懗濮愨偓?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/embedding/ollama_embedding.py`
-  - `tests/unit/test_ollama_embedding.py`锛堝寘鍚?mock HTTP 娴嬭瘯锛?
-- **楠屾敹鏍囧噯**锛?
-  - provider=ollama 鏃?`EmbeddingFactory` 鍙垱寤恒€?
-  - 鏀寔閰嶇疆 Ollama 鏈嶅姟鍦板潃锛堥粯璁?http://localhost:11434锛夊拰妯″瀷鍚嶇О銆?
-  - 杈撳嚭鍚戦噺缁村害鐢辨ā鍨嬪喅瀹氾紙濡?nomic-embed-text 涓?768 缁达級锛屾弧瓒?ingestion/retrieval 鐨勬帴鍙ｅ绾︺€?
-  - 鏀寔鎵归噺 `embed(texts)` 璋冪敤锛屽唴閮ㄥ鐞嗗崟鏉?鎵归噺璇锋眰閫昏緫銆?
-  - 绌鸿緭鍏ャ€佽秴闀胯緭鍏ユ湁鏄庣‘琛屼负锛堟姤閿欐垨鎴柇绛栫暐锛夈€?
-  - mock 娴嬭瘯瑕嗙洊姝ｅ父鍝嶅簲銆佽繛鎺ュけ璐ャ€佽秴鏃剁瓑鍦烘櫙銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_ollama_embedding.py`銆?
+  - `tests/unit/test_ollama_embedding.py`閿涘牆瀵橀崥?mock HTTP 濞村鐦敍?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=ollama 閺?`EmbeddingFactory` 閸欘垰鍨卞鎭掆偓?
+  - 閺€顖涘瘮闁板秶鐤?Ollama 閺堝秴濮熼崷鏉挎絻閿涘牓绮拋?http://localhost:11434閿涘鎷板Ο鈥崇€烽崥宥囆為妴?
+  - 鏉堟挸鍤崥鎴﹀櫤缂佹潙瀹抽悽杈侀崹瀣枀鐎规熬绱欐俊?nomic-embed-text 娑?768 缂佽揪绱氶敍灞惧姬鐡?ingestion/retrieval 閻ㄥ嫭甯撮崣锝咁殩缁撅负鈧?
+  - 閺€顖涘瘮閹靛綊鍣?`embed(texts)` 鐠嬪啰鏁ら敍灞藉敶闁劌顦╅悶鍡楀礋閺?閹靛綊鍣虹拠閿嬬湴闁槒绶妴?
+  - 缁岄缚绶崗銉ｂ偓浣界Т闂€鑳翻閸忋儲婀侀弰搴ｂ€樼悰灞艰礋閿涘牊濮ら柨娆愬灗閹搭亝鏌囩粵鏍殣閿涘鈧?
+  - mock 濞村鐦憰鍡欐磰濮濓絽鐖堕崫宥呯安閵嗕浇绻涢幒銉ャ亼鐠愩儯鈧浇绉撮弮鍓佺搼閸︾儤娅欓妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_ollama_embedding.py`閵?
 
-### B7.5锛歊ecursive Splitter 榛樿瀹炵幇
-- **鐩爣**锛氳ˉ榻?`recursive_splitter.py`锛屽皝瑁?LangChain 鐨勫垏鍒嗛€昏緫锛屼綔涓洪粯璁ゅ垏鍒嗗櫒銆?
-- **淇敼鏂囦欢**锛?
+### B7.5閿涙瓓ecursive Splitter 姒涙顓荤€圭偟骞?
+- **閻╊喗鐖?*閿涙俺藟姒?`recursive_splitter.py`閿涘苯鐨濈憗?LangChain 閻ㄥ嫬鍨忛崚鍡涒偓鏄忕帆閿涘奔缍旀稉娲帛鐠併倕鍨忛崚鍡楁珤閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/splitter/recursive_splitter.py`
   - `tests/unit/test_recursive_splitter_lib.py`
-- **楠屾敹鏍囧噯**锛?
-  - provider=recursive 鏃?`SplitterFactory` 鍙垱寤恒€?
-  - `split_text` 鑳芥纭鐞?Markdown 缁撴瀯锛堟爣棰?浠ｇ爜鍧椾笉琚墦鏂級銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_recursive_splitter_lib.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=recursive 閺?`SplitterFactory` 閸欘垰鍨卞鎭掆偓?
+  - `split_text` 閼宠姤顒滅涵顔碱槱閻?Markdown 缂佹挻鐎敍鍫熺垼妫?娴狅絿鐖滈崸妞剧瑝鐞氼偅澧﹂弬顓ㄧ礆閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_recursive_splitter_lib.py`閵?
 
-### B7.6锛欳hromaStore锛圴ectorStore 榛樿鍚庣锛?
-- **鐩爣**锛氳ˉ榻?`chroma_store.py`锛屾敮鎸佹渶灏?`upsert(records)` 涓?`query(vector, top_k, filters)`锛屽苟鏀寔鏈湴鎸佷箙鍖栫洰褰曪紙渚嬪 `data/db/chroma/`锛夈€?
-- **淇敼鏂囦欢**锛?
+### B7.6閿涙hromaStore閿涘湸ectorStore 姒涙顓婚崥搴ｎ伂閿?
+- **閻╊喗鐖?*閿涙俺藟姒?`chroma_store.py`閿涘本鏁幐浣规付鐏?`upsert(records)` 娑?`query(vector, top_k, filters)`閿涘苯鑻熼弨顖涘瘮閺堫剙婀撮幐浣风畽閸栨牜娲拌ぐ鏇礄娓氬顩?`data/db/chroma/`閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/vector_store/chroma_store.py`
   - `tests/integration/test_chroma_store_roundtrip.py`
-- **楠屾敹鏍囧噯**锛?
-  - provider=chroma 鏃?`VectorStoreFactory` 鍙垱寤恒€?
-  - **蹇呴』瀹屾垚瀹屾暣鐨?upsert鈫抭uery roundtrip 娴嬭瘯**锛氫娇鐢?mock 鏁版嵁瀹屾垚鐪熷疄鐨勫瓨鍌ㄥ拰妫€绱㈡祦绋嬶紝楠岃瘉杩斿洖缁撴灉鐨勭‘瀹氭€у拰姝ｇ‘鎬с€?
-  - 娴嬭瘯搴旇鐩栵細鍩烘湰 upsert銆佸悜閲忔煡璇€乼op_k 鍙傛暟銆乵etadata filters锛堝鏀寔锛夈€?
-  - 浣跨敤涓存椂鐩綍杩涜鎸佷箙鍖栨祴璇曪紝娴嬭瘯缁撴潫鍚庢竻鐞嗐€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_chroma_store_roundtrip.py`
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=chroma 閺?`VectorStoreFactory` 閸欘垰鍨卞鎭掆偓?
+  - **韫囧懘銆忕€瑰本鍨氱€瑰本鏆ｉ惃?upsert閳姯uery roundtrip 濞村鐦?*閿涙矮濞囬悽?mock 閺佺増宓佺€瑰本鍨氶惇鐔风杽閻ㄥ嫬鐡ㄩ崒銊ユ嫲濡偓缁便垺绁︾粙瀣剁礉妤犲矁鐦夋潻鏂挎礀缂佹挻鐏夐惃鍕€樼€规碍鈧冩嫲濮濓絿鈥橀幀褋鈧?
+  - 濞村鐦惔鏃囶洬閻╂牭绱伴崺鐑樻拱 upsert閵嗕礁鎮滈柌蹇旂叀鐠囶潿鈧辜op_k 閸欏倹鏆熼妴涔礶tadata filters閿涘牆顩ч弨顖涘瘮閿涘鈧?
+  - 娴ｈ法鏁ゆ稉瀛樻閻╊喖缍嶆潻娑滎攽閹镐椒绠欓崠鏍ㄧゴ鐠囨洩绱濆ù瀣槸缂佹挻娼崥搴㈢閻炲棎鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_chroma_store_roundtrip.py`
 
-### B7.7锛歀LM Reranker锛堣鍙?rerank prompt锛?
-- **鐩爣**锛氳ˉ榻?`llm_reranker.py`锛岃鍙?`config/prompts/rerank.txt` 鏋勯€?prompt锛堟祴璇曚腑鍙敞鍏ユ浛浠ｆ枃鏈級锛屽苟鍙湪澶辫触鏃惰繑鍥炲彲鍥為€€淇″彿銆?
-- **淇敼鏂囦欢**锛?
+### B7.7閿涙瓈LM Reranker閿涘牐顕伴崣?rerank prompt閿?
+- **閻╊喗鐖?*閿涙俺藟姒?`llm_reranker.py`閿涘矁顕伴崣?`config/prompts/rerank.txt` 閺嬪嫰鈧?prompt閿涘牊绁寸拠鏇氳厬閸欘垱鏁為崗銉︽禌娴狅絾鏋冮張顒婄礆閿涘苯鑻熼崣顖氭躬婢惰精瑙﹂弮鎯扮箲閸ョ偛褰查崶鐐衡偓鈧穱鈥冲娇閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/reranker/llm_reranker.py`
-  - `tests/unit/test_llm_reranker.py`锛坢ock LLM锛?
-- **楠屾敹鏍囧噯**锛?
-  - backend=llm 鏃?`RerankerFactory` 鍙垱寤恒€?
-  - 杈撳嚭涓ユ牸缁撴瀯鍖栵紙渚嬪 ranked ids锛夛紝涓嶆弧瓒?schema 鏃舵姏鍑哄彲璇婚敊璇€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_llm_reranker.py`銆?
+  - `tests/unit/test_llm_reranker.py`閿涘潰ock LLM閿?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - backend=llm 閺?`RerankerFactory` 閸欘垰鍨卞鎭掆偓?
+  - 鏉堟挸鍤稉銉︾壐缂佹挻鐎崠鏍电礄娓氬顩?ranked ids閿涘绱濇稉宥嗗姬鐡?schema 閺冭埖濮忛崙鍝勫讲鐠囧鏁婄拠顖樷偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_llm_reranker.py`閵?
 
-### B7.8锛欳ross-Encoder Reranker锛堟湰鍦?鎵樼妯″瀷锛屽崰浣嶅彲璺戯級
-- **鐩爣**锛氳ˉ榻?`cross_encoder_reranker.py`锛屾敮鎸佸 Top-M candidates 鎵撳垎鎺掑簭锛涙祴璇曚腑鐢?mock scorer 淇濊瘉 deterministic銆?
-- **淇敼鏂囦欢**锛?
+### B7.8閿涙ross-Encoder Reranker閿涘牊婀伴崷?閹垫顓稿Ο鈥崇€烽敍灞藉窗娴ｅ秴褰茬捄鎴礆
+- **閻╊喗鐖?*閿涙俺藟姒?`cross_encoder_reranker.py`閿涘本鏁幐浣割嚠 Top-M candidates 閹垫挸鍨庨幒鎺戠碍閿涙稒绁寸拠鏇氳厬閻?mock scorer 娣囨繆鐦?deterministic閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/reranker/cross_encoder_reranker.py`
-  - `tests/unit/test_cross_encoder_reranker.py`锛坢ock scorer锛?
-- **楠屾敹鏍囧噯**锛?
-  - backend=cross_encoder 鏃?`RerankerFactory` 鍙垱寤恒€?
-  - 鎻愪緵瓒呮椂/澶辫触鍥為€€淇″彿锛堜緵 Core 灞?`D6` fallback 浣跨敤锛夈€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_cross_encoder_reranker.py`銆?
+  - `tests/unit/test_cross_encoder_reranker.py`閿涘潰ock scorer閿?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - backend=cross_encoder 閺?`RerankerFactory` 閸欘垰鍨卞鎭掆偓?
+  - 閹绘劒绶电搾鍛/婢惰精瑙﹂崶鐐衡偓鈧穱鈥冲娇閿涘牅绶?Core 鐏?`D6` fallback 娴ｈ法鏁ら敍澶堚偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_cross_encoder_reranker.py`閵?
 
-### B8锛歏ision LLM 鎶借薄鎺ュ彛涓庡伐鍘傞泦鎴?
-- **鐩爣**锛氬畾涔?`BaseVisionLLM` 鎶借薄鎺ュ彛锛屾墿灞?`LLMFactory` 鏀寔 Vision LLM 鍒涘缓锛屼负 C7 鐨?ImageCaptioner 鎻愪緵搴曞眰鎶借薄銆?
-- **淇敼鏂囦欢**锛?
+### B8閿涙瓘ision LLM 閹跺€熻杽閹恒儱褰涙稉搴′紣閸樺倿娉﹂幋?
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseVisionLLM` 閹跺€熻杽閹恒儱褰涢敍灞惧⒖鐏?`LLMFactory` 閺€顖涘瘮 Vision LLM 閸掓稑缂撻敍灞艰礋 C7 閻?ImageCaptioner 閹绘劒绶垫惔鏇炵湴閹跺€熻杽閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/llm/base_vision_llm.py`
-  - `src/libs/llm/llm_factory.py`锛堟墿灞?`create_vision_llm` 鏂规硶锛?
+  - `src/libs/llm/llm_factory.py`閿涘牊澧跨仦?`create_vision_llm` 閺傝纭堕敍?
   - `tests/unit/test_vision_llm_factory.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseVisionLLM.chat_with_image(text: str, image_path: str | bytes, trace: TraceContext | None = None) -> ChatResponse`
   - `LLMFactory.create_vision_llm(settings) -> BaseVisionLLM`
-- **楠屾敹鏍囧噯**锛?
-  - 鎶借薄鎺ュ彛娓呮櫚瀹氫箟澶氭ā鎬佽緭鍏ワ紙鏂囨湰+鍥剧墖璺緞/base64锛夈€?
-  - 宸ュ巶鏂规硶 `create_vision_llm` 鑳芥牴鎹厤缃矾鐢卞埌涓嶅悓 provider锛堟祴璇曚腑鐢?Fake Vision LLM 楠岃瘉锛夈€?
-  - 鎺ュ彛璁捐鏀寔鍥剧墖棰勫鐞嗭紙鍘嬬缉銆佹牸寮忚浆鎹級鐨勬墿灞曠偣銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_vision_llm_factory.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 閹跺€熻杽閹恒儱褰涘〒鍛珰鐎规矮绠熸径姘侀幀浣界翻閸忋儻绱欓弬鍥ㄦ拱+閸ュ墽澧栫捄顖氱窞/base64閿涘鈧?
+  - 瀹搞儱宸堕弬瑙勭《 `create_vision_llm` 閼宠姤鐗撮幑顕€鍘ょ純顔跨熅閻㈠崬鍩屾稉宥呮倱 provider閿涘牊绁寸拠鏇氳厬閻?Fake Vision LLM 妤犲矁鐦夐敍澶堚偓?
+  - 閹恒儱褰涚拋鎹愵吀閺€顖涘瘮閸ュ墽澧栨０鍕槱閻炲棴绱欓崢瀣級閵嗕焦鐗稿蹇氭祮閹诡澁绱氶惃鍕⒖鐏炴洜鍋ｉ妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_vision_llm_factory.py`閵?
 
-### B9锛欰zure Vision LLM 瀹炵幇
-- **鐩爣**锛氬疄鐜?`AzureVisionLLM`锛屾敮鎸侀€氳繃 Azure OpenAI 璋冪敤 GPT-4o/GPT-4-Vision-Preview 杩涜鍥惧儚鐞嗚В銆?
-- **淇敼鏂囦欢**锛?
+### B9閿涙zure Vision LLM 鐎圭偟骞?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`AzureVisionLLM`閿涘本鏁幐渚€鈧俺绻?Azure OpenAI 鐠嬪啰鏁?GPT-4o/GPT-4-Vision-Preview 鏉╂稖顢戦崶鎯у剼閻炲棜袙閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/llm/azure_vision_llm.py`
-  - `tests/unit/test_azure_vision_llm.py`锛坢ock HTTP锛屼笉璧扮湡瀹?API锛?
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `AzureVisionLLM(BaseVisionLLM)`锛氬疄鐜?`chat_with_image` 鏂规硶
-  - 鏀寔 Azure 鐗规湁閰嶇疆锛歚azure_endpoint`, `api_version`, `deployment_name`, `api_key`
-- **楠屾敹鏍囧噯**锛?
-  - provider=azure 涓旈厤缃?vision_llm 鏃讹紝`LLMFactory.create_vision_llm()` 鍙垱寤?Azure Vision LLM 瀹炰緥銆?
-  - 鏀寔鍥剧墖璺緞鍜?base64 涓ょ杈撳叆鏂瑰紡銆?
-  - 鍥剧墖杩囧ぇ鏃惰嚜鍔ㄥ帇缂╄嚦 `max_image_size` 閰嶇疆鐨勫昂瀵革紙榛樿2048px锛夈€?
-  - API 璋冪敤澶辫触鏃舵姏鍑烘竻鏅伴敊璇紝鍖呭惈 Azure 鐗规湁閿欒鐮併€?
-  - mock 娴嬭瘯瑕嗙洊锛氭甯歌皟鐢ㄣ€佸浘鐗囧帇缂┿€佽秴鏃躲€佽璇佸け璐ョ瓑鍦烘櫙銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_azure_vision_llm.py`銆?
+  - `tests/unit/test_azure_vision_llm.py`閿涘潰ock HTTP閿涘奔绗夌挧鎵埂鐎?API閿?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `AzureVisionLLM(BaseVisionLLM)`閿涙艾鐤勯悳?`chat_with_image` 閺傝纭?
+  - 閺€顖涘瘮 Azure 閻楄婀侀柊宥囩枂閿涙瓪azure_endpoint`, `api_version`, `deployment_name`, `api_key`
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=azure 娑撴棃鍘ょ純?vision_llm 閺冭绱漙LLMFactory.create_vision_llm()` 閸欘垰鍨卞?Azure Vision LLM 鐎圭偘绶ラ妴?
+  - 閺€顖涘瘮閸ュ墽澧栫捄顖氱窞閸?base64 娑撱倗顫掓潏鎾冲弳閺傜懓绱￠妴?
+  - 閸ュ墽澧栨潻鍥с亣閺冩儼鍤滈崝銊ュ竾缂傗晞鍤?`max_image_size` 闁板秶鐤嗛惃鍕槀鐎甸潻绱欐妯款吇2048px閿涘鈧?
+  - API 鐠嬪啰鏁ゆ径杈Е閺冭埖濮忛崙鐑樼閺呬即鏁婄拠顖ょ礉閸栧懎鎯?Azure 閻楄婀侀柨娆掝嚖閻降鈧?
+  - mock 濞村鐦憰鍡欐磰閿涙碍顒滅敮姝岀殶閻劊鈧礁娴橀悧鍥у竾缂傗斂鈧浇绉撮弮韬测偓浣筋吇鐠囦礁銇戠拹銉х搼閸︾儤娅欓妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_azure_vision_llm.py`閵?
 
-### B9.1锛欴ashScope Vision LLM锛圦wen3.5-Plus锛夊疄鐜?
-- **鐩爣**锛氬疄鐜?`DashScopeVisionLLM`锛屾敮鎸侀€氳繃闃块噷浜戠櫨鐐硷紙DashScope锛夎皟鐢?`qwen3.5-plus` 杩涜鍥惧儚鐞嗚В锛岃ˉ榻愨€滃浗鍐?+ 鍥藉鍙屾ā鍨嬧€濇柟妗堜腑鐨勫浗鍐呴粯璁ゅ疄鐜般€?
-- **淇敼鏂囦欢**锛?
+### B9.1閿涙ashScope Vision LLM閿涘湨wen3.5-Plus閿涘鐤勯悳?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`DashScopeVisionLLM`閿涘本鏁幐渚€鈧俺绻冮梼鍧楀櫡娴滄垹娅ㄩ悙纭风礄DashScope閿涘鐨熼悽?`qwen3.5-plus` 鏉╂稖顢戦崶鎯у剼閻炲棜袙閿涘矁藟姒绘劏鈧粌娴楅崘?+ 閸ヨ棄顦婚崣灞灸侀崹瀣р偓婵囨煙濡楀牅鑵戦惃鍕禇閸愬懘绮拋銈呯杽閻滆埇鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/llm/dashscope_vision_llm.py`
-  - `src/libs/llm/llm_factory.py`锛坴ision provider 娉ㄥ唽 `dashscope`锛?
-  - `config/settings.yaml`锛堟柊澧?鏇存柊 `vision_llm.provider: dashscope` 绀轰緥閰嶇疆锛?
-  - `tests/unit/test_dashscope_vision_llm.py`锛坢ock HTTP锛屼笉璧扮湡瀹?API锛?
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `DashScopeVisionLLM(BaseVisionLLM)`锛氬疄鐜?`chat_with_image` 鏂规硶
-  - 鏀寔 DashScope 閰嶇疆锛歚base_url`, `api_key`, `model`, `timeout`, `max_image_size`
-- **楠屾敹鏍囧噯**锛?
-  - provider=dashscope 涓旈厤缃?vision_llm 鏃讹紝`LLMFactory.create_vision_llm()` 鍙垱寤?DashScope Vision LLM 瀹炰緥銆?
-  - 鏀寔鍥剧墖璺緞鍜?base64 涓ょ杈撳叆鏂瑰紡銆?
-  - 鍥剧墖杩囧ぇ鏃惰嚜鍔ㄥ帇缂╄嚦 `max_image_size` 閰嶇疆鐨勫昂瀵革紙榛樿2048px锛夈€?
-  - API 璋冪敤澶辫触鏃舵姏鍑烘竻鏅伴敊璇紙鍖呭惈 provider 涓庨敊璇被鍨?鐘舵€佺爜锛夈€?
-  - mock 娴嬭瘯瑕嗙洊锛氭甯歌皟鐢ㄣ€佸浘鐗囧帇缂┿€佽秴鏃躲€佽璇佸け璐ョ瓑鍦烘櫙銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_dashscope_vision_llm.py`銆?
+  - `src/libs/llm/llm_factory.py`閿涘澊ision provider 濞夈劌鍞?`dashscope`閿?
+  - `config/settings.yaml`閿涘牊鏌婃晶?閺囧瓨鏌?`vision_llm.provider: dashscope` 缁€杞扮伐闁板秶鐤嗛敍?
+  - `tests/unit/test_dashscope_vision_llm.py`閿涘潰ock HTTP閿涘奔绗夌挧鎵埂鐎?API閿?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `DashScopeVisionLLM(BaseVisionLLM)`閿涙艾鐤勯悳?`chat_with_image` 閺傝纭?
+  - 閺€顖涘瘮 DashScope 闁板秶鐤嗛敍姝歜ase_url`, `api_key`, `model`, `timeout`, `max_image_size`
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - provider=dashscope 娑撴棃鍘ょ純?vision_llm 閺冭绱漙LLMFactory.create_vision_llm()` 閸欘垰鍨卞?DashScope Vision LLM 鐎圭偘绶ラ妴?
+  - 閺€顖涘瘮閸ュ墽澧栫捄顖氱窞閸?base64 娑撱倗顫掓潏鎾冲弳閺傜懓绱￠妴?
+  - 閸ュ墽澧栨潻鍥с亣閺冩儼鍤滈崝銊ュ竾缂傗晞鍤?`max_image_size` 闁板秶鐤嗛惃鍕槀鐎甸潻绱欐妯款吇2048px閿涘鈧?
+  - API 鐠嬪啰鏁ゆ径杈Е閺冭埖濮忛崙鐑樼閺呬即鏁婄拠顖ょ礄閸栧懎鎯?provider 娑撳酣鏁婄拠顖滆閸?閻樿埖鈧胶鐖滈敍澶堚偓?
+  - mock 濞村鐦憰鍡欐磰閿涙碍顒滅敮姝岀殶閻劊鈧礁娴橀悧鍥у竾缂傗斂鈧浇绉撮弮韬测偓浣筋吇鐠囦礁銇戠拹銉х搼閸︾儤娅欓妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_dashscope_vision_llm.py`閵?
 
 ---
 
-## 闃舵 C锛欼ngestion Pipeline MVP锛堢洰鏍囷細鑳芥妸 PDF 鏍蜂緥鎽勫彇鍒版湰鍦板瓨鍌級
+## 闂冭埖顔?C閿涙ngestion Pipeline MVP閿涘牏娲伴弽鍥风窗閼宠姤濡?PDF 閺嶈渹绶ラ幗鍕絿閸掔増婀伴崷鏉跨摠閸岊煉绱?
 
-> 娉細鏈樁娈典弗鏍兼寜 5.4.1 鐨勭绾挎暟鎹祦钀藉湴锛屽苟浼樺厛瀹炵幇鈥滃閲忚烦杩囷紙SHA256锛夆€濄€?
+> 濞夘煉绱伴張顒勬▉濞堝吀寮楅弽鍏煎瘻 5.4.1 閻ㄥ嫮顬囩痪鎸庢殶閹诡喗绁﹂拃钘夋勾閿涘苯鑻熸导妯哄帥鐎圭偟骞囬垾婊冾杻闁插繗鐑︽潻鍥风礄SHA256閿涘鈧縿鈧?
 
-### C1锛氬畾涔夋牳蹇冩暟鎹被鍨?濂戠害锛圖ocument/Chunk/ChunkRecord锛?
-- **鐩爣**锛氬畾涔夊叏閾捐矾锛坕ngestion 鈫?retrieval 鈫?mcp tools锛夊叡鐢ㄧ殑鏁版嵁缁撴瀯/濂戠害锛岄伩鍏嶆暎钀藉湪鍚勫瓙妯″潡鍐呭鑷寸殑鑰﹀悎涓庨噸澶嶃€?
-- **淇敼鏂囦欢**锛?
+### C1閿涙艾鐣炬稊澶嬬壋韫囧啯鏆熼幑顔捐閸?婵傛垹瀹抽敍鍦杘cument/Chunk/ChunkRecord閿?
+- **閻╊喗鐖?*閿涙艾鐣炬稊澶婂弿闁炬崘鐭鹃敍鍧昻gestion 閳?retrieval 閳?mcp tools閿涘鍙￠悽銊ф畱閺佺増宓佺紒鎾寸€?婵傛垹瀹抽敍宀勪缉閸忓秵鏆庨拃钘夋躬閸氬嫬鐡欏Ο鈥虫健閸愬懎顕遍懛瀵告畱閼帮箑鎮庢稉搴ㄥ櫢婢跺秲鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/core/types.py`
-  - `src/core/__init__.py`锛堝彲閫夛細缁熶竴 re-export 浠ョ畝鍖栧鍏ヨ矾寰勶級
+  - `src/core/__init__.py`閿涘牆褰查柅澶涚窗缂佺喍绔?re-export 娴犮儳鐣濋崠鏍ь嚤閸忋儴鐭惧鍕剁礆
   - `tests/unit/test_core_types.py`
-- **瀹炵幇绫?鍑芥暟**锛堝缓璁級锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿涘牆缂撶拋顕嗙礆閿?
   - `Document(id, text, metadata)`
   - `Chunk(id, text, metadata, start_offset, end_offset, source_ref?)`
-  - `ChunkRecord(id, text, metadata, dense_vector?, sparse_vector?)`锛堢敤浜庡瓨鍌?妫€绱㈣浇浣擄紱瀛楁鎸夊悗缁?C8~C12 婕旇繘锛?
-- **楠屾敹鏍囧噯**锛?
-  - 绫诲瀷鍙簭鍒楀寲锛坉ict/json锛変笖瀛楁绋冲畾锛堝崟鍏冩祴璇曟柇瑷€锛夈€?
-  - `metadata` 绾﹀畾鏈€灏戝寘鍚?`source_path`锛屽叾浣欏瓧娈靛厑璁稿閲忔墿灞曚絾涓嶅緱鐮村潖鍏煎銆?
-  - **`metadata.images` 瀛楁瑙勮寖**锛堢敤浜庡妯℃€佹敮鎸侊級锛?
-    - 缁撴瀯锛歚List[{"id": str, "path": str, "page": int, "text_offset": int, "text_length": int, "position": dict}]`
-    - `id`锛氬叏灞€鍞竴鍥剧墖鏍囪瘑绗︼紙寤鸿鏍煎紡锛歚{doc_hash}_{page}_{seq}`锛?
-    - `path`锛氬浘鐗囨枃浠跺瓨鍌ㄨ矾寰勶紙绾﹀畾锛歚data/images/{collection}/{image_id}.png`锛?
-    - `page`锛氬浘鐗囧湪鍘熸枃妗ｄ腑鐨勯〉鐮侊紙鍙€夛紝閫傜敤浜嶱DF绛夊垎椤垫枃妗ｏ級
-    - `text_offset`锛氬崰浣嶇鍦?`Document.text` 涓殑璧峰瀛楃浣嶇疆锛堜粠0寮€濮嬭鏁帮級
-    - `text_length`锛氬崰浣嶇鐨勫瓧绗﹂暱搴︼紙閫氬父涓?`len("[IMAGE: {image_id}]")`锛?
-    - `position`锛氬浘鐗囧湪鍘熸枃妗ｄ腑鐨勭墿鐞嗕綅缃俊鎭紙鍙€夛紝濡侾DF鍧愭爣銆佸儚绱犱綅缃€佸昂瀵哥瓑锛?
-    - 璇存槑锛氶€氳繃 `text_offset` 鍜?`text_length` 鍙簿纭畾浣嶅浘鐗囧湪鏂囨湰涓殑浣嶇疆锛屾敮鎸佸悓涓€鍥剧墖澶氭鍑虹幇鐨勫満鏅?
-  - **鏂囨湰涓浘鐗囧崰浣嶇瑙勮寖**锛氬湪 `Document.text` 涓紝鍥剧墖浣嶇疆浣跨敤 `[IMAGE: {image_id}]` 鏍煎紡鏍囪銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_core_types.py`銆?
+  - `ChunkRecord(id, text, metadata, dense_vector?, sparse_vector?)`閿涘牏鏁ゆ禍搴＄摠閸?濡偓缁便垼娴囨担鎿勭幢鐎涙顔岄幐澶婃倵缂?C8~C12 濠曟棁绻橀敍?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 缁鐎烽崣顖氱碍閸掓瀵查敍鍧塱ct/json閿涘绗栫€涙顔岀粙鍐茬暰閿涘牆宕熼崗鍐╃ゴ鐠囨洘鏌囩懛鈧敍澶堚偓?
+  - `metadata` 缁撅箑鐣鹃張鈧亸鎴濆瘶閸?`source_path`閿涘苯鍙炬担娆忕摟濞堥潧鍘戠拋绋款杻闁插繑澧跨仦鏇氱稻娑撳秴绶遍惍鏉戞綎閸忕厧顔愰妴?
+  - **`metadata.images` 鐎涙顔岀憴鍕瘱**閿涘牏鏁ゆ禍搴☆樋濡剝鈧焦鏁幐渚婄礆閿?
+    - 缂佹挻鐎敍姝歀ist[{"id": str, "path": str, "page": int, "text_offset": int, "text_length": int, "position": dict}]`
+    - `id`閿涙艾鍙忕仦鈧崬顖欑閸ュ墽澧栭弽鍥槕缁楋讣绱欏楦款唴閺嶇厧绱￠敍姝歿doc_hash}_{page}_{seq}`閿?
+    - `path`閿涙艾娴橀悧鍥ㄦ瀮娴犺泛鐡ㄩ崒銊ㄧ熅瀵板嫸绱欑痪锕€鐣鹃敍姝歞ata/images/{collection}/{image_id}.png`閿?
+    - `page`閿涙艾娴橀悧鍥ф躬閸樼喐鏋冨锝勮厬閻ㄥ嫰銆夐惍渚婄礄閸欘垶鈧绱濋柅鍌滄暏娴滃侗DF缁涘鍨庢い鍨瀮濡楋綇绱?
+    - `text_offset`閿涙艾宕版担宥囶儊閸?`Document.text` 娑擃厾娈戠挧宄邦潗鐎涙顑佹担宥囩枂閿涘牅绮?瀵偓婵顓搁弫甯礆
+    - `text_length`閿涙艾宕版担宥囶儊閻ㄥ嫬鐡х粭锕傛毐鎼达讣绱欓柅姘埗娑?`len("[IMAGE: {image_id}]")`閿?
+    - `position`閿涙艾娴橀悧鍥ф躬閸樼喐鏋冨锝勮厬閻ㄥ嫮澧块悶鍡曠秴缂冾喕淇婇幁顖ょ礄閸欘垶鈧绱濇俊渚綝F閸ф劖鐖ｉ妴浣稿剼缁辩姳缍呯純顔衡偓浣告槀鐎靛摜鐡戦敍?
+    - 鐠囧瓨妲戦敍姘垛偓姘崇箖 `text_offset` 閸?`text_length` 閸欘垳绨跨涵顔肩暰娴ｅ秴娴橀悧鍥ф躬閺傚洦婀版稉顓犳畱娴ｅ秶鐤嗛敍灞炬暜閹镐礁鎮撴稉鈧崶鍓у婢舵碍顐奸崙铏瑰箛閻ㄥ嫬婧€閺?
+  - **閺傚洦婀版稉顓炴禈閻楀洤宕版担宥囶儊鐟欏嫯瀵?*閿涙艾婀?`Document.text` 娑擃叏绱濋崶鍓у娴ｅ秶鐤嗘担璺ㄦ暏 `[IMAGE: {image_id}]` 閺嶇厧绱￠弽鍥唶閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_core_types.py`閵?
 
-### C2锛氭枃浠跺畬鏁存€ф鏌ワ紙SHA256锛?
-- **鐩爣**锛氬湪Libs涓疄鐜?`file_integrity.py`锛氳绠楁枃浠?hash锛屽苟鎻愪緵鈥滄槸鍚﹁烦杩団€濈殑鍒ゅ畾鎺ュ彛锛堜娇鐢?SQLite 浣滀负榛樿瀛樺偍锛屾敮鎸佸悗缁浛鎹负 Redis/PostgreSQL锛夈€?
-- **淇敼鏂囦欢**锛?
+### C2閿涙碍鏋冩禒璺虹暚閺佸瓨鈧勵梾閺屻儻绱橲HA256閿?
+- **閻╊喗鐖?*閿涙艾婀狶ibs娑擃厼鐤勯悳?`file_integrity.py`閿涙俺顓哥粻妤佹瀮娴?hash閿涘苯鑻熼幓鎰返閳ユ粍妲搁崥锕佺儲鏉╁洠鈧繄娈戦崚銈呯暰閹恒儱褰涢敍鍫滃▏閻?SQLite 娴ｆ粈璐熸妯款吇鐎涙ê鍋嶉敍灞炬暜閹镐礁鎮楃紒顓熸禌閹诡澀璐?Redis/PostgreSQL閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/loader/file_integrity.py`
   - `tests/unit/test_file_integrity.py`
-  - 鏁版嵁搴撴枃浠讹細`data/db/ingestion_history.db`锛堣嚜鍔ㄥ垱寤猴級
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `FileIntegrityChecker` 绫伙紙鎶借薄鎺ュ彛锛?
-  - `SQLiteIntegrityChecker(FileIntegrityChecker)` 绫伙紙榛樿瀹炵幇锛?
+  - 閺佺増宓佹惔鎾存瀮娴犺绱癭data/db/ingestion_history.db`閿涘牐鍤滈崝銊ュ灡瀵ょ尨绱?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `FileIntegrityChecker` 缁紮绱欓幎鍊熻杽閹恒儱褰涢敍?
+  - `SQLiteIntegrityChecker(FileIntegrityChecker)` 缁紮绱欐妯款吇鐎圭偟骞囬敍?
     - `compute_sha256(path: str) -> str`
     - `should_skip(file_hash: str) -> bool`
     - `mark_success(file_hash: str, file_path: str, ...)`
     - `mark_failed(file_hash: str, error_msg: str)`
-- **楠屾敹鏍囧噯**锛?
-  - 鍚屼竴鏂囦欢澶氭璁＄畻hash缁撴灉涓€鑷?
-  - 鏍囪 success 鍚庯紝`should_skip` 杩斿洖 `True`
-  - 鏁版嵁搴撴枃浠舵纭垱寤哄湪 `data/db/ingestion_history.db`
-  - 鏀寔骞跺彂鍐欏叆锛圫QLite WAL妯″紡锛?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_file_integrity.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 閸氬奔绔撮弬鍥︽婢舵碍顐肩拋锛勭暬hash缂佹挻鐏夋稉鈧懛?
+  - 閺嶅洩顔?success 閸氬函绱漙should_skip` 鏉╂柨娲?`True`
+  - 閺佺増宓佹惔鎾存瀮娴犺埖顒滅涵顔煎灡瀵ゅ搫婀?`data/db/ingestion_history.db`
+  - 閺€顖涘瘮楠炶泛褰傞崘娆忓弳閿涘湯QLite WAL濡€崇础閿?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_file_integrity.py`閵?
 
-### C3锛歀oader 鎶借薄鍩虹被涓?PDF Loader 澹冲瓙
-- **鐩爣**锛氬湪Libs涓畾涔?`BaseLoader`锛屽苟瀹炵幇 `PdfLoader` 鐨勬渶灏忚涓恒€?
-- **淇敼鏂囦欢**锛?
+### C3閿涙瓈oader 閹跺€熻杽閸╄櫣琚稉?PDF Loader 婢瑰啿鐡?
+- **閻╊喗鐖?*閿涙艾婀狶ibs娑擃厼鐣炬稊?`BaseLoader`閿涘苯鑻熺€圭偟骞?`PdfLoader` 閻ㄥ嫭娓剁亸蹇氼攽娑撴亽鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/libs/loader/base_loader.py`
   - `src/libs/loader/pdf_loader.py`
   - `tests/unit/test_loader_pdf_contract.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseLoader.load(path) -> Document`
   - `PdfLoader.load(path)`
-- **楠屾敹鏍囧噯**锛?
-  - **鍩虹瑕佹眰**锛氬 sample PDF锛坒ixtures锛夎兘浜у嚭 Document锛宮etadata 鑷冲皯鍚?`source_path`銆?
-  - **鍥剧墖澶勭悊瑕佹眰**锛堥伒寰?C1 瀹氫箟鐨勫绾︼級锛?
-    - 鑻?PDF 鍖呭惈鍥剧墖锛屽簲鎻愬彇鍥剧墖骞朵繚瀛樺埌 `data/images/{doc_hash}/` 鐩綍
-    - 鍦?`Document.text` 涓紝鍥剧墖浣嶇疆鎻掑叆鍗犱綅绗︼細`[IMAGE: {image_id}]`
-    - 鍦?`metadata.images` 涓褰曞浘鐗囦俊鎭紙鏍煎紡瑙?C1 瑙勮寖锛?
-    - 鑻?PDF 鏃犲浘鐗囷紝`metadata.images` 鍙负绌哄垪琛ㄦ垨鐪佺暐璇ュ瓧娈?
-  - **闄嶇骇琛屼负**锛氬浘鐗囨彁鍙栧け璐ヤ笉搴旈樆濉炴枃鏈В鏋愶紝鍙湪鏃ュ織涓褰曡鍛娿€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_loader_pdf_contract.py`銆?
-- **娴嬭瘯寤鸿**锛?
-  - 鍑嗗涓や釜娴嬭瘯鏂囦欢锛歚simple.pdf`锛堢函鏂囨湰锛夊拰 `with_images.pdf`锛堝寘鍚浘鐗囷級
-  - 楠岃瘉绾枃鏈琍DF鑳芥甯歌В鏋?
-  - 楠岃瘉甯﹀浘鐗嘝DF鑳芥彁鍙栧浘鐗囧苟姝ｇ‘鎻掑叆鍗犱綅绗?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - **閸╄櫣顢呯憰浣圭湴**閿涙艾顕?sample PDF閿涘潚ixtures閿涘鍏樻禍褍鍤?Document閿涘etadata 閼峰啿鐨崥?`source_path`閵?
+  - **閸ュ墽澧栨径鍕倞鐟曚焦鐪?*閿涘牓浼掑?C1 鐎规矮绠熼惃鍕殩缁撅讣绱氶敍?
+    - 閼?PDF 閸栧懎鎯堥崶鍓у閿涘苯绨查幓鎰絿閸ュ墽澧栭獮鏈电箽鐎涙ê鍩?`data/images/{doc_hash}/` 閻╊喖缍?
+    - 閸?`Document.text` 娑擃叏绱濋崶鍓у娴ｅ秶鐤嗛幓鎺戝弳閸楃姳缍呯粭锔肩窗`[IMAGE: {image_id}]`
+    - 閸?`metadata.images` 娑擃叀顔囪ぐ鏇炴禈閻楀洣淇婇幁顖ょ礄閺嶇厧绱＄憴?C1 鐟欏嫯瀵栭敍?
+    - 閼?PDF 閺冪姴娴橀悧鍥风礉`metadata.images` 閸欘垯璐熺粚鍝勫灙鐞涖劍鍨ㄩ惇浣烘殣鐠囥儱鐡у▓?
+  - **闂勫秶楠囩悰灞艰礋**閿涙艾娴橀悧鍥ㄥ絹閸欐牕銇戠拹銉ょ瑝鎼存棃妯嗘繅鐐存瀮閺堫剝袙閺嬫劧绱濋崣顖氭躬閺冦儱绻旀稉顓☆唶瑜版洝顒熼崨濞库偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_loader_pdf_contract.py`閵?
+- **濞村鐦楦款唴**閿?
+  - 閸戝棗顦稉銈勯嚋濞村鐦弬鍥︽閿涙瓪simple.pdf`閿涘牏鍑介弬鍥ㄦ拱閿涘鎷?`with_images.pdf`閿涘牆瀵橀崥顐㈡禈閻楀浄绱?
+  - 妤犲矁鐦夌痪顖涙瀮閺堢悕DF閼宠姤顒滅敮姝屝掗弸?
+  - 妤犲矁鐦夌敮锕€娴橀悧鍢滵F閼宠姤褰侀崣鏍ф禈閻楀洤鑻熷锝団€橀幓鎺戝弳閸楃姳缍呯粭?
 
-### C4锛歋plitter 闆嗘垚锛堣皟鐢?Libs锛?
-- **鐩爣**锛氬疄鐜?Chunking 妯″潡浣滀负 `libs.splitter` 鍜?Ingestion Pipeline 涔嬮棿鐨?*閫傞厤鍣ㄥ眰**锛屽畬鎴?Document鈫扖hunks 鐨勪笟鍔″璞¤浆鎹€?
-- **鏍稿績鑱岃矗锛圖ocumentChunker 鐩告瘮 libs.splitter 鐨勫鍊硷級**锛?
-  - **鑱岃矗杈圭晫璇存槑**锛?
-    - `libs.splitter`锛氱函鏂囨湰鍒囧垎宸ュ叿锛坄str 鈫?List[str]`锛夛紝涓嶆秹鍙婁笟鍔″璞?
-    - `DocumentChunker`锛氫笟鍔￠€傞厤鍣紙`Document瀵硅薄 鈫?List[Chunk瀵硅薄]`锛夛紝娣诲姞涓氬姟閫昏緫
-  - **6 涓鍊煎姛鑳?*锛?
-    1. **Chunk ID 鐢熸垚**锛氫负姣忎釜鏂囨湰鐗囨鐢熸垚鍞竴涓旂‘瀹氭€х殑 ID锛堟牸寮忥細`{doc_id}_{index:04d}_{hash_8chars}`锛?
-    2. **鍏冩暟鎹户鎵?*锛氬皢 Document.metadata 澶嶅埗鍒版瘡涓?Chunk.metadata锛坰ource_path, doc_type, title 绛夛級
-    3. **娣诲姞 chunk_index**锛氳褰?chunk 鍦ㄦ枃妗ｄ腑鐨勫簭鍙凤紙浠?0 寮€濮嬶級锛岀敤浜庢帓搴忓拰瀹氫綅
-    4. **寤虹珛 source_ref**锛氳褰?Chunk.source_ref 鎸囧悜鐖?Document.id锛屾敮鎸佹函婧?
-    5. **鍥剧墖寮曠敤鎸夐渶鍒嗗彂**锛氭壂鎻忔瘡涓?chunk 鏂囨湰涓殑 `[IMAGE: {id}]` 鍗犱綅绗︼紝浠?`Document.metadata["images"]` 涓彁鍙栬 chunk 瀹為檯寮曠敤鐨?ImageRef锛屽啓鍏?`chunk.metadata["images"]`锛堜粎鍚 chunk 寮曠敤鐨勫瓙闆嗭級鍜?`chunk.metadata["image_refs"]`锛坕mage_id 鍒楄〃锛夈€傛棤鍗犱綅绗︾殑 chunk 涓嶅惈 `images` 瀛楁銆傗殸锔?涓嶅彲绠€鍗曟暣浣撶户鎵挎垨涓㈠純鏂囨。绾?`images`锛屽惁鍒欎笅娓?C7 ImageCaptioner 灏嗘棤娉曞畾浣嶅浘鐗囪矾寰勩€?
-    6. **绫诲瀷杞崲**锛氬皢 libs.splitter 鐨?`List[str]` 杞崲涓虹鍚?core.types 濂戠害鐨?`List[Chunk]` 瀵硅薄
-- **淇敼鏂囦欢**锛?
+### C4閿涙瓔plitter 闂嗗棙鍨氶敍鍫ｇ殶閻?Libs閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?Chunking 濡€虫健娴ｆ粈璐?`libs.splitter` 閸?Ingestion Pipeline 娑斿妫块惃?*闁倿鍘ら崳銊ョ湴**閿涘苯鐣幋?Document閳墫hunks 閻ㄥ嫪绗熼崝鈥愁嚠鐠灺ゆ祮閹诡潿鈧?
+- **閺嶇绺鹃懕宀冪煑閿涘湒ocumentChunker 閻╁憡鐦?libs.splitter 閻ㄥ嫬顤冮崐纭风礆**閿?
+  - **閼卞矁鐭楁潏鍦櫕鐠囧瓨妲?*閿?
+    - `libs.splitter`閿涙氨鍑介弬鍥ㄦ拱閸掑洤鍨庡銉ュ徔閿涘潉str 閳?List[str]`閿涘绱濇稉宥嗙Ч閸欏﹣绗熼崝鈥愁嚠鐠?
+    - `DocumentChunker`閿涙矮绗熼崝锟犫偓鍌炲帳閸ｎ煉绱檂Document鐎电钖?閳?List[Chunk鐎电钖刔`閿涘绱濆ǎ璇插娑撴艾濮熼柅鏄忕帆
+  - **6 娑擃亜顤冮崐鐓庡閼?*閿?
+    1. **Chunk ID 閻㈢喐鍨?*閿涙矮璐熷В蹇庨嚋閺傚洦婀伴悧鍥唽閻㈢喐鍨氶崬顖欑娑撴梻鈥樼€规碍鈧呮畱 ID閿涘牊鐗稿蹇ョ窗`{doc_id}_{index:04d}_{hash_8chars}`閿?
+    2. **閸忓啯鏆熼幑顔炬埛閹?*閿涙艾鐨?Document.metadata 婢跺秴鍩楅崚鐗堢槨娑?Chunk.metadata閿涘澃ource_path, doc_type, title 缁涘绱?
+    3. **濞ｈ濮?chunk_index**閿涙俺顔囪ぐ?chunk 閸︺劍鏋冨锝勮厬閻ㄥ嫬绨崣鍑ょ礄娴?0 瀵偓婵绱氶敍宀€鏁ゆ禍搴㈠笓鎼村繐鎷扮€规矮缍?
+    4. **瀵よ櫣鐝?source_ref**閿涙俺顔囪ぐ?Chunk.source_ref 閹稿洤鎮滈悥?Document.id閿涘本鏁幐浣瑰嚱濠?
+    5. **閸ュ墽澧栧鏇犳暏閹稿娓堕崚鍡楀絺**閿涙碍澹傞幓蹇旂槨娑?chunk 閺傚洦婀版稉顓犳畱 `[IMAGE: {id}]` 閸楃姳缍呯粭锔肩礉娴?`Document.metadata["images"]` 娑擃厽褰侀崣鏍嚉 chunk 鐎圭偤妾鏇犳暏閻?ImageRef閿涘苯鍟撻崗?`chunk.metadata["images"]`閿涘牅绮庨崥顐ヮ嚉 chunk 瀵洜鏁ら惃鍕摍闂嗗棴绱氶崪?`chunk.metadata["image_refs"]`閿涘潟mage_id 閸掓銆冮敍澶堚偓鍌涙￥閸楃姳缍呯粭锔炬畱 chunk 娑撳秴鎯?`images` 鐎涙顔岄妴鍌楁閿?娑撳秴褰茬粻鈧崡鏇熸殻娴ｆ挾鎴烽幍鎸庡灗娑撱垹绱旈弬鍥ㄣ€傜痪?`images`閿涘苯鎯侀崚娆庣瑓濞?C7 ImageCaptioner 鐏忓棙妫ゅ▔鏇炵暰娴ｅ秴娴橀悧鍥熅瀵板嫨鈧?
+    6. **缁鐎锋潪顒佸床**閿涙艾鐨?libs.splitter 閻?`List[str]` 鏉烆剚宕叉稉铏诡儊閸?core.types 婵傛垹瀹抽惃?`List[Chunk]` 鐎电钖?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/chunking/document_chunker.py`
   - `src/ingestion/chunking/__init__.py`
   - `tests/unit/test_document_chunker.py`
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `DocumentChunker` 绫?
-  - `__init__(settings: Settings)`锛氶€氳繃 SplitterFactory 鑾峰彇閰嶇疆鐨?splitter 瀹炰緥
-  - `split_document(document: Document) -> List[Chunk]`锛氬畬鏁寸殑杞崲娴佺▼
-  - `_generate_chunk_id(doc_id: str, index: int, text: str) -> str`锛氱敓鎴愮ǔ瀹?Chunk ID
-  - `_inherit_metadata(document: Document, chunk_index: int, chunk_text: str) -> dict`锛氬厓鏁版嵁缁ф壙 + 鍥剧墖寮曠敤鎸夐渶鍒嗗彂閫昏緫锛堥渶瑕?chunk_text 鏉ユ壂鎻?`[IMAGE: id]` 鍗犱綅绗︼級
-- **楠屾敹鏍囧噯**锛?
-  - **閰嶇疆椹卞姩**锛氶€氳繃淇敼 settings.yaml 涓殑 splitter 閰嶇疆锛堝 chunk_size锛夛紝浜у嚭鐨?chunk 鏁伴噺鍜岄暱搴﹀彂鐢熺浉搴斿彉鍖?
-  - **ID 鍞竴鎬?*锛氭瘡涓?Chunk 鐨?ID 鍦ㄦ暣涓枃妗ｄ腑鍞竴
-  - **ID 纭畾鎬?*锛氬悓涓€ Document 瀵硅薄閲嶅鍒囧垎浜х敓鐩稿悓鐨?Chunk ID 搴忓垪
-  - **鍏冩暟鎹畬鏁存€?*锛欳hunk.metadata 鍖呭惈鎵€鏈?Document.metadata 瀛楁 + chunk_index 瀛楁
-  - **鍥剧墖鍒嗗彂姝ｇ‘鎬?*锛氬惈 `[IMAGE: id]` 鍗犱綅绗︾殑 chunk 鍏?`metadata["images"]` 浠呭寘鍚 chunk 寮曠敤鐨勫浘鐗囧瓙闆嗭紱涓嶅惈鍗犱綅绗︾殑 chunk 鏃?`images` 瀛楁锛沗metadata["image_refs"]` 鍒楄〃涓庡崰浣嶇涓€鑷?
-  - **婧簮閾炬帴**锛氭墍鏈?Chunk.source_ref 姝ｇ‘鎸囧悜鐖?Document.id
-  - **绫诲瀷濂戠害**锛氳緭鍑虹殑 Chunk 瀵硅薄绗﹀悎 `core/types.py` 涓殑 Chunk 瀹氫箟锛堝彲搴忓垪鍖栥€佸瓧娈靛畬鏁达級
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_document_chunker.py`锛堜娇鐢?FakeSplitter 闅旂娴嬭瘯锛屾棤闇€鐪熷疄 LLM/澶栭儴渚濊禆锛夈€?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `DocumentChunker` 缁?
+  - `__init__(settings: Settings)`閿涙岸鈧俺绻?SplitterFactory 閼惧嘲褰囬柊宥囩枂閻?splitter 鐎圭偘绶?
+  - `split_document(document: Document) -> List[Chunk]`閿涙艾鐣弫瀵告畱鏉烆剚宕插ù浣衡柤
+  - `_generate_chunk_id(doc_id: str, index: int, text: str) -> str`閿涙氨鏁撻幋鎰旂€?Chunk ID
+  - `_inherit_metadata(document: Document, chunk_index: int, chunk_text: str) -> dict`閿涙艾鍘撻弫鐗堝祦缂佈勫 + 閸ュ墽澧栧鏇犳暏閹稿娓堕崚鍡楀絺闁槒绶敍鍫ユ付鐟?chunk_text 閺夈儲澹傞幓?`[IMAGE: id]` 閸楃姳缍呯粭锔肩礆
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - **闁板秶鐤嗘す鍗炲З**閿涙岸鈧俺绻冩穱顔芥暭 settings.yaml 娑擃厾娈?splitter 闁板秶鐤嗛敍鍫濐洤 chunk_size閿涘绱濇禍褍鍤惃?chunk 閺佷即鍣洪崪宀勬毐鎼达箑褰傞悽鐔烘祲鎼存柨褰夐崠?
+  - **ID 閸烆垯绔撮幀?*閿涙碍鐦℃稉?Chunk 閻?ID 閸︺劍鏆ｆ稉顏呮瀮濡楋絼鑵戦崬顖欑
+  - **ID 绾喖鐣鹃幀?*閿涙艾鎮撴稉鈧?Document 鐎电钖勯柌宥咁槻閸掑洤鍨庢禍褏鏁撻惄绋挎倱閻?Chunk ID 鎼村繐鍨?
+  - **閸忓啯鏆熼幑顔肩暚閺佸瓨鈧?*閿涙hunk.metadata 閸栧懎鎯堥幍鈧張?Document.metadata 鐎涙顔?+ chunk_index 鐎涙顔?
+  - **閸ュ墽澧栭崚鍡楀絺濮濓絿鈥橀幀?*閿涙艾鎯?`[IMAGE: id]` 閸楃姳缍呯粭锔炬畱 chunk 閸?`metadata["images"]` 娴犲懎瀵橀崥顐ヮ嚉 chunk 瀵洜鏁ら惃鍕禈閻楀洤鐡欓梿鍡幢娑撳秴鎯堥崡鐘辩秴缁楋妇娈?chunk 閺?`images` 鐎涙顔岄敍娌梞etadata["image_refs"]` 閸掓銆冩稉搴″窗娴ｅ秶顑佹稉鈧懛?
+  - **濠ь垱绨柧鐐复**閿涙碍澧嶉張?Chunk.source_ref 濮濓絿鈥橀幐鍥ф倻閻?Document.id
+  - **缁鐎锋總鎴犲**閿涙俺绶崙铏规畱 Chunk 鐎电钖勭粭锕€鎮?`core/types.py` 娑擃厾娈?Chunk 鐎规矮绠熼敍鍫濆讲鎼村繐鍨崠鏍モ偓浣哥摟濞堥潧鐣弫杈剧礆
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_document_chunker.py`閿涘牅濞囬悽?FakeSplitter 闂呮梻顬囧ù瀣槸閿涘本妫ら棁鈧惇鐔风杽 LLM/婢舵牠鍎存笟婵婄閿涘鈧?
 
-### C5锛歍ransform 鎶借薄鍩虹被 + ChunkRefiner锛堣鍒欏幓鍣?+ LLM 澧炲己锛?
-- **鐩爣**锛氬畾涔?`BaseTransform`锛涘疄鐜?`ChunkRefiner`锛氬厛鍋氳鍒欏幓鍣紝鍐嶉€氳繃LLM杩涜鏅鸿兘澧炲己锛屽苟鎻愪緵澶辫触闄嶇骇鏈哄埗锛圠LM寮傚父鏃跺洖閫€鍒拌鍒欑粨鏋滐紝涓嶉樆濉?ingestion锛夈€?
-- **鍓嶇疆鏉′欢**锛堝繀椤诲噯澶囷級锛?
-  - **蹇呴』閰嶇疆LLM**锛氬湪 `config/settings.yaml` 涓厤缃彲鐢ㄧ殑LLM锛坧rovider/model/api_key锛?
-  - **鐜鍙橀噺**锛氳缃搴旂殑API key鐜鍙橀噺锛坄OPENAI_API_KEY`/`OLLAMA_BASE_URL`绛夛級
-  - **楠岃瘉鐩殑**锛氶€氳繃鐪熷疄LLM娴嬭瘯楠岃瘉閰嶇疆姝ｇ‘鎬у拰refinement鏁堟灉
-- **淇敼鏂囦欢**锛?
-  - `src/ingestion/transform/base_transform.py`锛堟柊澧烇級
-  - `src/ingestion/transform/chunk_refiner.py`锛堟柊澧烇級
-  - `src/core/trace/trace_context.py`锛堟柊澧烇細鏈€灏忓疄鐜帮紝Phase F 瀹屽杽锛?
-  - `config/prompts/chunk_refinement.txt`锛堝凡瀛樺湪锛岄渶楠岃瘉鍐呭骞惰ˉ鍏?{text} 鍗犱綅绗︼級
-  - `tests/fixtures/noisy_chunks.json`锛堟柊澧烇細8涓吀鍨嬪櫔澹板満鏅級
-  - `tests/unit/test_chunk_refiner.py`锛堟柊澧烇細27涓崟鍏冩祴璇曪級
-  - `tests/integration/test_chunk_refiner_llm.py`锛堟柊澧烇細鐪熷疄LLM闆嗘垚娴嬭瘯锛?
-- **瀹炵幇绫?鍑芥暟**锛?
+### C5閿涙瓖ransform 閹跺€熻杽閸╄櫣琚?+ ChunkRefiner閿涘牐顫夐崚娆忓箵閸?+ LLM 婢х偛宸遍敍?
+- **閻╊喗鐖?*閿涙艾鐣炬稊?`BaseTransform`閿涙稑鐤勯悳?`ChunkRefiner`閿涙艾鍘涢崑姘愁潐閸掓瑥骞撻崳顏庣礉閸愬秹鈧俺绻僉LM鏉╂稖顢戦弲楦垮厴婢х偛宸遍敍灞借嫙閹绘劒绶垫径杈Е闂勫秶楠囬張鍝勫煑閿涘湢LM瀵倸鐖堕弮璺烘礀闁偓閸掓媽顫夐崚娆戠波閺嬫粣绱濇稉宥夋▎婵?ingestion閿涘鈧?
+- **閸撳秶鐤嗛弶鈥叉**閿涘牆绻€妞よ鍣径鍥风礆閿?
+  - **韫囧懘銆忛柊宥囩枂LLM**閿涙艾婀?`config/settings.yaml` 娑擃參鍘ょ純顔煎讲閻劎娈慙LM閿涘潷rovider/model/api_key閿?
+  - **閻滎垰顣ㄩ崣姗€鍣?*閿涙俺顔曠純顔碱嚠鎼存梻娈慉PI key閻滎垰顣ㄩ崣姗€鍣洪敍鍧凮PENAI_API_KEY`/`OLLAMA_BASE_URL`缁涘绱?
+  - **妤犲矁鐦夐惄顔炬畱**閿涙岸鈧俺绻冮惇鐔风杽LLM濞村鐦宀冪槈闁板秶鐤嗗锝団€橀幀褍鎷皉efinement閺佸牊鐏?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/ingestion/transform/base_transform.py`閿涘牊鏌婃晶鐑囩礆
+  - `src/ingestion/transform/chunk_refiner.py`閿涘牊鏌婃晶鐑囩礆
+  - `src/core/trace/trace_context.py`閿涘牊鏌婃晶鐑囩窗閺堚偓鐏忓繐鐤勯悳甯礉Phase F 鐎瑰苯鏉介敍?
+  - `config/prompts/chunk_refinement.txt`閿涘牆鍑＄€涙ê婀敍宀勬付妤犲矁鐦夐崘鍛啇楠炴儼藟閸?{text} 閸楃姳缍呯粭锔肩礆
+  - `tests/fixtures/noisy_chunks.json`閿涘牊鏌婃晶鐑囩窗8娑擃亜鍚€閸ㄥ娅旀竟鏉挎簚閺咁垽绱?
+  - `tests/unit/test_chunk_refiner.py`閿涘牊鏌婃晶鐑囩窗27娑擃亜宕熼崗鍐╃ゴ鐠囨洩绱?
+  - `tests/integration/test_chunk_refiner_llm.py`閿涘牊鏌婃晶鐑囩窗閻喎鐤凩LM闂嗗棙鍨氬ù瀣槸閿?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `BaseTransform.transform(chunks, trace) -> List[Chunk]`
   - `ChunkRefiner.__init__(settings, llm?, prompt_path?)`
   - `ChunkRefiner.transform(chunks, trace) -> List[Chunk]`
-  - `ChunkRefiner._rule_based_refine(text) -> str`锛堝幓绌虹櫧/椤电湁椤佃剼/鏍煎紡鏍囪/HTML娉ㄩ噴锛?
-  - `ChunkRefiner._llm_refine(text, trace) -> str | None`锛堝彲閫?LLM 閲嶅啓锛屽け璐ヨ繑鍥?None锛?
-  - `ChunkRefiner._load_prompt(prompt_path?)`锛堜粠鏂囦欢鍔犺浇prompt妯℃澘锛屾敮鎸侀粯璁allback锛?
-- **瀹炵幇娴佺▼寤鸿**锛?
-  1. 鍏堝垱寤?`tests/fixtures/noisy_chunks.json`锛屽寘鍚?涓吀鍨嬪櫔澹板満鏅細
-     - typical_noise_scenario: 缁煎悎鍣０锛堥〉鐪?椤佃剼/绌虹櫧锛?
-     - ocr_errors: OCR閿欒鏂囨湰
-     - page_header_footer: 椤电湁椤佃剼妯″紡
-     - excessive_whitespace: 澶氫綑绌虹櫧
-     - format_markers: HTML/Markdown鏍囪
-     - clean_text: 骞插噣鏂囨湰锛堥獙璇佷笉杩囧害娓呯悊锛?
-     - code_blocks: 浠ｇ爜鍧楋紙楠岃瘉淇濈暀鍐呴儴鏍煎紡锛?
-     - mixed_noise: 鐪熷疄娣峰悎鍦烘櫙
-  2. 鍒涘缓 `TraceContext` 鍗犱綅瀹炵幇锛坲uid鐢熸垚trace_id锛宺ecord_stage瀛樺偍闃舵鏁版嵁锛?
-  3. 瀹炵幇 `BaseTransform` 鎶借薄鎺ュ彛
-  4. 瀹炵幇 `ChunkRefiner._rule_based_refine` 瑙勫垯鍘诲櫔閫昏緫锛堟鍒欏尮閰?鍒嗘澶勭悊锛?
-  5. 缂栧啓瑙勫垯妯″紡鍗曞厓娴嬭瘯锛堜娇鐢?fixtures 鏂█娓呮礂鏁堟灉锛?
-  6. 瀹炵幇 `_llm_refine` 鍙€夊寮猴紙璇诲彇 prompt銆佽皟鐢?LLM銆侀敊璇鐞嗭級
-  7. 缂栧啓 LLM 妯″紡鍗曞厓娴嬭瘯锛坢ock LLM 鏂█璋冪敤涓庤緭鍑猴級
-  8. 缂栧啓闄嶇骇鍦烘櫙娴嬭瘯锛圠LM 澶辫触鏃跺洖閫€鍒拌鍒欑粨鏋滐紝鏍囪 metadata锛?
-  9. **缂栧啓鐪熷疄LLM闆嗘垚娴嬭瘯骞舵墽琛岄獙璇?*锛堝繀椤绘墽琛岋紝楠岃瘉LLM閰嶇疆锛?
-- **楠屾敹鏍囧噯**锛?
-  - **鍗曞厓娴嬭瘯锛堝揩閫熷弽棣堝惊鐜級**锛?
-    - 瑙勫垯妯″紡锛氬 fixtures 鍣０鏍蜂緥鑳芥纭幓鍣紙杩炵画绌虹櫧/椤电湁椤佃剼/鏍煎紡鏍囪/鍒嗛殧绾匡級
-    - 淇濈暀鑳藉姏锛氫唬鐮佸潡鍐呴儴鏍煎紡涓嶈鐮村潖锛孧arkdown缁撴瀯瀹屾暣淇濈暀
-    - LLM 妯″紡锛歮ock LLM 鏃惰兘姝ｇ‘璋冪敤骞惰繑鍥為噸鍐欑粨鏋滐紝metadata 鏍囪 `refined_by: "llm"`
-    - 闄嶇骇琛屼负锛歀LM 澶辫触鏃跺洖閫€鍒拌鍒欑粨鏋滐紝metadata 鏍囪 `refined_by: "rule"` 鍜?fallback 鍘熷洜
-    - 閰嶇疆寮€鍏筹細閫氳繃 `settings.yaml` 鐨?`ingestion.chunk_refiner.use_llm` 鎺у埗琛屼负
-    - 寮傚父澶勭悊锛氬崟涓猚hunk澶勭悊寮傚父涓嶅奖鍝嶅叾浠朿hunk锛屼繚鐣欏師鏂?
-  - **闆嗘垚娴嬭瘯锛堥獙鏀跺繀椤婚」锛?*锛?
-    - 鉁?**蹇呴』楠岃瘉鐪熷疄LLM璋冪敤鎴愬姛**锛氫娇鐢ㄥ墠缃潯浠朵腑閰嶇疆鐨凩LM杩涜鐪熷疄refinement
-    - 鉁?**蹇呴』楠岃瘉杈撳嚭璐ㄩ噺**锛歀LM refined鏂囨湰纭疄鏇村共鍑€锛堝櫔澹板噺灏戙€佸唴瀹逛繚鐣欙級
-    - 鉁?**蹇呴』楠岃瘉闄嶇骇鏈哄埗**锛氭棤鏁堟ā鍨嬪悕绉版椂浼橀泤闄嶇骇鍒皉ule-based锛屼笉宕╂簝
-    - 璇存槑锛氳繖鏄獙璇?鍓嶇疆鏉′欢涓噯澶囩殑LLM閰嶇疆鏄惁姝ｇ‘"鐨勫繀瑕佹楠?
-- **娴嬭瘯鏂规硶**锛?
-  - **闃舵1-鍗曞厓娴嬭瘯锛堝紑鍙戜腑蹇€熻凯浠ｏ級**锛?
+  - `ChunkRefiner._rule_based_refine(text) -> str`閿涘牆骞撶粚铏规/妞ょ數婀佹い浣冨壖/閺嶇厧绱￠弽鍥唶/HTML濞夈劑鍣撮敍?
+  - `ChunkRefiner._llm_refine(text, trace) -> str | None`閿涘牆褰查柅?LLM 闁插秴鍟撻敍灞姐亼鐠愩儴绻戦崶?None閿?
+  - `ChunkRefiner._load_prompt(prompt_path?)`閿涘牅绮犻弬鍥︽閸旂姾娴噋rompt濡剝婢橀敍灞炬暜閹镐線绮拋顦宎llback閿?
+- **鐎圭偟骞囧ù浣衡柤瀵ら缚顔?*閿?
+  1. 閸忓牆鍨卞?`tests/fixtures/noisy_chunks.json`閿涘苯瀵橀崥?娑擃亜鍚€閸ㄥ娅旀竟鏉挎簚閺咁垽绱?
+     - typical_noise_scenario: 缂佺厧鎮庨崳顏勶紣閿涘牓銆夐惇?妞や絻鍓?缁岃櫣娅ч敍?
+     - ocr_errors: OCR闁挎瑨顕ら弬鍥ㄦ拱
+     - page_header_footer: 妞ょ數婀佹い浣冨壖濡€崇础
+     - excessive_whitespace: 婢舵矮缍戠粚铏规
+     - format_markers: HTML/Markdown閺嶅洩顔?
+     - clean_text: 楠炴彃鍣ｉ弬鍥ㄦ拱閿涘牓鐛欑拠浣风瑝鏉╁洤瀹冲〒鍛倞閿?
+     - code_blocks: 娴狅絿鐖滈崸妤嬬礄妤犲矁鐦夋穱婵堟殌閸愬懘鍎撮弽鐓庣础閿?
+     - mixed_noise: 閻喎鐤勫ǎ宄版値閸︾儤娅?
+  2. 閸掓稑缂?`TraceContext` 閸楃姳缍呯€圭偟骞囬敍鍧瞮id閻㈢喐鍨歵race_id閿涘ecord_stage鐎涙ê鍋嶉梼鑸殿唽閺佺増宓侀敍?
+  3. 鐎圭偟骞?`BaseTransform` 閹跺€熻杽閹恒儱褰?
+  4. 鐎圭偟骞?`ChunkRefiner._rule_based_refine` 鐟欏嫬鍨崢璇叉珨闁槒绶敍鍫燁劀閸掓瑥灏柊?閸掑棙顔屾径鍕倞閿?
+  5. 缂傛牕鍟撶憴鍕灟濡€崇础閸楁洖鍘撳ù瀣槸閿涘牅濞囬悽?fixtures 閺傤叀鈻堝〒鍛閺佸牊鐏夐敍?
+  6. 鐎圭偟骞?`_llm_refine` 閸欘垶鈧顤冨鐚寸礄鐠囪褰?prompt閵嗕浇鐨熼悽?LLM閵嗕線鏁婄拠顖氼槱閻炲棴绱?
+  7. 缂傛牕鍟?LLM 濡€崇础閸楁洖鍘撳ù瀣槸閿涘潰ock LLM 閺傤叀鈻堢拫鍐暏娑撳氦绶崙鐚寸礆
+  8. 缂傛牕鍟撻梽宥囬獓閸︾儤娅欏ù瀣槸閿涘湢LM 婢惰精瑙﹂弮璺烘礀闁偓閸掓媽顫夐崚娆戠波閺嬫粣绱濋弽鍥唶 metadata閿?
+  9. **缂傛牕鍟撻惇鐔风杽LLM闂嗗棙鍨氬ù瀣槸楠炶埖澧界悰宀勭崣鐠?*閿涘牆绻€妞ょ粯澧界悰宀嬬礉妤犲矁鐦塋LM闁板秶鐤嗛敍?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - **閸楁洖鍘撳ù瀣槸閿涘牆鎻╅柅鐔峰冀妫ｅ牆鎯婇悳顖ょ礆**閿?
+    - 鐟欏嫬鍨Ο鈥崇础閿涙艾顕?fixtures 閸ｎ亜锛愰弽铚傜伐閼宠姤顒滅涵顔煎箵閸ｎ亷绱欐潻鐐电敾缁岃櫣娅?妞ょ數婀佹い浣冨壖/閺嶇厧绱￠弽鍥唶/閸掑棝娈х痪鍖＄礆
+    - 娣囨繄鏆€閼宠棄濮忛敍姘敩閻礁娼￠崘鍛村劥閺嶇厧绱℃稉宥堫潶閻潙娼栭敍瀛rkdown缂佹挻鐎€瑰本鏆ｆ穱婵堟殌
+    - LLM 濡€崇础閿涙ock LLM 閺冩儼鍏樺锝団€樼拫鍐暏楠炴儼绻戦崶鐐哄櫢閸愭瑧绮ㄩ弸婊愮礉metadata 閺嶅洩顔?`refined_by: "llm"`
+    - 闂勫秶楠囩悰灞艰礋閿涙瓈LM 婢惰精瑙﹂弮璺烘礀闁偓閸掓媽顫夐崚娆戠波閺嬫粣绱漨etadata 閺嶅洩顔?`refined_by: "rule"` 閸?fallback 閸樼喎娲?
+    - 闁板秶鐤嗗鈧崗绛圭窗闁俺绻?`settings.yaml` 閻?`ingestion.chunk_refiner.use_llm` 閹貉冨煑鐞涘奔璐?
+    - 瀵倸鐖舵径鍕倞閿涙艾宕熸稉鐚歨unk婢跺嫮鎮婂鍌氱埗娑撳秴濂栭崫宥呭従娴犳溈hunk閿涘奔绻氶悾娆忓斧閺?
+  - **闂嗗棙鍨氬ù瀣槸閿涘牓鐛欓弨璺虹箑妞ゅ銆嶉敍?*閿?
+    - 閴?**韫囧懘銆忔宀冪槈閻喎鐤凩LM鐠嬪啰鏁ら幋鎰**閿涙矮濞囬悽銊ュ缂冾喗娼禒鏈佃厬闁板秶鐤嗛惃鍑㎜M鏉╂稖顢戦惇鐔风杽refinement
+    - 閴?**韫囧懘銆忔宀冪槈鏉堟挸鍤拹銊╁櫤**閿涙瓈LM refined閺傚洦婀扮涵顔肩杽閺囨潙鍏遍崙鈧敍鍫濇珨婢规澘鍣虹亸鎴欌偓浣稿敶鐎归€涚箽閻ｆ瑱绱?
+    - 閴?**韫囧懘銆忔宀冪槈闂勫秶楠囬張鍝勫煑**閿涙碍妫ら弫鍫熌侀崹瀣倳缁夌増妞傛导姗€娉ら梽宥囬獓閸掔殙ule-based閿涘奔绗夊畷鈺傜皾
+    - 鐠囧瓨妲戦敍姘崇箹閺勵垶鐛欑拠?閸撳秶鐤嗛弶鈥叉娑擃厼鍣径鍥╂畱LLM闁板秶鐤嗛弰顖氭儊濮濓絿鈥?閻ㄥ嫬绻€鐟曚焦顒炴?
+- **濞村鐦弬瑙勭《**閿?
+  - **闂冭埖顔?-閸楁洖鍘撳ù瀣槸閿涘牆绱戦崣鎴滆厬韫囶偊鈧喕鍑禒锝忕礆**閿?
     ```bash
     pytest tests/unit/test_chunk_refiner.py -v
-    # 鉁?27涓祴璇曞叏閮ㄩ€氳繃锛屼娇鐢∕ock闅旂锛屾棤闇€鐪熷疄API
+    # 閴?27娑擃亝绁寸拠鏇炲弿闁劑鈧俺绻冮敍灞煎▏閻⑩垥ock闂呮梻顬囬敍灞炬￥闂団偓閻喎鐤凙PI
     ```
-  - **闃舵2-闆嗘垚娴嬭瘯锛堥獙鏀跺繀椤绘墽琛岋級**锛?
+  - **闂冭埖顔?-闂嗗棙鍨氬ù瀣槸閿涘牓鐛欓弨璺虹箑妞ょ粯澧界悰宀嬬礆**閿?
     ```bash
-    # 1. 杩愯鐪熷疄LLM闆嗘垚娴嬭瘯锛堝繀椤伙級
+    # 1. 鏉╂劘顢戦惇鐔风杽LLM闂嗗棙鍨氬ù瀣槸閿涘牆绻€妞や紮绱?
     pytest tests/integration/test_chunk_refiner_llm.py -v -s
-    # 鉁?楠岃瘉LLM閰嶇疆姝ｇ‘锛宺efinement鏁堟灉绗﹀悎棰勬湡
-    # 鈿狅笍 浼氫骇鐢熺湡瀹濧PI璋冪敤涓庤垂鐢?
+    # 閴?妤犲矁鐦塋LM闁板秶鐤嗗锝団€橀敍瀹篹finement閺佸牊鐏夌粭锕€鎮庢０鍕埂
+    # 閳跨媴绗?娴兼矮楠囬悽鐔烘埂鐎规咖PI鐠嬪啰鏁ゆ稉搴ゅ瀭閻?
     
-    # 2. Review鎵撳嵃杈撳嚭锛岀‘璁ょ簿鐐艰川閲?
-    # - 鍣０鏄惁琚湁鏁堝幓闄わ紵
-    # - 鏈夋晥鍐呭鏄惁瀹屾暣淇濈暀锛?
-    # - 闄嶇骇鏈哄埗鏄惁姝ｅ父宸ヤ綔锛?
+    # 2. Review閹垫挸宓冩潏鎾冲毉閿涘瞼鈥樼拋銈囩翱閻愯壈宸濋柌?
+    # - 閸ｎ亜锛愰弰顖氭儊鐞氼偅婀侀弫鍫濆箵闂勩倧绱?
+    # - 閺堝鏅ラ崘鍛啇閺勵垰鎯佺€瑰本鏆ｆ穱婵堟殌閿?
+    # - 闂勫秶楠囬張鍝勫煑閺勵垰鎯佸锝呯埗瀹搞儰缍旈敍?
     ```
-  - **娴嬭瘯鍒嗗眰閫昏緫**锛?
-    - 鍗曞厓娴嬭瘯锛氶獙璇佷唬鐮侀€昏緫姝ｇ‘
-    - 闆嗘垚娴嬭瘯锛氶獙璇佺郴缁熷彲鐢ㄦ€?
-    - 涓よ€呬簰琛ワ紝缂轰竴涓嶅彲
+  - **濞村鐦崚鍡楃湴闁槒绶?*閿?
+    - 閸楁洖鍘撳ù瀣槸閿涙岸鐛欑拠浣峰敩閻線鈧槒绶锝団€?
+    - 闂嗗棙鍨氬ù瀣槸閿涙岸鐛欑拠浣洪兇缂佺喎褰查悽銊︹偓?
+    - 娑撱倛鈧懍绨扮悰銉礉缂傝桨绔存稉宥呭讲
 
-### C6锛歁etadataEnricher锛堣鍒欏寮?+ 鍙€?LLM 澧炲己 + 闄嶇骇锛?
-- **鐩爣**锛氬疄鐜板厓鏁版嵁澧炲己妯″潡锛氭彁渚涜鍒欏寮虹殑榛樿瀹炵幇锛屽苟閲嶇偣鏀寔 LLM 澧炲己锛堥厤缃凡灏辩华锛孡LM 寮€鍏虫墦寮€锛夈€傚埄鐢?LLM 瀵?chunk 杩涜楂樿川閲忕殑 title 鐢熸垚銆乻ummary 鎽樿鍜?tags 鎻愬彇銆傚悓鏃朵繚鐣欏け璐ラ檷绾ф満鍒讹紝纭繚涓嶉樆濉?ingestion銆?
-- **淇敼鏂囦欢**锛?
+### C6閿涙瓉etadataEnricher閿涘牐顫夐崚娆忣杻瀵?+ 閸欘垶鈧?LLM 婢х偛宸?+ 闂勫秶楠囬敍?
+- **閻╊喗鐖?*閿涙艾鐤勯悳鏉垮帗閺佺増宓佹晶鐐插繁濡€虫健閿涙碍褰佹笟娑滎潐閸掓瑥顤冨铏规畱姒涙顓荤€圭偟骞囬敍灞借嫙闁插秶鍋ｉ弨顖涘瘮 LLM 婢х偛宸遍敍鍫ュ帳缂冾喖鍑＄亸杈╁崕閿涘LM 瀵偓閸忚櫕澧﹀鈧敍澶堚偓鍌氬焺閻?LLM 鐎?chunk 鏉╂稖顢戞妯垮窛闁插繒娈?title 閻㈢喐鍨氶妴涔籾mmary 閹芥顩﹂崪?tags 閹绘劕褰囬妴鍌氭倱閺冩湹绻氶悾娆忋亼鐠愩儵妾风痪褎婧€閸掕绱濈涵顔荤箽娑撳秹妯嗘繅?ingestion閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/transform/metadata_enricher.py`
   - `tests/unit/test_metadata_enricher_contract.py`
-- **楠屾敹鏍囧噯**锛?
-  - 瑙勫垯妯″紡锛氫綔涓哄厹搴曢€昏緫锛岃緭鍑?metadata 蹇呴』鍖呭惈 `title/summary/tags`锛堣嚦灏戦潪绌猴級銆?
-  - **LLM 妯″紡锛堟牳蹇冿級**锛氬湪 LLM 鎵撳紑鐨勬儏鍐典笅锛岀‘淇濈湡瀹炶皟鐢?LLM锛堟垨楂樿川閲?Mock锛夊苟鐢熸垚璇箟涓板瘜鐨?metadata銆傞渶楠岃瘉鍦ㄦ湁鐪熷疄 LLM 閰嶇疆涓嬬殑杩為€氭€т笌鏁堟灉銆?
-  - 闄嶇骇琛屼负锛歀LM 璋冪敤澶辫触鏃跺洖閫€鍒拌鍒欐ā寮忕粨鏋滐紙鍙湪 metadata 鏍囪闄嶇骇鍘熷洜锛屼絾涓嶆姏鍑鸿嚧鍛藉紓甯革級銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_metadata_enricher_contract.py`锛屽苟纭繚鍖呭惈寮€鍚?LLM 鐨勯泦鎴愭祴璇曠敤渚嬨€?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 鐟欏嫬鍨Ο鈥崇础閿涙矮缍旀稉鍝勫幑鎼存洟鈧槒绶敍宀冪翻閸?metadata 韫囧懘銆忛崠鍛儓 `title/summary/tags`閿涘牐鍤︾亸鎴︽姜缁岀尨绱氶妴?
+  - **LLM 濡€崇础閿涘牊鐗宠箛鍐跨礆**閿涙艾婀?LLM 閹垫挸绱戦惃鍕剰閸愬吀绗呴敍宀€鈥樻穱婵堟埂鐎圭偠鐨熼悽?LLM閿涘牊鍨ㄦ妯垮窛闁?Mock閿涘鑻熼悽鐔稿灇鐠囶厺绠熸稉鏉跨槣閻?metadata閵嗗倿娓舵宀冪槈閸︺劍婀侀惇鐔风杽 LLM 闁板秶鐤嗘稉瀣畱鏉╃偤鈧碍鈧傜瑢閺佸牊鐏夐妴?
+  - 闂勫秶楠囩悰灞艰礋閿涙瓈LM 鐠嬪啰鏁ゆ径杈Е閺冭泛娲栭柅鈧崚鎷岊潐閸掓瑦膩瀵繒绮ㄩ弸婊愮礄閸欘垰婀?metadata 閺嶅洩顔囬梽宥囬獓閸樼喎娲滈敍灞肩稻娑撳秵濮忛崙楦垮毀閸涜棄绱撶敮闈╃礆閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_metadata_enricher_contract.py`閿涘苯鑻熺涵顔荤箽閸栧懎鎯堝鈧崥?LLM 閻ㄥ嫰娉﹂幋鎰ゴ鐠囨洜鏁ゆ笟瀣ㄢ偓?
 
-### C7锛欼mageCaptioner锛堝彲閫夌敓鎴?caption + 闄嶇骇涓嶉樆濉烇級
-- **鐩爣**锛氬疄鐜?`image_captioner.py`锛氬綋鍚敤 Vision LLM 涓斿瓨鍦?image_refs 鏃剁敓鎴?caption 骞跺啓鍥?chunk metadata锛涘綋绂佺敤/涓嶅彲鐢?寮傚父鏃惰蛋闄嶇骇璺緞锛屼笉闃诲 ingestion銆?
-- **淇敼鏂囦欢**锛?
+### C7閿涙mageCaptioner閿涘牆褰查柅澶屾晸閹?caption + 闂勫秶楠囨稉宥夋▎婵夌儑绱?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`image_captioner.py`閿涙艾缍嬮崥顖滄暏 Vision LLM 娑撴柨鐡ㄩ崷?image_refs 閺冨墎鏁撻幋?caption 楠炶泛鍟撻崶?chunk metadata閿涙稑缍嬬粋浣烘暏/娑撳秴褰查悽?瀵倸鐖堕弮鎯拌泲闂勫秶楠囩捄顖氱窞閿涘奔绗夐梼璇差敚 ingestion閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/transform/image_captioner.py`
-  - `config/prompts/image_captioning.txt`锛堜綔涓洪粯璁?prompt 鏉ユ簮锛涘彲鍦ㄦ祴璇曚腑娉ㄥ叆鏇夸唬鏂囨湰锛?
+  - `config/prompts/image_captioning.txt`閿涘牅缍旀稉娲帛鐠?prompt 閺夈儲绨敍娑樺讲閸︺劍绁寸拠鏇氳厬濞夈劌鍙嗛弴澶稿敩閺傚洦婀伴敍?
   - `tests/unit/test_image_captioner_fallback.py`
-- **楠屾敹鏍囧噯**锛?
-  - 鍚敤妯″紡锛氬瓨鍦?image_refs 鏃朵細鐢熸垚 caption 骞跺啓鍏?metadata锛堟祴璇曚腑鐢?mock Vision LLM 鏂█璋冪敤涓庤緭鍑猴級銆?
-  - 闄嶇骇妯″紡锛氬綋閰嶇疆绂佺敤鎴栧紓甯告椂锛宑hunk 淇濈暀 image_refs锛屼絾涓嶇敓鎴?caption 涓旀爣璁?`has_unprocessed_images`銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_image_captioner_fallback.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 閸氼垳鏁ゅΟ鈥崇础閿涙艾鐡ㄩ崷?image_refs 閺冩湹绱伴悽鐔稿灇 caption 楠炶泛鍟撻崗?metadata閿涘牊绁寸拠鏇氳厬閻?mock Vision LLM 閺傤叀鈻堢拫鍐暏娑撳氦绶崙鐚寸礆閵?
+  - 闂勫秶楠囧Ο鈥崇础閿涙艾缍嬮柊宥囩枂缁備胶鏁ら幋鏍х磽鐢憡妞傞敍瀹慼unk 娣囨繄鏆€ image_refs閿涘奔绲炬稉宥囨晸閹?caption 娑撴梹鐖ｇ拋?`has_unprocessed_images`閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_image_captioner_fallback.py`閵?
 
-### C8锛欴enseEncoder锛堜緷璧?libs.embedding锛?
-- **鐩爣**锛氬疄鐜?`dense_encoder.py`锛屾妸 chunks.text 鎵归噺閫佸叆 `BaseEmbedding`銆?
-- **淇敼鏂囦欢**锛?
+### C8閿涙enseEncoder閿涘牅绶风挧?libs.embedding閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`dense_encoder.py`閿涘本濡?chunks.text 閹靛綊鍣洪柅浣稿弳 `BaseEmbedding`閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/embedding/dense_encoder.py`
   - `tests/unit/test_dense_encoder.py`
-- **楠屾敹鏍囧噯**锛歟ncoder 杈撳嚭鍚戦噺鏁伴噺涓?chunks 鏁伴噺涓€鑷达紝缁村害涓€鑷淬€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_dense_encoder.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙瓱ncoder 鏉堟挸鍤崥鎴﹀櫤閺佷即鍣烘稉?chunks 閺佷即鍣烘稉鈧懛杈剧礉缂佹潙瀹虫稉鈧懛娣偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_dense_encoder.py`閵?
 
-### C9锛歋parseEncoder锛圔M25 缁熻涓庤緭鍑哄绾︼級
-- **鐩爣**锛氬疄鐜?`sparse_encoder.py`锛氬 chunks 寤虹珛 BM25 鎵€闇€缁熻锛堝彲鍏堜粎杈撳嚭 term weights 缁撴瀯锛岀储寮曡惤鍦颁笅涓€姝ュ仛锛夈€?
-- **淇敼鏂囦欢**锛?
+### C9閿涙瓔parseEncoder閿涘湐M25 缂佺喕顓告稉搴ょ翻閸戝搫顨栫痪锔肩礆
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`sparse_encoder.py`閿涙艾顕?chunks 瀵よ櫣鐝?BM25 閹碘偓闂団偓缂佺喕顓搁敍鍫濆讲閸忓牅绮庢潏鎾冲毉 term weights 缂佹挻鐎敍宀€鍌ㄥ鏇℃儰閸﹂绗呮稉鈧銉ヤ粵閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/embedding/sparse_encoder.py`
   - `tests/unit/test_sparse_encoder.py`
-- **楠屾敹鏍囧噯**锛氳緭鍑虹粨鏋勫彲鐢ㄤ簬 bm25_indexer锛涘绌烘枃鏈湁鏄庣‘琛屼负銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_sparse_encoder.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙俺绶崙铏圭波閺嬪嫬褰查悽銊ょ艾 bm25_indexer閿涙稑顕粚鐑樻瀮閺堫剚婀侀弰搴ｂ€樼悰灞艰礋閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_sparse_encoder.py`閵?
 
-### C10锛欱atchProcessor锛堟壒澶勭悊缂栨帓锛?
-- **鐩爣**锛氬疄鐜?`batch_processor.py`锛氬皢 chunks 鍒?batch锛岄┍鍔?dense/sparse 缂栫爜锛岃褰曟壒娆¤€楁椂锛堜负 trace 棰勭暀锛夈€?
-- **淇敼鏂囦欢**锛?
+### C10閿涙atchProcessor閿涘牊澹掓径鍕倞缂傛牗甯撻敍?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`batch_processor.py`閿涙艾鐨?chunks 閸?batch閿涘矂鈹嶉崝?dense/sparse 缂傛牜鐖滈敍宀冾唶瑜版洘澹掑▎陇鈧妞傞敍鍫滆礋 trace 妫板嫮鏆€閿涘鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/embedding/batch_processor.py`
   - `tests/unit/test_batch_processor.py`
-- **楠屾敹鏍囧噯**锛歜atch_size=2 鏃跺 5 chunks 鍒嗘垚 3 鎵癸紝涓旈『搴忕ǔ瀹氥€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_batch_processor.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙瓬atch_size=2 閺冭泛顕?5 chunks 閸掑棙鍨?3 閹电櫢绱濇稉鏃堛€庢惔蹇暻旂€规哎鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_batch_processor.py`閵?
 
 ---
 
-**鈹佲攣鈹佲攣 瀛樺偍闃舵鍒嗙晫绾匡細浠ヤ笅浠诲姟璐熻矗灏嗙紪鐮佺粨鏋滄寔涔呭寲 鈹佲攣鈹佲攣**
+**閳逛讲鏀ｉ埞浣叉敚 鐎涙ê鍋嶉梼鑸殿唽閸掑棛鏅痪鍖＄窗娴犮儰绗呮禒璇插鐠愮喕鐭楃亸鍡欑椽閻胶绮ㄩ弸婊勫瘮娑斿懎瀵?閳逛讲鏀ｉ埞浣叉敚**
 
-> **璇存槑**锛欳8-C10瀹屾垚浜咲ense鍜孲parse鐨勭紪鐮佸伐浣滐紝C11-C13璐熻矗灏嗙紪鐮佺粨鏋滃瓨鍌ㄥ埌涓嶅悓鐨勫悗绔€?
-> - **C11 (BM25Indexer)**锛氬鐞哠parse缂栫爜缁撴灉 鈫?鏋勫缓鍊掓帓绱㈠紩 鈫?瀛樺偍鍒版枃浠剁郴缁?
-> - **C12 (VectorUpserter)**锛氬鐞咲ense缂栫爜缁撴灉 鈫?鐢熸垚绋冲畾ID 鈫?瀛樺偍鍒板悜閲忔暟鎹簱
-> - **C13 (ImageStorage)**锛氬鐞嗗浘鐗囨暟鎹?鈫?鏂囦欢瀛樺偍 + 绱㈠紩鏄犲皠
+> **鐠囧瓨妲?*閿涙8-C10鐎瑰本鍨氭禍鍜瞖nse閸滃parse閻ㄥ嫮绱惍浣镐紣娴ｆ粣绱滳11-C13鐠愮喕鐭楃亸鍡欑椽閻胶绮ㄩ弸婊冪摠閸屻劌鍩屾稉宥呮倱閻ㄥ嫬鎮楃粩顖樷偓?
+> - **C11 (BM25Indexer)**閿涙艾顦╅悶鍝爌arse缂傛牜鐖滅紒鎾寸亯 閳?閺嬪嫬缂撻崐鎺撳笓缁便垹绱?閳?鐎涙ê鍋嶉崚鐗堟瀮娴犲墎閮寸紒?
+> - **C12 (VectorUpserter)**閿涙艾顦╅悶鍜瞖nse缂傛牜鐖滅紒鎾寸亯 閳?閻㈢喐鍨氱粙鍐茬暰ID 閳?鐎涙ê鍋嶉崚鏉挎倻闁插繑鏆熼幑顔肩氨
+> - **C13 (ImageStorage)**閿涙艾顦╅悶鍡楁禈閻楀洦鏆熼幑?閳?閺傚洣娆㈢€涙ê鍋?+ 缁便垹绱╅弰鐘茬殸
 
 ---
 
-### C11锛欱M25Indexer锛堝€掓帓绱㈠紩鏋勫缓涓庢寔涔呭寲锛?
-- **鐩爣**锛氬疄鐜?`bm25_indexer.py`锛氭帴鏀?SparseEncoder 鐨則erm statistics杈撳嚭锛岃绠桰DF锛屾瀯寤哄€掓帓绱㈠紩锛屽苟鎸佷箙鍖栧埌 `data/db/bm25/`銆?
-- **鏍稿績鍔熻兘**锛?
-  - 璁＄畻 IDF (Inverse Document Frequency)锛歚IDF(term) = log((N - df + 0.5) / (df + 0.5))`
-  - 鏋勫缓鍊掓帓绱㈠紩缁撴瀯锛歚{term: {idf, postings: [{chunk_id, tf, doc_length}]}}`
-  - 绱㈠紩搴忓垪鍖栦笌鍔犺浇锛堟敮鎸佸閲忔洿鏂颁笌閲嶅缓锛?
-- **淇敼鏂囦欢**锛?
+### C11閿涙M25Indexer閿涘牆鈧帗甯撶槐銏犵穿閺嬪嫬缂撴稉搴㈠瘮娑斿懎瀵查敍?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`bm25_indexer.py`閿涙碍甯撮弨?SparseEncoder 閻ㄥ墖erm statistics鏉堟挸鍤敍宀冾吀缁犳“DF閿涘本鐎鍝勨偓鎺撳笓缁便垹绱╅敍灞借嫙閹镐椒绠欓崠鏍у煂 `data/db/bm25/`閵?
+- **閺嶇绺鹃崝鐔诲厴**閿?
+  - 鐠侊紕鐣?IDF (Inverse Document Frequency)閿涙瓪IDF(term) = log((N - df + 0.5) / (df + 0.5))`
+  - 閺嬪嫬缂撻崐鎺撳笓缁便垹绱╃紒鎾寸€敍姝歿term: {idf, postings: [{chunk_id, tf, doc_length}]}}`
+  - 缁便垹绱╂惔蹇撳灙閸栨牔绗岄崝鐘烘祰閿涘牊鏁幐浣割杻闁插繑娲块弬棰佺瑢闁插秴缂撻敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/storage/bm25_indexer.py`
   - `tests/unit/test_bm25_indexer_roundtrip.py`
-- **楠屾敹鏍囧噯**锛?
-  - build 鍚庤兘 load 骞跺鍚屼竴璇枡鏌ヨ杩斿洖绋冲畾 top ids
-  - IDF璁＄畻鍑嗙‘锛堝彲鐢ㄥ凡鐭ヨ鏂欏姣旈獙璇侊級
-  - 鏀寔绱㈠紩閲嶅缓涓庡閲忔洿鏂?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_bm25_indexer_roundtrip.py`銆?
-- **澶囨敞**锛氭湰浠诲姟瀹屾垚Sparse璺緞鐨勬渶鍚庝竴鐜紝涓篋3 (SparseRetriever) 鎻愪緵鍙煡璇㈢殑BM25绱㈠紩銆?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - build 閸氬氦鍏?load 楠炶泛顕崥灞肩鐠囶厽鏋￠弻銉嚄鏉╂柨娲栫粙鍐茬暰 top ids
+  - IDF鐠侊紕鐣婚崙鍡欌€橀敍鍫濆讲閻劌鍑￠惌銉嚔閺傛瑥顕В鏃堢崣鐠囦緤绱?
+  - 閺€顖涘瘮缁便垹绱╅柌宥呯紦娑撳骸顤冮柌蹇旀纯閺?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_bm25_indexer_roundtrip.py`閵?
+- **婢跺洦鏁?*閿涙碍婀版禒璇插鐎瑰本鍨歋parse鐠侯垰绶為惃鍕付閸氬簼绔撮悳顖ょ礉娑撶瘚3 (SparseRetriever) 閹绘劒绶甸崣顖涚叀鐠囥垻娈態M25缁便垹绱╅妴?
 
-### C12锛歏ectorUpserter锛堝悜閲忓瓨鍌ㄤ笌骞傜瓑鎬т繚璇侊級
-- **鐩爣**锛氬疄鐜?`vector_upserter.py`锛氭帴鏀?DenseEncoder 鐨勫悜閲忚緭鍑猴紝鐢熸垚绋冲畾鐨?`chunk_id`锛屽苟璋冪敤 VectorStore 杩涜骞傜瓑鍐欏叆銆?
-- **鏍稿績鍔熻兘**锛?
-  - 鐢熸垚纭畾鎬?chunk_id锛歚hash(source_path + chunk_index + content_hash[:8])`
-  - 璋冪敤 `BaseVectorStore.upsert()` 鍐欏叆鍚戦噺鏁版嵁搴?
-  - 淇濊瘉骞傜瓑鎬э細鍚屼竴鍐呭閲嶅鍐欏叆涓嶄骇鐢熼噸澶嶈褰?
-- **淇敼鏂囦欢**锛?
+### C12閿涙瓘ectorUpserter閿涘牆鎮滈柌蹇撶摠閸屻劋绗岄獮鍌滅搼閹傜箽鐠囦緤绱?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`vector_upserter.py`閿涙碍甯撮弨?DenseEncoder 閻ㄥ嫬鎮滈柌蹇氱翻閸戠尨绱濋悽鐔稿灇缁嬪啿鐣鹃惃?`chunk_id`閿涘苯鑻熺拫鍐暏 VectorStore 鏉╂稖顢戦獮鍌滅搼閸愭瑥鍙嗛妴?
+- **閺嶇绺鹃崝鐔诲厴**閿?
+  - 閻㈢喐鍨氱涵顔肩暰閹?chunk_id閿涙瓪hash(source_path + chunk_index + content_hash[:8])`
+  - 鐠嬪啰鏁?`BaseVectorStore.upsert()` 閸愭瑥鍙嗛崥鎴﹀櫤閺佺増宓佹惔?
+  - 娣囨繆鐦夐獮鍌滅搼閹嶇窗閸氬奔绔撮崘鍛啇闁插秴顦查崘娆忓弳娑撳秳楠囬悽鐔煎櫢婢跺秷顔囪ぐ?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/storage/vector_upserter.py`
   - `tests/unit/test_vector_upserter_idempotency.py`
-- **楠屾敹鏍囧噯**锛?
-  - 鍚屼竴 chunk 涓ゆ upsert 浜х敓鐩稿悓 id
-  - 鍐呭鍙樻洿鏃?id 鍙樻洿
-  - 鏀寔鎵归噺 upsert 涓斾繚鎸侀『搴?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_vector_upserter_idempotency.py`銆?
-- **澶囨敞**锛氭湰浠诲姟瀹屾垚Dense璺緞鐨勬渶鍚庝竴鐜紝涓篋2 (DenseRetriever) 鎻愪緵鍙煡璇㈢殑鍚戦噺鏁版嵁搴撱€?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 閸氬奔绔?chunk 娑撱倖顐?upsert 娴溠呮晸閻╃鎮?id
+  - 閸愬懎顔愰崣妯绘纯閺?id 閸欐ɑ娲?
+  - 閺€顖涘瘮閹靛綊鍣?upsert 娑撴柧绻氶幐渚€銆庢惔?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_vector_upserter_idempotency.py`閵?
+- **婢跺洦鏁?*閿涙碍婀版禒璇插鐎瑰本鍨欴ense鐠侯垰绶為惃鍕付閸氬簼绔撮悳顖ょ礉娑撶瘚2 (DenseRetriever) 閹绘劒绶甸崣顖涚叀鐠囥垻娈戦崥鎴﹀櫤閺佺増宓佹惔鎾扁偓?
 
-### C13锛欼mageStorage锛堝浘鐗囨枃浠跺瓨鍌ㄤ笌绱㈠紩琛ㄥ绾︼級
-- **鐩爣**锛氬疄鐜?`image_storage.py`锛氫繚瀛樺浘鐗囧埌 `data/images/{collection}/`锛屽苟浣跨敤 **SQLite** 璁板綍 image_id鈫抪ath 鏄犲皠銆?
-- **淇敼鏂囦欢**锛?
+### C13閿涙mageStorage閿涘牆娴橀悧鍥ㄦ瀮娴犺泛鐡ㄩ崒銊ょ瑢缁便垹绱╃悰銊ヮ殩缁撅讣绱?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`image_storage.py`閿涙矮绻氱€涙ê娴橀悧鍥у煂 `data/images/{collection}/`閿涘苯鑻熸担璺ㄦ暏 **SQLite** 鐠佹澘缍?image_id閳姫ath 閺勭姴鐨犻妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/storage/image_storage.py`
   - `tests/unit/test_image_storage.py`
-- **楠屾敹鏍囧噯**锛氫繚瀛樺悗鏂囦欢瀛樺湪锛涙煡鎵?image_id 杩斿洖姝ｇ‘璺緞锛涙槧灏勫叧绯绘寔涔呭寲鍦?`data/db/image_index.db`銆?
-- **鎶€鏈柟妗?*锛?
-  - 澶嶇敤椤圭洰宸叉湁鐨?SQLite 鏋舵瀯妯″紡锛堝弬鑰?`file_integrity.py` 鐨?`SQLiteIntegrityChecker`锛?
-  - 鏁版嵁搴撹〃缁撴瀯锛?
+- **妤犲本鏁归弽鍥у櫙**閿涙矮绻氱€涙ê鎮楅弬鍥︽鐎涙ê婀敍娑欑叀閹?image_id 鏉╂柨娲栧锝団€樼捄顖氱窞閿涙稒妲х亸鍕彠缁粯瀵旀稊鍛閸?`data/db/image_index.db`閵?
+- **閹垛偓閺堫垱鏌熷?*閿?
+  - 婢跺秶鏁ゆい鍦窗瀹稿弶婀侀惃?SQLite 閺嬭埖鐎Ο鈥崇础閿涘牆寮懓?`file_integrity.py` 閻?`SQLiteIntegrityChecker`閿?
+  - 閺佺増宓佹惔鎾广€冪紒鎾寸€敍?
     ```sql
     CREATE TABLE image_index (
         image_id TEXT PRIMARY KEY,
@@ -736,544 +736,544 @@
     CREATE INDEX idx_collection ON image_index(collection);
     CREATE INDEX idx_doc_hash ON image_index(doc_hash);
     ```
-  - 鎻愪緵骞跺彂瀹夊叏璁块棶锛圵AL 妯″紡锛?
-  - 鏀寔鎸?collection 鎵归噺鏌ヨ
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_image_storage.py`銆?
+  - 閹绘劒绶甸獮璺哄絺鐎瑰鍙忕拋鍧楁６閿涘湹AL 濡€崇础閿?
+  - 閺€顖涘瘮閹?collection 閹靛綊鍣洪弻銉嚄
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_image_storage.py`閵?
 
-### C14锛歅ipeline 缂栨帓锛圡VP 涓茶捣鏉ワ級
-- **鐩爣**锛氬疄鐜?`pipeline.py`锛氫覆琛屾墽琛岋紙integrity鈫抣oad鈫抯plit鈫抰ransform鈫抏ncode鈫抯tore锛夛紝骞跺澶辫触姝ラ鍋氭竻鏅板紓甯搞€?
-- **淇敼鏂囦欢**锛?
+### C14閿涙瓍ipeline 缂傛牗甯撻敍鍦P 娑撹尪鎹ｉ弶銉礆
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`pipeline.py`閿涙矮瑕嗙悰灞惧⒔鐞涘矉绱檌ntegrity閳姡oad閳姱plit閳姲ransform閳姀ncode閳姱tore閿涘绱濋獮璺侯嚠婢惰精瑙﹀銉╊€冮崑姘閺呮澘绱撶敮鎼炩偓?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/ingestion/pipeline.py`
   - `tests/integration/test_ingestion_pipeline.py`
-- **娴嬭瘯鏁版嵁**锛?
-  - **涓绘祴璇曟枃妗?*锛歚tests/fixtures/sample_documents/complex_technical_doc.pdf`
-    - 8绔犺妭鎶€鏈枃妗ｏ紙~21KB锛?
-    - 鍖呭惈3寮犲祵鍏ュ浘鐗囷紙闇€娴嬭瘯鍥剧墖鎻愬彇鍜屾弿杩帮級
-    - 鍖呭惈5涓〃鏍硷紙娴嬭瘯琛ㄦ牸鍐呭瑙ｆ瀽锛?
-    - 澶氶〉澶氭钀斤紙娴嬭瘯瀹屾暣鍒嗗潡娴佺▼锛?
-  - **杈呭姪娴嬭瘯**锛歚tests/fixtures/sample_documents/simple.pdf`锛堢畝鍗曞満鏅洖褰掞級
-- **楠屾敹鏍囧噯**锛?
-  - 瀵?`complex_technical_doc.pdf` 璺戝畬鏁?pipeline锛屾垚鍔熻緭鍑猴細
-    - 鍚戦噺绱㈠紩鏂囦欢鍒?ChromaDB
-    - BM25 绱㈠紩鏂囦欢鍒?`data/db/bm25/`
-    - 鎻愬彇鐨勫浘鐗囧埌 `data/images/` (SHA256鍛藉悕)
-  - Pipeline 鏃ュ織娓呮櫚灞曠ず鍚勯樁娈佃繘搴?
-  - 澶辫触姝ラ鎶涘嚭鏄庣‘寮傚父淇℃伅
-- **娴嬭瘯鏂规硶**锛歚pytest -v tests/integration/test_ingestion_pipeline.py`銆?
+- **濞村鐦弫鐗堝祦**閿?
+  - **娑撶粯绁寸拠鏇熸瀮濡?*閿涙瓪tests/fixtures/sample_documents/complex_technical_doc.pdf`
+    - 8缁旂姾濡幎鈧張顖涙瀮濡楋綇绱檦21KB閿?
+    - 閸栧懎鎯?瀵姴绁甸崗銉ユ禈閻楀浄绱欓棁鈧ù瀣槸閸ュ墽澧栭幓鎰絿閸滃本寮挎潻甯礆
+    - 閸栧懎鎯?娑擃亣銆冮弽纭风礄濞村鐦悰銊︾壐閸愬懎顔愮憴锝嗙€介敍?
+    - 婢舵岸銆夋径姘唽閽€鏂ょ礄濞村鐦€瑰本鏆ｉ崚鍡楁健濞翠胶鈻奸敍?
+  - **鏉堝懎濮ù瀣槸**閿涙瓪tests/fixtures/sample_documents/simple.pdf`閿涘牏鐣濋崡鏇炴簚閺咁垰娲栬ぐ鎺炵礆
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 鐎?`complex_technical_doc.pdf` 鐠烘垵鐣弫?pipeline閿涘本鍨氶崝鐔荤翻閸戠尨绱?
+    - 閸氭垿鍣虹槐銏犵穿閺傚洣娆㈤崚?ChromaDB
+    - BM25 缁便垹绱╅弬鍥︽閸?`data/db/bm25/`
+    - 閹绘劕褰囬惃鍕禈閻楀洤鍩?`data/images/` (SHA256閸涜棄鎮?
+  - Pipeline 閺冦儱绻斿〒鍛珰鐏炴洜銇氶崥鍕▉濞堜絻绻樻惔?
+  - 婢惰精瑙﹀銉╊€冮幎娑樺毉閺勫海鈥樺鍌氱埗娣団剝浼?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -v tests/integration/test_ingestion_pipeline.py`閵?
 
-### C15锛氳剼鏈叆鍙?ingest.py锛堢绾垮彲鐢級
-- **鐩爣**锛氬疄鐜?`scripts/ingest.py`锛屾敮鎸?`--collection`銆乣--path`銆乣--force`锛屽苟璋冪敤 pipeline銆?
-- **淇敼鏂囦欢**锛?
+### C15閿涙俺鍓奸張顒€鍙嗛崣?ingest.py閿涘牏顬囩痪鍨讲閻㈩煉绱?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`scripts/ingest.py`閿涘本鏁幐?`--collection`閵嗕梗--path`閵嗕梗--force`閿涘苯鑻熺拫鍐暏 pipeline閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `scripts/ingest.py`
   - `tests/e2e/test_data_ingestion.py`
-- **楠屾敹鏍囧噯**锛氬懡浠よ鍙繍琛屽苟鍦?`data/db` 浜х敓浜х墿锛涢噸澶嶈繍琛屽湪鏈彉鏇存椂璺宠繃銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/e2e/test_data_ingestion.py`锛堝敖閲忕敤涓存椂鐩綍锛夈€?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾鎳℃禒銈堫攽閸欘垵绻嶇悰灞借嫙閸?`data/db` 娴溠呮晸娴溠呭⒖閿涙盯鍣告径宥堢箥鐞涘苯婀張顏勫綁閺囧瓨妞傜捄瀹犵箖閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/e2e/test_data_ingestion.py`閿涘牆鏁栭柌蹇曟暏娑撳瓨妞傞惄顔肩秿閿涘鈧?
 
 ---
 
-## 闃舵 D锛歊etrieval MVP锛堢洰鏍囷細鑳?query 骞惰繑鍥?Top-K chunks锛?
+## 闂冭埖顔?D閿涙瓓etrieval MVP閿涘牏娲伴弽鍥风窗閼?query 楠炴儼绻戦崶?Top-K chunks閿?
 
-### D1锛歈ueryProcessor锛堝叧閿瘝鎻愬彇 + filters 缁撴瀯锛?
-- **鐩爣**锛氬疄鐜?`query_processor.py`锛氬叧閿瘝鎻愬彇锛堝厛瑙勫垯/鍒嗚瘝锛夛紝骞惰В鏋愰€氱敤 filters 缁撴瀯锛堝彲绌哄疄鐜帮級銆?
-- **淇敼鏂囦欢**锛?
+### D1閿涙瓐ueryProcessor閿涘牆鍙ч柨顔跨槤閹绘劕褰?+ filters 缂佹挻鐎敍?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`query_processor.py`閿涙艾鍙ч柨顔跨槤閹绘劕褰囬敍鍫濆帥鐟欏嫬鍨?閸掑棜鐦濋敍澶涚礉楠炴儼袙閺嬫劙鈧氨鏁?filters 缂佹挻鐎敍鍫濆讲缁屽搫鐤勯悳甯礆閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/core/query_engine/query_processor.py`
   - `tests/unit/test_query_processor.py`
-- **楠屾敹鏍囧噯**锛氬杈撳叆 query 杈撳嚭 `keywords` 闈炵┖锛堝彲鏍规嵁鍋滅敤璇嶇瓥鐣ワ級锛宖ilters 涓?dict銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_query_processor.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾顕潏鎾冲弳 query 鏉堟挸鍤?`keywords` 闂堢偟鈹栭敍鍫濆讲閺嶈宓侀崑婊呮暏鐠囧秶鐡ラ悾銉礆閿涘畺ilters 娑?dict閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_query_processor.py`閵?
 
-### D2锛欴enseRetriever锛堣皟鐢?VectorStore.query锛?
-- **鐩爣**锛氬疄鐜?`dense_retriever.py`锛岀粍鍚?`EmbeddingClient`锛坬uery 鍚戦噺鍖栵級+ `VectorStore`锛堝悜閲忔绱級锛屽畬鎴愯涔夊彫鍥炪€?
-- **鍓嶇疆浠诲姟**锛?
-  1. 闇€鍏堝湪 `src/core/types.py` 涓畾涔?`RetrievalResult` 绫诲瀷锛堝寘鍚?`chunk_id`, `score`, `text`, `metadata` 瀛楁锛?
-  2. 闇€纭 ChromaStore.query() 杩斿洖缁撴灉鍖呭惈 text锛堝綋鍓嶅瓨鍌ㄥ湪 documents 瀛楁锛岄渶琛ュ厖杩斿洖锛?
-- **淇敼鏂囦欢**锛?
-  - `src/core/types.py`锛堟柊澧?`RetrievalResult` 绫诲瀷锛?
-  - `src/libs/vector_store/chroma_store.py`锛堜慨澶嶏細query 杩斿洖缁撴灉闇€鍖呭惈 text 瀛楁锛?
+### D2閿涙enseRetriever閿涘牐鐨熼悽?VectorStore.query閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`dense_retriever.py`閿涘瞼绮嶉崥?`EmbeddingClient`閿涘潿uery 閸氭垿鍣洪崠鏍电礆+ `VectorStore`閿涘牆鎮滈柌蹇旑梾缁鳖澁绱氶敍灞界暚閹存劘顕㈡稊澶婂将閸ョ偑鈧?
+- **閸撳秶鐤嗘禒璇插**閿?
+  1. 闂団偓閸忓牆婀?`src/core/types.py` 娑擃厼鐣炬稊?`RetrievalResult` 缁鐎烽敍鍫濆瘶閸?`chunk_id`, `score`, `text`, `metadata` 鐎涙顔岄敍?
+  2. 闂団偓绾喛顓?ChromaStore.query() 鏉╂柨娲栫紒鎾寸亯閸栧懎鎯?text閿涘牆缍嬮崜宥呯摠閸屻劌婀?documents 鐎涙顔岄敍宀勬付鐞涖儱鍘栨潻鏂挎礀閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/core/types.py`閿涘牊鏌婃晶?`RetrievalResult` 缁鐎烽敍?
+  - `src/libs/vector_store/chroma_store.py`閿涘牅鎱ㄦ径宥忕窗query 鏉╂柨娲栫紒鎾寸亯闂団偓閸栧懎鎯?text 鐎涙顔岄敍?
   - `src/core/query_engine/dense_retriever.py`
   - `tests/unit/test_dense_retriever.py`
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `RetrievalResult` dataclass锛歚chunk_id: str`, `score: float`, `text: str`, `metadata: Dict`
-  - `DenseRetriever.__init__(settings, embedding_client?, vector_store?)`锛氭敮鎸佷緷璧栨敞鍏ョ敤浜庢祴璇?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `RetrievalResult` dataclass閿涙瓪chunk_id: str`, `score: float`, `text: str`, `metadata: Dict`
+  - `DenseRetriever.__init__(settings, embedding_client?, vector_store?)`閿涙碍鏁幐浣风贩鐠ф牗鏁為崗銉ф暏娴滃孩绁寸拠?
   - `DenseRetriever.retrieve(query: str, top_k: int, filters?: dict, trace?) -> List[RetrievalResult]`
-  - 鍐呴儴娴佺▼锛歚query 鈫?embedding_client.embed([query]) 鈫?vector_store.query(vector, top_k, filters) 鈫?浠庤繑鍥炵粨鏋滄彁鍙?text 鈫?瑙勮寖鍖栫粨鏋渀
-- **楠屾敹鏍囧噯**锛?
-  - `RetrievalResult` 绫诲瀷宸插畾涔夊苟鍙簭鍒楀寲
-  - ChromaStore.query() 杩斿洖缁撴灉鍖呭惈 `text` 瀛楁
-  - 瀵硅緭鍏?query 鑳界敓鎴?embedding 骞惰皟鐢?VectorStore 妫€绱?
-  - 杩斿洖缁撴灉鍖呭惈 `chunk_id`銆乣score`銆乣text`銆乣metadata`
-  - mock EmbeddingClient 鍜?VectorStore 鏃惰兘姝ｇ‘缂栨帓璋冪敤
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_dense_retriever.py`锛坢ock embedding + vector store锛夈€?
+  - 閸愬懘鍎村ù浣衡柤閿涙瓪query 閳?embedding_client.embed([query]) 閳?vector_store.query(vector, top_k, filters) 閳?娴犲氦绻戦崶鐐电波閺嬫粍褰侀崣?text 閳?鐟欏嫯瀵栭崠鏍波閺嬫竴
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `RetrievalResult` 缁鐎峰鎻掔暰娑斿鑻熼崣顖氱碍閸掓瀵?
+  - ChromaStore.query() 鏉╂柨娲栫紒鎾寸亯閸栧懎鎯?`text` 鐎涙顔?
+  - 鐎电绶崗?query 閼崇晫鏁撻幋?embedding 楠炴儼鐨熼悽?VectorStore 濡偓缁?
+  - 鏉╂柨娲栫紒鎾寸亯閸栧懎鎯?`chunk_id`閵嗕梗score`閵嗕梗text`閵嗕梗metadata`
+  - mock EmbeddingClient 閸?VectorStore 閺冩儼鍏樺锝団€樼紓鏍ㄥ笓鐠嬪啰鏁?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_dense_retriever.py`閿涘潰ock embedding + vector store閿涘鈧?
 
-### D3锛歋parseRetriever锛圔M25 鏌ヨ锛?
-- **鐩爣**锛氬疄鐜?`sparse_retriever.py`锛氫粠 `data/db/bm25/` 杞藉叆绱㈠紩骞舵煡璇€?
-- **鍓嶇疆浠诲姟**锛氶渶鍦?`BaseVectorStore` 鍜?`ChromaStore` 涓坊鍔?`get_by_ids()` 鏂规硶锛岀敤浜庢牴鎹?chunk_id 鎵归噺鑾峰彇 text 鍜?metadata
-- **淇敼鏂囦欢**锛?
-  - `src/libs/vector_store/base_vector_store.py`锛堟柊澧?`get_by_ids()` 鎶借薄鏂规硶锛?
-  - `src/libs/vector_store/chroma_store.py`锛堝疄鐜?`get_by_ids()` 鏂规硶锛?
+### D3閿涙瓔parseRetriever閿涘湐M25 閺屻儴顕楅敍?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`sparse_retriever.py`閿涙矮绮?`data/db/bm25/` 鏉炶棄鍙嗙槐銏犵穿楠炶埖鐓＄拠顫偓?
+- **閸撳秶鐤嗘禒璇插**閿涙岸娓堕崷?`BaseVectorStore` 閸?`ChromaStore` 娑擃厽鍧婇崝?`get_by_ids()` 閺傝纭堕敍宀€鏁ゆ禍搴㈢壌閹?chunk_id 閹靛綊鍣洪懢宄板絿 text 閸?metadata
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/libs/vector_store/base_vector_store.py`閿涘牊鏌婃晶?`get_by_ids()` 閹跺€熻杽閺傝纭堕敍?
+  - `src/libs/vector_store/chroma_store.py`閿涘牆鐤勯悳?`get_by_ids()` 閺傝纭堕敍?
   - `src/core/query_engine/sparse_retriever.py`
   - `tests/unit/test_sparse_retriever.py`
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `BaseVectorStore.get_by_ids(ids: List[str]) -> List[Dict]`锛氭牴鎹?ID 鎵归噺鑾峰彇璁板綍
-  - `ChromaStore.get_by_ids(ids: List[str]) -> List[Dict]`锛氳皟鐢?ChromaDB 鐨?get 鏂规硶
-  - `SparseRetriever.__init__(settings, bm25_indexer?, vector_store?)`锛氭敮鎸佷緷璧栨敞鍏ョ敤浜庢祴璇?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `BaseVectorStore.get_by_ids(ids: List[str]) -> List[Dict]`閿涙碍鐗撮幑?ID 閹靛綊鍣洪懢宄板絿鐠佹澘缍?
+  - `ChromaStore.get_by_ids(ids: List[str]) -> List[Dict]`閿涙俺鐨熼悽?ChromaDB 閻?get 閺傝纭?
+  - `SparseRetriever.__init__(settings, bm25_indexer?, vector_store?)`閿涙碍鏁幐浣风贩鐠ф牗鏁為崗銉ф暏娴滃孩绁寸拠?
   - `SparseRetriever.retrieve(keywords: List[str], top_k: int, trace?) -> List[RetrievalResult]`
-  - 鍐呴儴娴佺▼锛?
-    1. `keywords 鈫?bm25_indexer.query(keywords, top_k) 鈫?[{chunk_id, score}]`
-    2. `chunk_ids 鈫?vector_store.get_by_ids(chunk_ids) 鈫?[{id, text, metadata}]`
-    3. 鍚堝苟 score 涓?text/metadata锛岀粍瑁呬负 `RetrievalResult` 鍒楄〃
-  - 娉ㄦ剰锛歬eywords 鏉ヨ嚜 `QueryProcessor.process()` 鐨?`ProcessedQuery.keywords`
-- **楠屾敹鏍囧噯**锛?
-  - `BaseVectorStore.get_by_ids()` 鍜?`ChromaStore.get_by_ids()` 宸插疄鐜?
-  - 瀵瑰凡鏋勫缓绱㈠紩鐨?fixtures 璇枡锛屽叧閿瘝妫€绱㈠懡涓鏈?chunk_id
-  - 杩斿洖缁撴灉鍖呭惈瀹屾暣鐨?text 鍜?metadata
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_sparse_retriever.py`銆?
+  - 閸愬懘鍎村ù浣衡柤閿?
+    1. `keywords 閳?bm25_indexer.query(keywords, top_k) 閳?[{chunk_id, score}]`
+    2. `chunk_ids 閳?vector_store.get_by_ids(chunk_ids) 閳?[{id, text, metadata}]`
+    3. 閸氬牆鑻?score 娑?text/metadata閿涘瞼绮嶇憗鍛礋 `RetrievalResult` 閸掓銆?
+  - 濞夈劍鍓伴敍姝琫ywords 閺夈儴鍤?`QueryProcessor.process()` 閻?`ProcessedQuery.keywords`
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `BaseVectorStore.get_by_ids()` 閸?`ChromaStore.get_by_ids()` 瀹告彃鐤勯悳?
+  - 鐎电懓鍑￠弸鍕紦缁便垹绱╅惃?fixtures 鐠囶厽鏋￠敍灞藉彠闁款喛鐦濆Λ鈧槐銏犳嚒娑擃參顣╅張?chunk_id
+  - 鏉╂柨娲栫紒鎾寸亯閸栧懎鎯堢€瑰本鏆ｉ惃?text 閸?metadata
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_sparse_retriever.py`閵?
 
-### D4锛欶usion锛圧RF 瀹炵幇锛?
-- **鐩爣**锛氬疄鐜?`fusion.py`锛歊RF 铻嶅悎 dense/sparse 鎺掑悕骞惰緭鍑虹粺涓€鎺掑簭銆?
-- **淇敼鏂囦欢**锛?
+### D4閿涙usion閿涘湩RF 鐎圭偟骞囬敍?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`fusion.py`閿涙瓓RF 閾诲秴鎮?dense/sparse 閹烘帒鎮曢獮鎯扮翻閸戣櫣绮烘稉鈧幒鎺戠碍閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/core/query_engine/fusion.py`
   - `tests/unit/test_fusion_rrf.py`
-- **楠屾敹鏍囧噯**锛氬鏋勯€犵殑鎺掑悕杈撳叆杈撳嚭 deterministic锛沰 鍙傛暟鍙厤缃€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_fusion_rrf.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾顕弸鍕偓鐘垫畱閹烘帒鎮曟潏鎾冲弳鏉堟挸鍤?deterministic閿涙舶 閸欏倹鏆熼崣顖炲帳缂冾喓鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_fusion_rrf.py`閵?
 
-### D5锛欻ybridSearch 缂栨帓
-- **鐩爣**锛氬疄鐜?`hybrid_search.py`锛氱紪鎺?Dense + Sparse + Fusion 鐨勫畬鏁存贩鍚堟绱㈡祦绋嬶紝骞堕泦鎴?Metadata 杩囨护閫昏緫銆?
-- **鍓嶇疆渚濊禆**锛欴1锛圦ueryProcessor锛夈€丏2锛圖enseRetriever锛夈€丏3锛圫parseRetriever锛夈€丏4锛團usion锛?
-- **淇敼鏂囦欢**锛?
+### D5閿涙ybridSearch 缂傛牗甯?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`hybrid_search.py`閿涙氨绱幒?Dense + Sparse + Fusion 閻ㄥ嫬鐣弫瀛樿穿閸氬牊顥呯槐銏＄ウ缁嬪绱濋獮鍫曟肠閹?Metadata 鏉╁洦鎶ら柅鏄忕帆閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙1閿涘湨ueryProcessor閿涘鈧笍2閿涘湒enseRetriever閿涘鈧笍3閿涘湯parseRetriever閿涘鈧笍4閿涘湗usion閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/core/query_engine/hybrid_search.py`
   - `tests/integration/test_hybrid_search.py`
-- **瀹炵幇绫?鍑芥暟**锛?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `HybridSearch.__init__(settings, query_processor, dense_retriever, sparse_retriever, fusion)`
   - `HybridSearch.search(query: str, top_k: int, filters?: dict, trace?) -> List[RetrievalResult]`
-  - `HybridSearch._apply_metadata_filters(candidates, filters) -> List[RetrievalResult]`锛氬悗缃繃婊ゅ厹搴?
-  - 鍐呴儴娴佺▼锛歚query_processor.process() 鈫?骞惰(dense.retrieve + sparse.retrieve) 鈫?fusion.fuse() 鈫?metadata_filter 鈫?Top-K`
-- **楠屾敹鏍囧噯**锛?
-  - 瀵?fixtures 鏁版嵁锛岃兘杩斿洖 Top-K锛堝寘鍚?chunk 鏂囨湰涓?metadata锛?
-  - 鏀寔 filters 鍙傛暟锛堝 `collection`銆乣doc_type`锛夎繘琛岃繃婊?
-  - Dense/Sparse 浠讳竴璺緞澶辫触鏃惰兘闄嶇骇鍒板崟璺粨鏋?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_hybrid_search.py`銆?
+  - `HybridSearch._apply_metadata_filters(candidates, filters) -> List[RetrievalResult]`閿涙艾鎮楃純顔跨箖濠娿倕鍘规惔?
+  - 閸愬懘鍎村ù浣衡柤閿涙瓪query_processor.process() 閳?楠炴儼顢?dense.retrieve + sparse.retrieve) 閳?fusion.fuse() 閳?metadata_filter 閳?Top-K`
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 鐎?fixtures 閺佺増宓侀敍宀冨厴鏉╂柨娲?Top-K閿涘牆瀵橀崥?chunk 閺傚洦婀版稉?metadata閿?
+  - 閺€顖涘瘮 filters 閸欏倹鏆熼敍鍫濐洤 `collection`閵嗕梗doc_type`閿涘绻樼悰宀冪箖濠?
+  - Dense/Sparse 娴犺绔寸捄顖氱窞婢惰精瑙﹂弮鎯板厴闂勫秶楠囬崚鏉垮礋鐠侯垳绮ㄩ弸?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_hybrid_search.py`閵?
 
-### D6锛歊eranker锛圕ore 灞傜紪鎺?+ fallback锛?
-- **鐩爣**锛氬疄鐜?`core/query_engine/reranker.py`锛氭帴鍏?`libs.reranker` 鍚庣锛屽け璐?瓒呮椂鍥為€€ fusion 鎺掑悕銆?
-- **淇敼鏂囦欢**锛?
+### D6閿涙瓓eranker閿涘湑ore 鐏炲倻绱幒?+ fallback閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`core/query_engine/reranker.py`閿涙碍甯撮崗?`libs.reranker` 閸氬海顏敍灞姐亼鐠?鐡掑懏妞傞崶鐐衡偓鈧?fusion 閹烘帒鎮曢妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/core/query_engine/reranker.py`
-  - `config/prompts/rerank.txt`锛堜粎褰撳惎鐢?LLM Rerank 鍚庣鏃朵娇鐢級
+  - `config/prompts/rerank.txt`閿涘牅绮庤ぐ鎾虫儙閻?LLM Rerank 閸氬海顏弮鏈靛▏閻㈩煉绱?
   - `tests/unit/test_reranker_fallback.py`
-- **楠屾敹鏍囧噯**锛氭ā鎷熷悗绔紓甯告椂涓嶅奖鍝嶆渶缁堣繑鍥烇紝涓旀爣璁?fallback=true銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_reranker_fallback.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙碍膩閹风喎鎮楃粩顖氱磽鐢憡妞傛稉宥呭閸濆秵娓剁紒鍫ｇ箲閸ョ儑绱濇稉鏃€鐖ｇ拋?fallback=true閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_reranker_fallback.py`閵?
 
-### D7锛氳剼鏈叆鍙?query.py锛堟煡璇㈠彲鐢級
-- **鐩爣**锛氬疄鐜?`scripts/query.py`锛屼綔涓哄湪绾挎煡璇㈢殑鍛戒护琛屽叆鍙ｏ紝璋冪敤瀹屾暣鐨?HybridSearch + Reranker 娴佺▼骞惰緭鍑烘绱㈢粨鏋溿€?
-- **鍓嶇疆渚濊禆**锛欴5锛圚ybridSearch锛夈€丏6锛圧eranker锛?
-- **淇敼鏂囦欢**锛?
+### D7閿涙俺鍓奸張顒€鍙嗛崣?query.py閿涘牊鐓＄拠銏犲讲閻㈩煉绱?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`scripts/query.py`閿涘奔缍旀稉鍝勬躬缁炬寧鐓＄拠銏㈡畱閸涙垝鎶ょ悰灞藉弳閸欙綇绱濈拫鍐暏鐎瑰本鏆ｉ惃?HybridSearch + Reranker 濞翠胶鈻奸獮鎯扮翻閸戠儤顥呯槐銏㈢波閺嬫嚎鈧?
+- **閸撳秶鐤嗘笟婵婄**閿涙5閿涘湚ybridSearch閿涘鈧笍6閿涘湩eranker閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `scripts/query.py`
-- **瀹炵幇鍔熻兘**锛?
-  - **鍙傛暟鏀寔**锛?
-    - `--query "闂"`锛氬繀濉紝鏌ヨ鏂囨湰
-    - `--top-k 10`锛氬彲閫夛紝杩斿洖缁撴灉鏁伴噺锛堥粯璁?10锛?
-    - `--collection xxx`锛氬彲閫夛紝闄愬畾妫€绱㈤泦鍚?
-    - `--verbose`锛氬彲閫夛紝鏄剧ず鍚勯樁娈典腑闂寸粨鏋?
-    - `--no-rerank`锛氬彲閫夛紝璺宠繃 Reranker 闃舵
-  - **杈撳嚭鍐呭**锛?
-    - 榛樿妯″紡锛歍op-K 缁撴灉锛堝簭鍙枫€乻core銆佹枃鏈憳瑕併€佹潵婧愭枃浠躲€侀〉鐮侊級
-    - Verbose 妯″紡锛氶澶栨樉绀?Dense 鍙洖缁撴灉銆丼parse 鍙洖缁撴灉銆丗usion 缁撴灉銆丷erank 缁撴灉
-  - **鍐呴儴娴佺▼**锛?
-    1. 鍔犺浇閰嶇疆 `Settings`
-    2. 鍒濆鍖栫粍浠讹紙EmbeddingClient銆乂ectorStore銆丅M25Indexer銆丷eranker锛?
-    3. 鍒涘缓 `QueryProcessor`銆乣DenseRetriever`銆乣SparseRetriever`銆乣HybridSearch` 瀹炰緥
-    4. 璋冪敤 `HybridSearch.search()` 鑾峰彇鍊欓€夌粨鏋?
-    5. 璋冪敤 `Reranker.rerank()` 杩涜绮炬帓锛堥櫎闈?`--no-rerank`锛?
-    6. 鏍煎紡鍖栬緭鍑虹粨鏋?
-- **楠屾敹鏍囧噯**锛?
-  - 鍛戒护琛屽彲杩愯锛歚python scripts/query.py --query "濡備綍閰嶇疆 Azure锛?`
-  - 杩斿洖鏍煎紡鍖栫殑 Top-K 妫€绱㈢粨鏋?
-  - `--verbose` 妯″紡鏄剧ず鍚勯樁娈典腑闂寸粨鏋滐紙渚夸簬璋冭瘯锛?
-  - 鏃犳暟鎹椂杩斿洖鍙嬪ソ鎻愮ず锛堝"鏈壘鍒扮浉鍏虫枃妗ｏ紝璇峰厛杩愯 ingest.py 鎽勫彇鏁版嵁"锛?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄨ繍琛?`python scripts/query.py --query "娴嬭瘯鏌ヨ" --verbose`锛堜緷璧栧凡鎽勫彇鐨勬暟鎹級銆?
-- **涓?MCP Tool 鐨勫叧绯?*锛?
-  - `scripts/query.py` 鏄紑鍙戣皟璇曠敤鐨勫懡浠よ宸ュ叿
-  - `E3 query_knowledge_hub` 鏄敓浜х幆澧冪殑 MCP Tool
-  - 涓よ€呭叡浜?Core 灞傞€昏緫锛圚ybridSearch + Reranker锛夛紝浣嗗叆鍙ｅ拰杈撳嚭鏍煎紡涓嶅悓
+- **鐎圭偟骞囬崝鐔诲厴**閿?
+  - **閸欏倹鏆熼弨顖涘瘮**閿?
+    - `--query "闂傤噣顣?`閿涙艾绻€婵夘偓绱濋弻銉嚄閺傚洦婀?
+    - `--top-k 10`閿涙艾褰查柅澶涚礉鏉╂柨娲栫紒鎾寸亯閺佷即鍣洪敍鍫ョ帛鐠?10閿?
+    - `--collection xxx`閿涙艾褰查柅澶涚礉闂勬劕鐣惧Λ鈧槐銏ゆ肠閸?
+    - `--verbose`閿涙艾褰查柅澶涚礉閺勫墽銇氶崥鍕▉濞堝吀鑵戦梻瀵哥波閺?
+    - `--no-rerank`閿涙艾褰查柅澶涚礉鐠哄疇绻?Reranker 闂冭埖顔?
+  - **鏉堟挸鍤崘鍛啇**閿?
+    - 姒涙顓诲Ο鈥崇础閿涙瓖op-K 缂佹挻鐏夐敍鍫濈碍閸欐灚鈧够core閵嗕焦鏋冮張顒佹喅鐟曚降鈧焦娼靛┃鎰瀮娴犺翰鈧線銆夐惍渚婄礆
+    - Verbose 濡€崇础閿涙岸顤傛径鏍ㄦ▔缁€?Dense 閸欘剙娲栫紒鎾寸亯閵嗕讣parse 閸欘剙娲栫紒鎾寸亯閵嗕笚usion 缂佹挻鐏夐妴涓積rank 缂佹挻鐏?
+  - **閸愬懘鍎村ù浣衡柤**閿?
+    1. 閸旂姾娴囬柊宥囩枂 `Settings`
+    2. 閸掓繂顫愰崠鏍矋娴犺绱橢mbeddingClient閵嗕箓ectorStore閵嗕竻M25Indexer閵嗕阜eranker閿?
+    3. 閸掓稑缂?`QueryProcessor`閵嗕梗DenseRetriever`閵嗕梗SparseRetriever`閵嗕梗HybridSearch` 鐎圭偘绶?
+    4. 鐠嬪啰鏁?`HybridSearch.search()` 閼惧嘲褰囬崐娆撯偓澶岀波閺?
+    5. 鐠嬪啰鏁?`Reranker.rerank()` 鏉╂稖顢戠划鐐笓閿涘牓娅庨棃?`--no-rerank`閿?
+    6. 閺嶇厧绱￠崠鏍翻閸戣櫣绮ㄩ弸?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 閸涙垝鎶ょ悰灞藉讲鏉╂劘顢戦敍姝歱ython scripts/query.py --query "婵″倷缍嶉柊宥囩枂 Azure閿?`
+  - 鏉╂柨娲栭弽鐓庣础閸栨牜娈?Top-K 濡偓缁便垻绮ㄩ弸?
+  - `--verbose` 濡€崇础閺勫墽銇氶崥鍕▉濞堝吀鑵戦梻瀵哥波閺嬫粣绱欐笟澶哥艾鐠嬪啳鐦敍?
+  - 閺冪姵鏆熼幑顔芥鏉╂柨娲栭崣瀣偨閹绘劗銇氶敍鍫濐洤"閺堫亝澹橀崚鎵祲閸忚櫕鏋冨锝忕礉鐠囧嘲鍘涙潻鎰攽 ingest.py 閹藉嫬褰囬弫鐗堝祦"閿?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊ㄧ箥鐞?`python scripts/query.py --query "濞村鐦弻銉嚄" --verbose`閿涘牅绶风挧鏍у嚒閹藉嫬褰囬惃鍕殶閹诡噯绱氶妴?
+- **娑?MCP Tool 閻ㄥ嫬鍙х化?*閿?
+  - `scripts/query.py` 閺勵垰绱戦崣鎴ｇ殶鐠囨洜鏁ら惃鍕嚒娴犮倛顢戝銉ュ徔
+  - `E3 query_knowledge_hub` 閺勵垳鏁撴禍褏骞嗘晶鍐畱 MCP Tool
+  - 娑撱倛鈧懎鍙℃禍?Core 鐏炲倿鈧槒绶敍鍦歽bridSearch + Reranker閿涘绱濇担鍡楀弳閸欙絽鎷版潏鎾冲毉閺嶇厧绱℃稉宥呮倱
 
 ---
 
-## 闃舵 E锛歁CP Server 灞備笌 Tools锛堢洰鏍囷細瀵瑰鍙敤鐨?MCP tools锛?
+## 闂冭埖顔?E閿涙瓉CP Server 鐏炲倷绗?Tools閿涘牏娲伴弽鍥风窗鐎电懓顦婚崣顖滄暏閻?MCP tools閿?
 
-### E1锛歁CP Server 鍏ュ彛涓?Stdio 绾︽潫
-- **鐩爣**锛氬疄鐜?`mcp_server/server.py`锛氶伒寰?stdout 鍙緭鍑?MCP 娑堟伅锛屾棩蹇楀埌 stderr"銆?
-- **淇敼鏂囦欢**锛?
+### E1閿涙瓉CP Server 閸忋儱褰涙稉?Stdio 缁撅附娼?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`mcp_server/server.py`閿涙岸浼掑?stdout 閸欘亣绶崙?MCP 濞戝牊浼呴敍灞炬）韫囨鍩?stderr"閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/mcp_server/server.py`
   - `tests/integration/test_mcp_server.py`
-- **楠屾敹鏍囧噯**锛氬惎鍔?server 鑳藉畬鎴?initialize锛泂tderr 鏈夋棩蹇椾絾 stdout 涓嶆薄鏌撱€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_mcp_server.py`锛堝瓙杩涚▼鏂瑰紡锛夈€?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾鎯庨崝?server 閼宠棄鐣幋?initialize閿涙硞tderr 閺堝妫╄箛妞剧稻 stdout 娑撳秵钖勯弻鎾扁偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_mcp_server.py`閿涘牆鐡欐潻娑氣柤閺傜懓绱￠敍澶堚偓?
 
-### E2锛歅rotocol Handler 鍗忚瑙ｆ瀽涓庤兘鍔涘崗鍟?
-- **鐩爣**锛氬疄鐜?`mcp_server/protocol_handler.py`锛氬皝瑁?JSON-RPC 2.0 鍗忚瑙ｆ瀽锛屽鐞?`initialize`銆乣tools/list`銆乣tools/call` 涓夌被鏍稿績鏂规硶锛屽苟瀹炵幇瑙勮寖鐨勯敊璇鐞嗐€?
-- **淇敼鏂囦欢**锛?
+### E2閿涙瓍rotocol Handler 閸楀繗顔呯憴锝嗙€芥稉搴ゅ厴閸旀稑宕楅崯?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`mcp_server/protocol_handler.py`閿涙艾鐨濈憗?JSON-RPC 2.0 閸楀繗顔呯憴锝嗙€介敍灞筋槱閻?`initialize`閵嗕梗tools/list`閵嗕梗tools/call` 娑撳琚弽绋跨妇閺傝纭堕敍灞借嫙鐎圭偟骞囩憴鍕瘱閻ㄥ嫰鏁婄拠顖氼槱閻炲棎鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/mcp_server/protocol_handler.py`
   - `tests/unit/test_protocol_handler.py`
-- **瀹炵幇瑕佺偣**锛?
-  - **ProtocolHandler 绫?*锛?
-    - `handle_initialize(params)` 鈫?杩斿洖 server capabilities锛堟敮鎸佺殑 tools 鍒楄〃銆佺増鏈俊鎭級
-    - `handle_tools_list()` 鈫?杩斿洖宸叉敞鍐岀殑 tool schema锛坣ame, description, inputSchema锛?
-    - `handle_tools_call(name, arguments)` 鈫?璺敱鍒板叿浣?tool 鎵ц锛屾崟鑾峰紓甯稿苟杞崲涓?JSON-RPC error
-  - **閿欒鐮佽鑼?*锛氶伒寰?JSON-RPC 2.0锛?32600 Invalid Request, -32601 Method not found, -32602 Invalid params, -32603 Internal error锛?
-  - **鑳藉姏鍗忓晢**锛氬湪 `initialize` 鍝嶅簲涓０鏄?`capabilities.tools`
-- **楠屾敹鏍囧噯**锛?
-  - 鍙戦€?`initialize` 璇锋眰鑳借繑鍥炴纭殑 `serverInfo` 鍜?`capabilities`
-  - 鍙戦€?`tools/list` 鑳借繑鍥炲凡娉ㄥ唽 tools 鐨?schema
-  - 鍙戦€?`tools/call` 鑳芥纭矾鐢卞苟杩斿洖缁撴灉鎴栬鑼冮敊璇?
-  - **閿欒澶勭悊**锛氭棤鏁堟柟娉曡繑鍥?-32601锛屽弬鏁伴敊璇繑鍥?-32602锛屽唴閮ㄥ紓甯歌繑鍥?-32603 涓斾笉娉勯湶鍫嗘爤
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_protocol_handler.py`銆?
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - **ProtocolHandler 缁?*閿?
+    - `handle_initialize(params)` 閳?鏉╂柨娲?server capabilities閿涘牊鏁幐浣烘畱 tools 閸掓銆冮妴浣哄閺堫兛淇婇幁顖ょ礆
+    - `handle_tools_list()` 閳?鏉╂柨娲栧鍙夋暈閸愬瞼娈?tool schema閿涘潱ame, description, inputSchema閿?
+    - `handle_tools_call(name, arguments)` 閳?鐠侯垳鏁遍崚鏉垮徔娴?tool 閹笛嗩攽閿涘本宕熼懢宄扮磽鐢鑻熸潪顒佸床娑?JSON-RPC error
+  - **闁挎瑨顕ら惍浣筋潐閼?*閿涙岸浼掑?JSON-RPC 2.0閿?32600 Invalid Request, -32601 Method not found, -32602 Invalid params, -32603 Internal error閿?
+  - **閼宠棄濮忛崡蹇撴櫌**閿涙艾婀?`initialize` 閸濆秴绨叉稉顓烇紣閺?`capabilities.tools`
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 閸欐垿鈧?`initialize` 鐠囬攱鐪伴懗鍊熺箲閸ョ偞顒滅涵顔炬畱 `serverInfo` 閸?`capabilities`
+  - 閸欐垿鈧?`tools/list` 閼冲€熺箲閸ョ偛鍑″▔銊ュ斀 tools 閻?schema
+  - 閸欐垿鈧?`tools/call` 閼宠姤顒滅涵顔跨熅閻㈠崬鑻熸潻鏂挎礀缂佹挻鐏夐幋鏍潐閼煎啴鏁婄拠?
+  - **闁挎瑨顕ゆ径鍕倞**閿涙碍妫ら弫鍫熸煙濞夋洝绻戦崶?-32601閿涘苯寮弫浼存晩鐠囶垵绻戦崶?-32602閿涘苯鍞撮柈銊ョ磽鐢瓕绻戦崶?-32603 娑撴柧绗夊▔鍕苟閸棙鐖?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_protocol_handler.py`閵?
 
-### E3锛氬疄鐜?tool锛歲uery_knowledge_hub
-- **鐩爣**锛氬疄鐜?`tools/query_knowledge_hub.py`锛氳皟鐢?HybridSearch + Reranker锛屾瀯寤哄甫寮曠敤鐨勫搷搴旓紝杩斿洖 Markdown + structured citations銆?
-- **鍓嶇疆渚濊禆**锛欴5锛圚ybridSearch锛夈€丏6锛圧eranker锛夈€丒1锛圫erver锛夈€丒2锛圥rotocol Handler锛?
-- **淇敼鏂囦欢**锛?
+### E3閿涙艾鐤勯悳?tool閿涙uery_knowledge_hub
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`tools/query_knowledge_hub.py`閿涙俺鐨熼悽?HybridSearch + Reranker閿涘本鐎鍝勭敨瀵洜鏁ら惃鍕惙鎼存棑绱濇潻鏂挎礀 Markdown + structured citations閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙5閿涘湚ybridSearch閿涘鈧笍6閿涘湩eranker閿涘鈧笒1閿涘湯erver閿涘鈧笒2閿涘湧rotocol Handler閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/mcp_server/tools/query_knowledge_hub.py`
-  - `src/core/response/response_builder.py`锛堟柊澧烇細鏋勫缓 MCP 鍝嶅簲鏍煎紡锛?
-  - `src/core/response/citation_generator.py`锛堟柊澧烇細鐢熸垚寮曠敤淇℃伅锛?
-  - `tests/unit/test_response_builder.py`锛堟柊澧烇級
-  - `tests/integration/test_mcp_server.py`锛堣ˉ鐢ㄤ緥锛?
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `ResponseBuilder.build(retrieval_results, query) -> MCPResponse`锛氭瀯寤?MCP 鏍煎紡鍝嶅簲
-  - `CitationGenerator.generate(retrieval_results) -> List[Citation]`锛氱敓鎴愬紩鐢ㄥ垪琛?
-  - `query_knowledge_hub(query, top_k?, collection?) -> MCPToolResult`锛歍ool 鍏ュ彛鍑芥暟
-- **楠屾敹鏍囧噯**锛?
-  - tool 杩斿洖 `content[0]` 涓哄彲璇?Markdown锛堝惈 `[1]`銆乣[2]` 绛夊紩鐢ㄦ爣娉級
-  - `structuredContent.citations` 鍖呭惈 `source`/`page`/`chunk_id`/`score` 瀛楁
-  - 鏃犵粨鏋滄椂杩斿洖鍙嬪ソ鎻愮ず鑰岄潪绌烘暟缁?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_mcp_server.py -k query_knowledge_hub`銆?
+  - `src/core/response/response_builder.py`閿涘牊鏌婃晶鐑囩窗閺嬪嫬缂?MCP 閸濆秴绨查弽鐓庣础閿?
+  - `src/core/response/citation_generator.py`閿涘牊鏌婃晶鐑囩窗閻㈢喐鍨氬鏇犳暏娣団剝浼呴敍?
+  - `tests/unit/test_response_builder.py`閿涘牊鏌婃晶鐑囩礆
+  - `tests/integration/test_mcp_server.py`閿涘牐藟閻劋绶ラ敍?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `ResponseBuilder.build(retrieval_results, query) -> MCPResponse`閿涙碍鐎?MCP 閺嶇厧绱￠崫宥呯安
+  - `CitationGenerator.generate(retrieval_results) -> List[Citation]`閿涙氨鏁撻幋鎰穿閻劌鍨悰?
+  - `query_knowledge_hub(query, top_k?, collection?) -> MCPToolResult`閿涙瓖ool 閸忋儱褰涢崙鑺ユ殶
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - tool 鏉╂柨娲?`content[0]` 娑撳搫褰茬拠?Markdown閿涘牆鎯?`[1]`閵嗕梗[2]` 缁涘绱╅悽銊︾垼濞夘煉绱?
+  - `structuredContent.citations` 閸栧懎鎯?`source`/`page`/`chunk_id`/`score` 鐎涙顔?
+  - 閺冪姷绮ㄩ弸婊勬鏉╂柨娲栭崣瀣偨閹绘劗銇氶懓宀勬姜缁岀儤鏆熺紒?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_mcp_server.py -k query_knowledge_hub`閵?
 
-### E4锛氬疄鐜?tool锛歭ist_collections
-- **鐩爣**锛氬疄鐜?`tools/list_collections.py`锛氬垪鍑?`data/documents/` 涓嬮泦鍚堝苟闄勫甫缁熻锛堝彲寤跺悗鍒颁笅涓€姝ワ級銆?
-- **淇敼鏂囦欢**锛?
+### E4閿涙艾鐤勯悳?tool閿涙ist_collections
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`tools/list_collections.py`閿涙艾鍨崙?`data/documents/` 娑撳娉﹂崥鍫濊嫙闂勫嫬鐢紒鐔活吀閿涘牆褰插璺烘倵閸掗绗呮稉鈧銉礆閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/mcp_server/tools/list_collections.py`
   - `tests/unit/test_list_collections.py`
-- **楠屾敹鏍囧噯**锛氬 fixtures 涓殑鐩綍缁撴瀯鑳借繑鍥為泦鍚堝悕鍒楄〃銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_list_collections.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾顕?fixtures 娑擃厾娈戦惄顔肩秿缂佹挻鐎懗鍊熺箲閸ョ偤娉﹂崥鍫濇倳閸掓銆冮妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_list_collections.py`閵?
 
-### E5锛氬疄鐜?tool锛歡et_document_summary
-- **鐩爣**锛氬疄鐜?`tools/get_document_summary.py`锛氭寜 doc_id 杩斿洖 title/summary/tags锛堝彲鍏堜粠 metadata/缂撳瓨鍙栵級銆?
-- **淇敼鏂囦欢**锛?
+### E5閿涙艾鐤勯悳?tool閿涙et_document_summary
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`tools/get_document_summary.py`閿涙碍瀵?doc_id 鏉╂柨娲?title/summary/tags閿涘牆褰查崗鍫滅矤 metadata/缂傛挸鐡ㄩ崣鏍电礆閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/mcp_server/tools/get_document_summary.py`
   - `tests/unit/test_get_document_summary.py`
-- **楠屾敹鏍囧噯**锛氬涓嶅瓨鍦?doc_id 杩斿洖瑙勮寖閿欒锛涘瓨鍦ㄦ椂杩斿洖缁撴瀯鍖栦俊鎭€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_get_document_summary.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾顕稉宥呯摠閸?doc_id 鏉╂柨娲栫憴鍕瘱闁挎瑨顕ら敍娑樼摠閸︺劍妞傛潻鏂挎礀缂佹挻鐎崠鏍︿繆閹垬鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_get_document_summary.py`閵?
 
-### E6锛氬妯℃€佽繑鍥炵粍瑁咃紙Text + Image锛?
-- **鐩爣**锛氬疄鐜?`multimodal_assembler.py`锛氬懡涓?chunk 鍚?image_refs 鏃惰鍙栧浘鐗囧苟 base64 杩斿洖 ImageContent銆?
-- **淇敼鏂囦欢**锛?
+### E6閿涙艾顦垮Ο鈩冣偓浣界箲閸ョ偟绮嶇憗鍜冪礄Text + Image閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`multimodal_assembler.py`閿涙艾鎳℃稉?chunk 閸?image_refs 閺冩儼顕伴崣鏍ф禈閻楀洤鑻?base64 鏉╂柨娲?ImageContent閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `src/core/response/multimodal_assembler.py`
-  - `tests/integration/test_mcp_server.py`锛堣ˉ鍥惧儚杩斿洖鐢ㄤ緥锛?
-- **楠屾敹鏍囧噯**锛氳繑鍥?content 涓寘鍚?image type锛宮imeType 姝ｇ‘锛宒ata 涓?base64 瀛楃涓层€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_mcp_server.py -k image`銆?
+  - `tests/integration/test_mcp_server.py`閿涘牐藟閸ユ儳鍎氭潻鏂挎礀閻劋绶ラ敍?
+- **妤犲本鏁归弽鍥у櫙**閿涙俺绻戦崶?content 娑擃厼瀵橀崥?image type閿涘imeType 濮濓絿鈥橀敍瀹抋ta 娑?base64 鐎涙顑佹稉灞傗偓?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_mcp_server.py -k image`閵?
 
 ---
 
-## 闃舵 F锛歍race 鍩虹璁炬柦涓庢墦鐐癸紙鐩爣锛欼ngestion + Query 鍙岄摼璺彲杩借釜锛?
+## 闂冭埖顔?F閿涙瓖race 閸╄櫣顢呯拋鐐煢娑撳孩澧﹂悙鐧哥礄閻╊喗鐖ｉ敍娆糿gestion + Query 閸欏矂鎽肩捄顖氬讲鏉╁€熼嚋閿?
 
-### F1锛歍raceContext 澧炲己锛坒inish + 鑰楁椂缁熻 + trace_type锛?
-- **鐩爣**锛氬寮哄凡鏈夌殑 `TraceContext`锛圕5 宸插疄鐜板熀纭€鐗堬級锛屾坊鍔?`finish()` 鏂规硶銆佽€楁椂缁熻銆乣trace_type` 瀛楁锛堝尯鍒?query/ingestion锛夈€乣to_dict()` 搴忓垪鍖栧姛鑳姐€?
-- **淇敼鏂囦欢**锛?
-  - `src/core/trace/trace_context.py`锛堝寮猴細娣诲姞 trace_type/finish/elapsed_ms/to_dict锛?
-  - `src/core/trace/trace_collector.py`锛堟柊澧烇細鏀堕泦骞舵寔涔呭寲 trace锛?
-  - `tests/unit/test_trace_context.py`锛堣ˉ鍏?finish/to_dict 鐩稿叧娴嬭瘯锛?
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `TraceContext.__init__(trace_type: str = "query")`锛氭敮鎸?`"query"` 鎴?`"ingestion"` 绫诲瀷
-  - `TraceContext.finish() -> None`锛氭爣璁?trace 缁撴潫锛岃绠楁€昏€楁椂
-  - `TraceContext.elapsed_ms(stage_name?) -> float`锛氳幏鍙栨寚瀹氶樁娈垫垨鎬昏€楁椂
-  - `TraceContext.to_dict() -> dict`锛氬簭鍒楀寲涓哄彲 JSON 杈撳嚭鐨勫瓧鍏革紙鍚?trace_type锛?
-  - `TraceCollector.collect(trace: TraceContext) -> None`锛氭敹闆?trace 骞惰Е鍙戞寔涔呭寲
-- **楠屾敹鏍囧噯**锛?
-  - `record_stage` 杩藉姞闃舵鏁版嵁锛堝凡鏈夛級
-  - `finish()` 鍚?`to_dict()` 杈撳嚭鍖呭惈 `trace_id`銆乣trace_type`銆乣started_at`銆乣finished_at`銆乣total_elapsed_ms`銆乣stages`
-  - 杈撳嚭 dict 鍙洿鎺?`json.dumps()` 搴忓垪鍖?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_trace_context.py`銆?
+### F1閿涙瓖raceContext 婢х偛宸遍敍鍧抜nish + 閼版妞傜紒鐔活吀 + trace_type閿?
+- **閻╊喗鐖?*閿涙艾顤冨鍝勫嚒閺堝娈?`TraceContext`閿涘湑5 瀹告彃鐤勯悳鏉跨唨绾偓閻楀牞绱氶敍灞惧潑閸?`finish()` 閺傝纭堕妴浣解偓妤佹缂佺喕顓搁妴涔race_type` 鐎涙顔岄敍鍫濆隘閸?query/ingestion閿涘鈧梗to_dict()` 鎼村繐鍨崠鏍у閼冲鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/core/trace/trace_context.py`閿涘牆顤冨鐚寸窗濞ｈ濮?trace_type/finish/elapsed_ms/to_dict閿?
+  - `src/core/trace/trace_collector.py`閿涘牊鏌婃晶鐑囩窗閺€鍫曟肠楠炶埖瀵旀稊鍛 trace閿?
+  - `tests/unit/test_trace_context.py`閿涘牐藟閸?finish/to_dict 閻╃鍙уù瀣槸閿?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `TraceContext.__init__(trace_type: str = "query")`閿涙碍鏁幐?`"query"` 閹?`"ingestion"` 缁鐎?
+  - `TraceContext.finish() -> None`閿涙碍鐖ｇ拋?trace 缂佹挻娼敍宀冾吀缁犳鈧槒鈧妞?
+  - `TraceContext.elapsed_ms(stage_name?) -> float`閿涙俺骞忛崣鏍ㄥ瘹鐎规岸妯佸▓鍨灗閹槒鈧妞?
+  - `TraceContext.to_dict() -> dict`閿涙艾绨崚妤€瀵叉稉鍝勫讲 JSON 鏉堟挸鍤惃鍕摟閸忛潻绱欓崥?trace_type閿?
+  - `TraceCollector.collect(trace: TraceContext) -> None`閿涙碍鏁归梿?trace 楠炴儼袝閸欐垶瀵旀稊鍛
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `record_stage` 鏉╄棄濮為梼鑸殿唽閺佺増宓侀敍鍫濆嚒閺堝绱?
+  - `finish()` 閸?`to_dict()` 鏉堟挸鍤崠鍛儓 `trace_id`閵嗕梗trace_type`閵嗕梗started_at`閵嗕梗finished_at`閵嗕梗total_elapsed_ms`閵嗕梗stages`
+  - 鏉堟挸鍤?dict 閸欘垳娲块幒?`json.dumps()` 鎼村繐鍨崠?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_trace_context.py`閵?
 
 
-### F2锛氱粨鏋勫寲鏃ュ織 logger锛圝SON Lines锛?
-- **鐩爣**锛氬寮?`observability/logger.py`锛屾敮鎸?JSON Lines 鏍煎紡杈撳嚭锛屽苟瀹炵幇 trace 鎸佷箙鍖栧埌 `logs/traces.jsonl`銆?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/logger.py`锛堝寮猴細娣诲姞 JSONFormatter + FileHandler锛?
+### F2閿涙氨绮ㄩ弸鍕閺冦儱绻?logger閿涘湞SON Lines閿?
+- **閻╊喗鐖?*閿涙艾顤冨?`observability/logger.py`閿涘本鏁幐?JSON Lines 閺嶇厧绱℃潏鎾冲毉閿涘苯鑻熺€圭偟骞?trace 閹镐椒绠欓崠鏍у煂 `logs/traces.jsonl`閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/logger.py`閿涘牆顤冨鐚寸窗濞ｈ濮?JSONFormatter + FileHandler閿?
   - `tests/unit/test_jsonl_logger.py`
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `JSONFormatter`锛氳嚜瀹氫箟 logging Formatter锛岃緭鍑?JSON 鏍煎紡
-  - `get_trace_logger() -> logging.Logger`锛氳幏鍙栭厤缃簡 JSON Lines 杈撳嚭鐨?logger
-  - `write_trace(trace_dict: dict) -> None`锛氬皢 trace 瀛楀吀鍐欏叆 `logs/traces.jsonl`
-- **涓?F1 鐨勫垎宸?*锛?
-  - F1 璐熻矗 TraceContext 鐨勬暟鎹粨鏋勶紙鍚?`trace_type`锛夊拰 `finish()` 鏂规硶
-  - F2 璐熻矗灏?`trace.to_dict()` 鐨勭粨鏋滄寔涔呭寲鍒版枃浠?
-- **楠屾敹鏍囧噯**锛氬啓鍏ヤ竴鏉?trace 鍚庢枃浠舵柊澧炰竴琛屽悎娉?JSON锛屽寘鍚?`trace_type` 瀛楁銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_jsonl_logger.py`銆?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `JSONFormatter`閿涙俺鍤滅€规矮绠?logging Formatter閿涘矁绶崙?JSON 閺嶇厧绱?
+  - `get_trace_logger() -> logging.Logger`閿涙俺骞忛崣鏍帳缂冾喕绨?JSON Lines 鏉堟挸鍤惃?logger
+  - `write_trace(trace_dict: dict) -> None`閿涙艾鐨?trace 鐎涙鍚€閸愭瑥鍙?`logs/traces.jsonl`
+- **娑?F1 閻ㄥ嫬鍨庡?*閿?
+  - F1 鐠愮喕鐭?TraceContext 閻ㄥ嫭鏆熼幑顔剧波閺嬪嫸绱欓崥?`trace_type`閿涘鎷?`finish()` 閺傝纭?
+  - F2 鐠愮喕鐭楃亸?`trace.to_dict()` 閻ㄥ嫮绮ㄩ弸婊勫瘮娑斿懎瀵查崚鐗堟瀮娴?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾鍟撻崗銉ょ閺?trace 閸氬孩鏋冩禒鑸垫煀婢х偘绔寸悰灞芥値濞?JSON閿涘苯瀵橀崥?`trace_type` 鐎涙顔岄妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_jsonl_logger.py`閵?
 
-### F3锛氬湪 Query 閾捐矾鎵撶偣
-- **鐩爣**锛氬湪 HybridSearch/Rerank 涓敞鍏?TraceContext锛坄trace_type="query"`锛夛紝鍒╃敤 B 闃舵鎶借薄鎺ュ彛涓鐣欑殑 `trace` 鍙傛暟锛屾樉寮忚皟鐢?`trace.record_stage()` 璁板綍鍚勯樁娈垫暟鎹€?
-- **鍓嶇疆渚濊禆**锛欴5锛圚ybridSearch锛夈€丏6锛圧eranker锛夈€丗1锛圱raceContext 澧炲己锛夈€丗2锛堢粨鏋勫寲鏃ュ織锛?
-- **淇敼鏂囦欢**锛?
-  - `src/core/query_engine/hybrid_search.py`锛堝鍔?trace 璁板綍锛歞ense/sparse/fusion 闃舵锛?
-  - `src/core/query_engine/reranker.py`锛堝鍔?trace 璁板綍锛歳erank 闃舵锛?
-  - `tests/integration/test_hybrid_search.py`锛堟柇瑷€ trace 涓瓨鍦ㄥ悇闃舵锛?
-- **璇存槑**锛欱 闃舵鐨勬帴鍙ｅ凡棰勭暀 `trace: TraceContext | None = None` 鍙傛暟锛屾湰浠诲姟璐熻矗鍦ㄨ皟鐢ㄦ椂浼犲叆瀹為檯鐨?TraceContext 瀹炰緥锛屽苟鍦ㄥ悇闃舵璁板綍 `method`/`provider`/`details` 瀛楁銆?
-- **楠屾敹鏍囧噯**锛?
-  - 涓€娆℃煡璇㈢敓鎴?trace锛屽寘鍚?`query_processing`/`dense_retrieval`/`sparse_retrieval`/`fusion`/`rerank` 闃舵
-  - 姣忎釜闃舵璁板綍 `elapsed_ms` 鑰楁椂瀛楁鍜?`method` 瀛楁
-  - `trace.to_dict()` 涓?`trace_type == "query"`
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_hybrid_search.py`銆?
+### F3閿涙艾婀?Query 闁炬崘鐭鹃幍鎾跺仯
+- **閻╊喗鐖?*閿涙艾婀?HybridSearch/Rerank 娑擃厽鏁為崗?TraceContext閿涘潉trace_type="query"`閿涘绱濋崚鈺冩暏 B 闂冭埖顔岄幎鍊熻杽閹恒儱褰涙稉顓㈩暕閻ｆ瑧娈?`trace` 閸欏倹鏆熼敍灞炬▔瀵繗鐨熼悽?`trace.record_stage()` 鐠佹澘缍嶉崥鍕▉濞堝灚鏆熼幑顔衡偓?
+- **閸撳秶鐤嗘笟婵婄**閿涙5閿涘湚ybridSearch閿涘鈧笍6閿涘湩eranker閿涘鈧笚1閿涘湵raceContext 婢х偛宸遍敍澶堚偓涓?閿涘牏绮ㄩ弸鍕閺冦儱绻旈敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/core/query_engine/hybrid_search.py`閿涘牆顤冮崝?trace 鐠佹澘缍嶉敍姝瀍nse/sparse/fusion 闂冭埖顔岄敍?
+  - `src/core/query_engine/reranker.py`閿涘牆顤冮崝?trace 鐠佹澘缍嶉敍姝砮rank 闂冭埖顔岄敍?
+  - `tests/integration/test_hybrid_search.py`閿涘牊鏌囩懛鈧?trace 娑擃厼鐡ㄩ崷銊ユ倗闂冭埖顔岄敍?
+- **鐠囧瓨妲?*閿涙 闂冭埖顔岄惃鍕复閸欙絽鍑℃０鍕殌 `trace: TraceContext | None = None` 閸欏倹鏆熼敍灞炬拱娴犺濮熺拹鐔荤煑閸︺劏鐨熼悽銊︽娴肩姴鍙嗙€圭偤妾惃?TraceContext 鐎圭偘绶ラ敍灞借嫙閸︺劌鎮囬梼鑸殿唽鐠佹澘缍?`method`/`provider`/`details` 鐎涙顔岄妴?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 娑撯偓濞嗏剝鐓＄拠銏㈡晸閹?trace閿涘苯瀵橀崥?`query_processing`/`dense_retrieval`/`sparse_retrieval`/`fusion`/`rerank` 闂冭埖顔?
+  - 濮ｅ繋閲滈梼鑸殿唽鐠佹澘缍?`elapsed_ms` 閼版妞傜€涙顔岄崪?`method` 鐎涙顔?
+  - `trace.to_dict()` 娑?`trace_type == "query"`
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_hybrid_search.py`閵?
 
-### F4锛氬湪 Ingestion 閾捐矾鎵撶偣
-- **鐩爣**锛氬湪 IngestionPipeline 涓敞鍏?TraceContext锛坄trace_type="ingestion"`锛夛紝璁板綍鍚勬憚鍙栭樁娈电殑澶勭悊鏁版嵁銆?
-- **鍓嶇疆渚濊禆**锛欳5锛圥ipeline锛夈€丗1锛圱raceContext 澧炲己锛夈€丗2锛堢粨鏋勫寲鏃ュ織锛?
-- **淇敼鏂囦欢**锛?
-  - `src/ingestion/pipeline.py`锛堝鍔?trace 浼犻€掞細load/split/transform/embed/upsert 闃舵锛?
-  - `tests/integration/test_ingestion_pipeline.py`锛堟柇瑷€ trace 涓瓨鍦ㄥ悇闃舵锛?
-- **楠屾敹鏍囧噯**锛?
-  - 涓€娆℃憚鍙栫敓鎴?trace锛屽寘鍚?`load`/`split`/`transform`/`embed`/`upsert` 闃舵
-  - 姣忎釜闃舵璁板綍 `elapsed_ms`銆乣method`锛堝 markitdown/recursive/chroma锛夊拰澶勭悊璇︽儏
-  - `trace.to_dict()` 涓?`trace_type == "ingestion"`
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_ingestion_pipeline.py`銆?
+### F4閿涙艾婀?Ingestion 闁炬崘鐭鹃幍鎾跺仯
+- **閻╊喗鐖?*閿涙艾婀?IngestionPipeline 娑擃厽鏁為崗?TraceContext閿涘潉trace_type="ingestion"`閿涘绱濈拋鏉跨秿閸氬嫭鎲氶崣鏍▉濞堢數娈戞径鍕倞閺佺増宓侀妴?
+- **閸撳秶鐤嗘笟婵婄**閿涙5閿涘湧ipeline閿涘鈧笚1閿涘湵raceContext 婢х偛宸遍敍澶堚偓涓?閿涘牏绮ㄩ弸鍕閺冦儱绻旈敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/ingestion/pipeline.py`閿涘牆顤冮崝?trace 娴肩娀鈧帪绱發oad/split/transform/embed/upsert 闂冭埖顔岄敍?
+  - `tests/integration/test_ingestion_pipeline.py`閿涘牊鏌囩懛鈧?trace 娑擃厼鐡ㄩ崷銊ユ倗闂冭埖顔岄敍?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - 娑撯偓濞嗏剝鎲氶崣鏍晸閹?trace閿涘苯瀵橀崥?`load`/`split`/`transform`/`embed`/`upsert` 闂冭埖顔?
+  - 濮ｅ繋閲滈梼鑸殿唽鐠佹澘缍?`elapsed_ms`閵嗕梗method`閿涘牆顩?markitdown/recursive/chroma閿涘鎷版径鍕倞鐠囷附鍎?
+  - `trace.to_dict()` 娑?`trace_type == "ingestion"`
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_ingestion_pipeline.py`閵?
 
-### F5锛歅ipeline 杩涘害鍥炶皟 (on_progress)
-- **鐩爣**锛氬湪 `IngestionPipeline.run()` 鏂规硶涓柊澧炲彲閫?`on_progress` 鍥炶皟鍙傛暟锛屾敮鎸佸閮ㄥ疄鏃惰幏鍙栧鐞嗚繘搴︺€?
-- **鍓嶇疆渚濊禆**锛欶4锛圛ngestion 鎵撶偣锛?
-- **淇敼鏂囦欢**锛?
-  - `src/ingestion/pipeline.py`锛堝湪鍚勯樁娈佃皟鐢?`on_progress(stage_name, current, total)`锛?
-  - `tests/unit/test_pipeline_progress.py`锛堟柊澧烇細楠岃瘉鍥炶皟琚纭皟鐢級
-- **瀹炵幇瑕佺偣**锛?
-  - 鍥炶皟绛惧悕锛歚on_progress(stage_name: str, current: int, total: int)`
-  - `on_progress` 涓?`None` 鏃跺畬鍏ㄤ笉褰卞搷鐜版湁琛屼负
-  - 鍚勯樁娈靛湪澶勭悊姣忎釜 batch 鎴栧畬鎴愭椂瑙﹀彂鍥炶皟
-- **楠屾敹鏍囧噯**锛歅ipeline 杩愯鏃朵紶鍏?mock 鍥炶皟锛屾柇瑷€鍚勯樁娈靛潎琚皟鐢ㄤ笖鍙傛暟姝ｇ‘銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_pipeline_progress.py`銆?
+### F5閿涙瓍ipeline 鏉╂稑瀹抽崶鐐剁殶 (on_progress)
+- **閻╊喗鐖?*閿涙艾婀?`IngestionPipeline.run()` 閺傝纭舵稉顓熸煀婢х偛褰查柅?`on_progress` 閸ョ偠鐨熼崣鍌涙殶閿涘本鏁幐浣割樆闁劌鐤勯弮鎯板箯閸欐牕顦╅悶鍡氱箻鎼达负鈧?
+- **閸撳秶鐤嗘笟婵婄**閿涙4閿涘湜ngestion 閹垫挾鍋ｉ敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/ingestion/pipeline.py`閿涘牆婀崥鍕▉濞堜絻鐨熼悽?`on_progress(stage_name, current, total)`閿?
+  - `tests/unit/test_pipeline_progress.py`閿涘牊鏌婃晶鐑囩窗妤犲矁鐦夐崶鐐剁殶鐞氼偅顒滅涵顔跨殶閻㈩煉绱?
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 閸ョ偠鐨熺粵鎯ф倳閿涙瓪on_progress(stage_name: str, current: int, total: int)`
+  - `on_progress` 娑?`None` 閺冭泛鐣崗銊ょ瑝瑜板崬鎼烽悳鐗堟箒鐞涘奔璐?
+  - 閸氬嫰妯佸▓闈涙躬婢跺嫮鎮婂В蹇庨嚋 batch 閹存牕鐣幋鎰鐟欙箑褰傞崶鐐剁殶
+- **妤犲本鏁归弽鍥у櫙**閿涙瓍ipeline 鏉╂劘顢戦弮鏈电炊閸?mock 閸ョ偠鐨熼敍灞炬焽鐟封偓閸氬嫰妯佸▓闈涙綆鐞氼偉鐨熼悽銊ょ瑬閸欏倹鏆熷锝団€橀妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_pipeline_progress.py`閵?
 
 ---
 
-## 闃舵 G锛氬彲瑙嗗寲绠＄悊骞冲彴 Dashboard锛堢洰鏍囷細鍏〉闈㈠畬鏁村彲瑙嗗寲绠＄悊锛?
+## 闂冭埖顔?G閿涙艾褰茬憴鍡楀缁狅紕鎮婇獮鍐插酱 Dashboard閿涘牏娲伴弽鍥风窗閸忣參銆夐棃銏犵暚閺佹潙褰茬憴鍡楀缁狅紕鎮婇敍?
 
-### G1锛欴ashboard 鍩虹鏋舵瀯涓庣郴缁熸€昏椤?
-- **鐩爣**锛氭惌寤?Streamlit 澶氶〉闈㈠簲鐢ㄦ鏋讹紝瀹炵幇绯荤粺鎬昏椤甸潰锛堝睍绀虹粍浠堕厤缃笌鏁版嵁缁熻锛夈€?
-- **鍓嶇疆渚濊禆**锛欶1-F2锛圱race 鍩虹璁炬柦锛?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/dashboard/app.py`锛堥噸鍐欙細澶氶〉闈㈠鑸灦鏋勶級
-  - `src/observability/dashboard/pages/overview.py`锛堟柊澧烇細绯荤粺鎬昏椤甸潰锛?
-  - `src/observability/dashboard/services/config_service.py`锛堟柊澧烇細閰嶇疆璇诲彇鏈嶅姟锛?
-  - `scripts/start_dashboard.py`锛堟柊澧烇細Dashboard 鍚姩鑴氭湰锛?
-- **瀹炵幇瑕佺偣**锛?
-  - `app.py` 浣跨敤 `st.navigation()` 娉ㄥ唽鍏釜椤甸潰锛堟湭瀹屾垚鐨勯〉闈㈡樉绀哄崰浣嶆彁绀猴級
-  - Overview 椤甸潰锛氳鍙?`Settings` 灞曠ず缁勪欢鍗＄墖锛岃皟鐢?`ChromaStore.get_collection_stats()` 灞曠ず鏁版嵁缁熻
-  - `ConfigService`锛氬皝瑁?Settings 璇诲彇锛屾牸寮忓寲缁勪欢閰嶇疆淇℃伅
-- **楠屾敹鏍囧噯**锛歚streamlit run src/observability/dashboard/app.py` 鍙惎鍔紝鎬昏椤靛睍绀哄綋鍓嶉厤缃俊鎭€?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄨ繍琛?`python scripts/start_dashboard.py` 骞堕獙璇侀〉闈㈡覆鏌撱€?
+### G1閿涙ashboard 閸╄櫣顢呴弸鑸电€稉搴ｉ兇缂佺喐鈧槒顫嶆い?
+- **閻╊喗鐖?*閿涙碍鎯屽?Streamlit 婢舵岸銆夐棃銏犵安閻劍顢嬮弸璁圭礉鐎圭偟骞囩化鑽ょ埠閹槒顫嶆い鐢告桨閿涘牆鐫嶇粈铏圭矋娴犲爼鍘ょ純顔荤瑢閺佺増宓佺紒鐔活吀閿涘鈧?
+- **閸撳秶鐤嗘笟婵婄**閿涙1-F2閿涘湵race 閸╄櫣顢呯拋鐐煢閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/dashboard/app.py`閿涘牓鍣搁崘娆欑窗婢舵岸銆夐棃銏狀嚤閼割亝鐏﹂弸鍕剁礆
+  - `src/observability/dashboard/pages/overview.py`閿涘牊鏌婃晶鐑囩窗缁崵绮洪幀鏄忣潔妞ょ敻娼伴敍?
+  - `src/observability/dashboard/services/config_service.py`閿涘牊鏌婃晶鐑囩窗闁板秶鐤嗙拠璇插絿閺堝秴濮熼敍?
+  - `scripts/start_dashboard.py`閿涘牊鏌婃晶鐑囩窗Dashboard 閸氼垰濮╅懘姘拱閿?
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - `app.py` 娴ｈ法鏁?`st.navigation()` 濞夈劌鍞介崗顓濋嚋妞ょ敻娼伴敍鍫熸弓鐎瑰本鍨氶惃鍕€夐棃銏℃▔缁€鍝勫窗娴ｅ秵褰佺粈鐚寸礆
+  - Overview 妞ょ敻娼伴敍姘愁嚢閸?`Settings` 鐏炴洜銇氱紒鍕閸楋紕澧栭敍宀冪殶閻?`ChromaStore.get_collection_stats()` 鐏炴洜銇氶弫鐗堝祦缂佺喕顓?
+  - `ConfigService`閿涙艾鐨濈憗?Settings 鐠囪褰囬敍灞剧壐瀵繐瀵茬紒鍕闁板秶鐤嗘穱鈩冧紖
+- **妤犲本鏁归弽鍥у櫙**閿涙瓪streamlit run src/observability/dashboard/app.py` 閸欘垰鎯庨崝顭掔礉閹槒顫嶆い闈涚潔缁€鍝勭秼閸撳秹鍘ょ純顔讳繆閹垬鈧?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊ㄧ箥鐞?`python scripts/start_dashboard.py` 楠炲爼鐛欑拠渚€銆夐棃銏¤閺屾挶鈧?
 
-### G2锛欴ocumentManager 瀹炵幇
-- **鐩爣**锛氬疄鐜?`src/ingestion/document_manager.py`锛氳法瀛樺偍鐨勬枃妗ｇ敓鍛藉懆鏈熺鐞嗭紙list/delete/stats锛夈€?
-- **鍓嶇疆渚濊禆**锛欳5锛圥ipeline + 鍚勫瓨鍌ㄦā鍧楀凡灏辩华锛?
-- **淇敼鏂囦欢**锛?
-  - `src/ingestion/document_manager.py`锛堟柊澧烇級
-  - `src/libs/vector_store/chroma_store.py`锛堝寮猴細娣诲姞 `delete_by_metadata`锛?
-  - `src/ingestion/storage/bm25_indexer.py`锛堝寮猴細娣诲姞 `remove_document`锛?
-  - `src/libs/loader/file_integrity.py`锛堝寮猴細娣诲姞 `remove_record` + `list_processed`锛?
-  - `tests/unit/test_document_manager.py`锛堟柊澧烇級
-- **瀹炵幇绫?鍑芥暟**锛?
+### G2閿涙ocumentManager 鐎圭偟骞?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`src/ingestion/document_manager.py`閿涙俺娉曠€涙ê鍋嶉惃鍕瀮濡楋絿鏁撻崨钘夋噯閺堢喓顓搁悶鍡礄list/delete/stats閿涘鈧?
+- **閸撳秶鐤嗘笟婵婄**閿涙5閿涘湧ipeline + 閸氬嫬鐡ㄩ崒銊δ侀崸妤€鍑＄亸杈╁崕閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/ingestion/document_manager.py`閿涘牊鏌婃晶鐑囩礆
+  - `src/libs/vector_store/chroma_store.py`閿涘牆顤冨鐚寸窗濞ｈ濮?`delete_by_metadata`閿?
+  - `src/ingestion/storage/bm25_indexer.py`閿涘牆顤冨鐚寸窗濞ｈ濮?`remove_document`閿?
+  - `src/libs/loader/file_integrity.py`閿涘牆顤冨鐚寸窗濞ｈ濮?`remove_record` + `list_processed`閿?
+  - `tests/unit/test_document_manager.py`閿涘牊鏌婃晶鐑囩礆
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `DocumentManager.__init__(chroma_store, bm25_indexer, image_storage, file_integrity)`
   - `DocumentManager.list_documents(collection?) -> List[DocumentInfo]`
   - `DocumentManager.get_document_detail(doc_id) -> DocumentDetail`
   - `DocumentManager.delete_document(source_path, collection) -> DeleteResult`
   - `DocumentManager.get_collection_stats(collection?) -> CollectionStats`
-- **楠屾敹鏍囧噯**锛?
-  - `list_documents` 杩斿洖宸叉憚鍏ユ枃妗ｅ垪琛紙source銆乧hunk 鏁般€佸浘鐗囨暟锛?
-  - `delete_document` 鍗忚皟鍒犻櫎 Chroma + BM25 + ImageStorage + FileIntegrity 鍥涗釜瀛樺偍
-  - 鍒犻櫎鍚庡啀娆?list 涓嶅寘鍚凡鍒犻櫎鏂囨。
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_document_manager.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `list_documents` 鏉╂柨娲栧鍙夋啔閸忋儲鏋冨锝呭灙鐞涱煉绱檚ource閵嗕恭hunk 閺佽埇鈧礁娴橀悧鍥ㄦ殶閿?
+  - `delete_document` 閸楀繗鐨熼崚鐘绘珟 Chroma + BM25 + ImageStorage + FileIntegrity 閸ユ稐閲滅€涙ê鍋?
+  - 閸掔娀娅庨崥搴″晙濞?list 娑撳秴瀵橀崥顐㈠嚒閸掔娀娅庨弬鍥ㄣ€?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_document_manager.py`閵?
 
-### G3锛氭暟鎹祻瑙堝櫒椤甸潰
-- **鐩爣**锛氬疄鐜?Dashboard 鏁版嵁娴忚鍣ㄩ〉闈紙鏌ョ湅鏂囨。鍒楄〃銆丆hunk 璇︽儏銆佸浘鐗囬瑙堬級銆?
-- **鍓嶇疆渚濊禆**锛欸1锛圖ashboard 鏋舵瀯锛夈€丟2锛圖ocumentManager锛?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/dashboard/pages/data_browser.py`锛堟柊澧烇級
-  - `src/observability/dashboard/services/data_service.py`锛堟柊澧烇細灏佽 ChromaStore/ImageStorage 璇诲彇锛?
-- **瀹炵幇瑕佺偣**锛?
-  - 鏂囨。鍒楄〃瑙嗗浘锛氬睍绀?source_path銆侀泦鍚堛€乧hunk 鏁般€佹憚鍏ユ椂闂达紱鏀寔闆嗗悎绛涢€?
-  - Chunk 璇︽儏瑙嗗浘锛氱偣鍑绘枃妗ｅ睍寮€鎵€鏈?chunk锛屾樉绀哄唴瀹癸紙鍙姌鍙狅級銆乵etadata 瀛楁銆佸叧鑱斿浘鐗?
-  - `DataService`锛氬皝瑁?`ChromaStore.get_by_metadata()` 鍜?`ImageStorage.list_images()` 璋冪敤
-- **楠屾敹鏍囧噯**锛氬彲鍦?Dashboard 涓祻瑙堝凡鎽勫叆鐨勬枃妗ｅ拰 chunk 璇︽儏銆?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄩ獙璇侊紙鍏?ingest 鏍蜂緥鏁版嵁锛屽啀鍦?Dashboard 娴忚锛夈€?
+### G3閿涙碍鏆熼幑顔界セ鐟欏牆娅掓い鐢告桨
+- **閻╊喗鐖?*閿涙艾鐤勯悳?Dashboard 閺佺増宓佸ù蹇氼潔閸ｃ劑銆夐棃顫礄閺屻儳婀呴弬鍥ㄣ€傞崚妤勩€冮妴涓唄unk 鐠囷附鍎忛妴浣告禈閻楀洭顣╃憴鍫礆閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙1閿涘湒ashboard 閺嬭埖鐎敍澶堚偓涓?閿涘湒ocumentManager閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/dashboard/pages/data_browser.py`閿涘牊鏌婃晶鐑囩礆
+  - `src/observability/dashboard/services/data_service.py`閿涘牊鏌婃晶鐑囩窗鐏忎浇顥?ChromaStore/ImageStorage 鐠囪褰囬敍?
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 閺傚洦銆傞崚妤勩€冪憴鍡楁禈閿涙艾鐫嶇粈?source_path閵嗕線娉﹂崥鍫涒偓涔unk 閺佽埇鈧焦鎲氶崗銉︽闂傝揪绱遍弨顖涘瘮闂嗗棗鎮庣粵娑⑩偓?
+  - Chunk 鐠囷附鍎忕憴鍡楁禈閿涙氨鍋ｉ崙缁樻瀮濡楋絽鐫嶅鈧幍鈧張?chunk閿涘本妯夌粈鍝勫敶鐎圭櫢绱欓崣顖涘閸欑媴绱氶妴涔礶tadata 鐎涙顔岄妴浣稿彠閼辨柨娴橀悧?
+  - `DataService`閿涙艾鐨濈憗?`ChromaStore.get_by_metadata()` 閸?`ImageStorage.list_images()` 鐠嬪啰鏁?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾褰查崷?Dashboard 娑擃厽绁荤憴鍫濆嚒閹藉嫬鍙嗛惃鍕瀮濡楋絽鎷?chunk 鐠囷附鍎忛妴?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊╃崣鐠囦緤绱欓崗?ingest 閺嶈渹绶ラ弫鐗堝祦閿涘苯鍟€閸?Dashboard 濞村繗顫嶉敍澶堚偓?
 
-### G4锛欼ngestion 绠＄悊椤甸潰
-- **鐩爣**锛氬疄鐜?Dashboard Ingestion 绠＄悊椤甸潰锛堟枃浠朵笂浼犺Е鍙戞憚鍙栥€佽繘搴﹀睍绀恒€佹枃妗ｅ垹闄わ級銆?
-- **鍓嶇疆渚濊禆**锛欸2锛圖ocumentManager锛夈€丟3锛圖ataService锛夈€丗5锛坥n_progress 鍥炶皟锛?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/dashboard/pages/ingestion_manager.py`锛堟柊澧烇級
-- **瀹炵幇瑕佺偣**锛?
-  - 鏂囦欢涓婁紶锛歚st.file_uploader` 閫夋嫨鏂囦欢 + 闆嗗悎閫夋嫨
-  - 鎽勫彇瑙﹀彂锛氳皟鐢?`IngestionPipeline.run(on_progress=...)` + `st.progress()` 瀹炴椂杩涘害
-  - 鏂囨。鍒犻櫎锛氬湪鏂囨。鍒楄〃涓彁渚涘垹闄ゆ寜閽紝璋冪敤 `DocumentManager.delete_document()`
-- **楠屾敹鏍囧噯**锛氬彲鍦?Dashboard 涓笂浼犳枃浠惰Е鍙戞憚鍙栥€佺湅鍒板疄鏃惰繘搴︽潯銆佸垹闄ゅ凡鏈夋枃妗ｃ€?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄩ獙璇侊紙涓婁紶 PDF 鈫?瑙傚療杩涘害 鈫?鍒犻櫎 鈫?纭宸茬Щ闄わ級銆?
+### G4閿涙ngestion 缁狅紕鎮婃い鐢告桨
+- **閻╊喗鐖?*閿涙艾鐤勯悳?Dashboard Ingestion 缁狅紕鎮婃い鐢告桨閿涘牊鏋冩禒鏈电瑐娴肩姾袝閸欐垶鎲氶崣鏍モ偓浣界箻鎼达箑鐫嶇粈鎭掆偓浣规瀮濡楋絽鍨归梽銈忕礆閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙2閿涘湒ocumentManager閿涘鈧笩3閿涘湒ataService閿涘鈧笚5閿涘潵n_progress 閸ョ偠鐨熼敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/dashboard/pages/ingestion_manager.py`閿涘牊鏌婃晶鐑囩礆
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 閺傚洣娆㈡稉濠佺炊閿涙瓪st.file_uploader` 闁瀚ㄩ弬鍥︽ + 闂嗗棗鎮庨柅澶嬪
+  - 閹藉嫬褰囩憴锕€褰傞敍姘崇殶閻?`IngestionPipeline.run(on_progress=...)` + `st.progress()` 鐎圭偞妞傛潻娑樺
+  - 閺傚洦銆傞崚鐘绘珟閿涙艾婀弬鍥ㄣ€傞崚妤勩€冩稉顓熷絹娓氭稑鍨归梽銈嗗瘻闁筋噯绱濈拫鍐暏 `DocumentManager.delete_document()`
+- **妤犲本鏁归弽鍥у櫙**閿涙艾褰查崷?Dashboard 娑擃厺绗傛导鐘虫瀮娴犳儼袝閸欐垶鎲氶崣鏍モ偓浣烘箙閸掓澘鐤勯弮鎯扮箻鎼达附娼妴浣稿灩闂勩倕鍑￠張澶嬫瀮濡楋絻鈧?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊╃崣鐠囦緤绱欐稉濠佺炊 PDF 閳?鐟欏倸鐧傛潻娑樺 閳?閸掔娀娅?閳?绾喛顓诲鑼╅梽銈忕礆閵?
 
-### G5锛欼ngestion 杩借釜椤甸潰
-- **鐩爣**锛氬疄鐜?Dashboard Ingestion 杩借釜椤甸潰锛堟憚鍙栧巻鍙插垪琛ㄣ€侀樁娈佃€楁椂鐎戝竷鍥撅級銆?
-- **鍓嶇疆渚濊禆**锛欶4锛圛ngestion 鎵撶偣锛夈€丟1锛圖ashboard 鏋舵瀯锛?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/dashboard/pages/ingestion_traces.py`锛堟柊澧烇級
-  - `src/observability/dashboard/services/trace_service.py`锛堟柊澧烇細瑙ｆ瀽 traces.jsonl锛?
-- **瀹炵幇瑕佺偣**锛?
-  - 鍘嗗彶鍒楄〃锛氭寜鏃堕棿鍊掑簭灞曠ず `trace_type == "ingestion"` 璁板綍
-  - 璇︽儏椤碉細妯悜鏉″舰鍥惧睍绀?load/split/transform/embed/upsert 鑰楁椂鍒嗗竷
-  - `TraceService`锛氳鍙?`logs/traces.jsonl`锛岃В鏋愪负 Trace 瀵硅薄鍒楄〃
-- **楠屾敹鏍囧噯**锛氭墽琛?ingest 鍚庯紝Dashboard 鏄剧ず瀵瑰簲鐨勮拷韪褰曚笌鑰楁椂鐎戝竷鍥俱€?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄩ獙璇侊紙鍏?ingest 鈫?鎵撳紑 Dashboard 鈫?鏌ョ湅杩借釜锛夈€?
+### G5閿涙ngestion 鏉╁€熼嚋妞ょ敻娼?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?Dashboard Ingestion 鏉╁€熼嚋妞ょ敻娼伴敍鍫熸啔閸欐牕宸婚崣鎻掑灙鐞涖劊鈧線妯佸▓浣冣偓妤佹閻庢垵绔烽崶鎾呯礆閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙4閿涘湜ngestion 閹垫挾鍋ｉ敍澶堚偓涓?閿涘湒ashboard 閺嬭埖鐎敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/dashboard/pages/ingestion_traces.py`閿涘牊鏌婃晶鐑囩礆
+  - `src/observability/dashboard/services/trace_service.py`閿涘牊鏌婃晶鐑囩窗鐟欙絾鐎?traces.jsonl閿?
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 閸樺棗褰堕崚妤勩€冮敍姘瘻閺冨爼妫块崐鎺戠碍鐏炴洜銇?`trace_type == "ingestion"` 鐠佹澘缍?
+  - 鐠囷附鍎忔い纰夌窗濡亜鎮滈弶鈥宠埌閸ユ儳鐫嶇粈?load/split/transform/embed/upsert 閼版妞傞崚鍡楃
+  - `TraceService`閿涙俺顕伴崣?`logs/traces.jsonl`閿涘矁袙閺嬫劒璐?Trace 鐎电钖勯崚妤勩€?
+- **妤犲本鏁归弽鍥у櫙**閿涙碍澧界悰?ingest 閸氬函绱滵ashboard 閺勫墽銇氱€电懓绨查惃鍕嫹闊亣顔囪ぐ鏇氱瑢閼版妞傞悗鎴濈閸ヤ勘鈧?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊╃崣鐠囦緤绱欓崗?ingest 閳?閹垫挸绱?Dashboard 閳?閺屻儳婀呮潻鍊熼嚋閿涘鈧?
 
-### G6锛歈uery 杩借釜椤甸潰
-- **鐩爣**锛氬疄鐜?Dashboard Query 杩借釜椤甸潰锛堟煡璇㈠巻鍙层€丏ense/Sparse 瀵规瘮銆丷erank 鍙樺寲锛夈€?
-- **鍓嶇疆渚濊禆**锛欶3锛圦uery 鎵撶偣锛夈€丟1锛圖ashboard 鏋舵瀯锛夈€丟5锛圱raceService 宸插疄鐜帮級
-- **淇敼鏂囦欢**锛?
-  - `src/observability/dashboard/pages/query_traces.py`锛堟柊澧烇級
-- **瀹炵幇瑕佺偣**锛?
-  - 鍘嗗彶鍒楄〃锛氭寜鏃堕棿鍊掑簭灞曠ず `trace_type == "query"` 璁板綍锛屾敮鎸佹寜 Query 鍏抽敭璇嶆悳绱?
-  - 璇︽儏椤碉細鑰楁椂鐎戝竷鍥?+ Dense vs Sparse 骞跺垪瀵规瘮 + Rerank 鍓嶅悗鎺掑悕鍙樺寲
-- **楠屾敹鏍囧噯**锛氭墽琛?query 鍚庯紝Dashboard 鏄剧ず鏌ヨ杩借釜璇︽儏涓庡悇闃舵瀵规瘮銆?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄩ獙璇侊紙鍏?query 鈫?鎵撳紑 Dashboard 鈫?鏌ョ湅杩借釜锛夈€?
+### G6閿涙瓐uery 鏉╁€熼嚋妞ょ敻娼?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?Dashboard Query 鏉╁€熼嚋妞ょ敻娼伴敍鍫熺叀鐠囥垹宸婚崣灞傗偓涓廵nse/Sparse 鐎佃鐦妴涓積rank 閸欐ê瀵查敍澶堚偓?
+- **閸撳秶鐤嗘笟婵婄**閿涙3閿涘湨uery 閹垫挾鍋ｉ敍澶堚偓涓?閿涘湒ashboard 閺嬭埖鐎敍澶堚偓涓?閿涘湵raceService 瀹告彃鐤勯悳甯礆
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/dashboard/pages/query_traces.py`閿涘牊鏌婃晶鐑囩礆
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 閸樺棗褰堕崚妤勩€冮敍姘瘻閺冨爼妫块崐鎺戠碍鐏炴洜銇?`trace_type == "query"` 鐠佹澘缍嶉敍灞炬暜閹镐焦瀵?Query 閸忔娊鏁拠宥嗘偝缁?
+  - 鐠囷附鍎忔い纰夌窗閼版妞傞悗鎴濈閸?+ Dense vs Sparse 楠炶泛鍨€佃鐦?+ Rerank 閸撳秴鎮楅幒鎺戞倳閸欐ê瀵?
+- **妤犲本鏁归弽鍥у櫙**閿涙碍澧界悰?query 閸氬函绱滵ashboard 閺勫墽銇氶弻銉嚄鏉╁€熼嚋鐠囷附鍎忔稉搴℃倗闂冭埖顔岀€佃鐦妴?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊╃崣鐠囦緤绱欓崗?query 閳?閹垫挸绱?Dashboard 閳?閺屻儳婀呮潻鍊熼嚋閿涘鈧?
 
 ---
 
-## 闃舵 H锛氳瘎浼颁綋绯伙紙鐩爣锛氬彲鎻掓嫈璇勪及 + 鍙噺鍖栧洖褰掞級
+## 闂冭埖顔?H閿涙俺鐦庢导棰佺秼缁紮绱欓惄顔界垼閿涙艾褰查幓鎺撳珗鐠囧嫪鍙?+ 閸欘垶鍣洪崠鏍ф礀瑜版帪绱?
 
-### H1锛歊agasEvaluator 瀹炵幇
-- **鐩爣**锛氬疄鐜?`ragas_evaluator.py`锛氬皝瑁?Ragas 妗嗘灦锛屽疄鐜?`BaseEvaluator` 鎺ュ彛銆?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/evaluation/ragas_evaluator.py`锛堟柊澧烇級
-  - `src/libs/evaluator/evaluator_factory.py`锛堟敞鍐?ragas provider锛?
-  - `tests/unit/test_ragas_evaluator.py`锛堟柊澧烇級
-- **瀹炵幇绫?鍑芥暟**锛?
-  - `RagasEvaluator(BaseEvaluator)`锛氬疄鐜?`evaluate()` 鏂规硶
-  - 鏀寔鎸囨爣锛欶aithfulness, Answer Relevancy, Context Precision
-  - 浼橀泤闄嶇骇锛歊agas 鏈畨瑁呮椂鎶涘嚭鏄庣‘鐨?`ImportError` 鎻愮ず
-- **楠屾敹鏍囧噯**锛歮ock LLM 鐜涓嬶紝`evaluate()` 杩斿洖鍖呭惈 faithfulness/answer_relevancy 鐨?metrics 瀛楀吀銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_ragas_evaluator.py`銆?
+### H1閿涙瓓agasEvaluator 鐎圭偟骞?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`ragas_evaluator.py`閿涙艾鐨濈憗?Ragas 濡楀棙鐏﹂敍灞界杽閻?`BaseEvaluator` 閹恒儱褰涢妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/evaluation/ragas_evaluator.py`閿涘牊鏌婃晶鐑囩礆
+  - `src/libs/evaluator/evaluator_factory.py`閿涘牊鏁為崘?ragas provider閿?
+  - `tests/unit/test_ragas_evaluator.py`閿涘牊鏌婃晶鐑囩礆
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
+  - `RagasEvaluator(BaseEvaluator)`閿涙艾鐤勯悳?`evaluate()` 閺傝纭?
+  - 閺€顖涘瘮閹稿洦鐖ｉ敍娆禷ithfulness, Answer Relevancy, Context Precision
+  - 娴兼﹢娉ら梽宥囬獓閿涙瓓agas 閺堫亜鐣ㄧ憗鍛閹舵稑鍤弰搴ｂ€橀惃?`ImportError` 閹绘劗銇?
+- **妤犲本鏁归弽鍥у櫙**閿涙ock LLM 閻滎垰顣ㄦ稉瀣剁礉`evaluate()` 鏉╂柨娲栭崠鍛儓 faithfulness/answer_relevancy 閻?metrics 鐎涙鍚€閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_ragas_evaluator.py`閵?
 
-### H2锛欳ompositeEvaluator 瀹炵幇
-- **鐩爣**锛氬疄鐜?`composite_evaluator.py`锛氱粍鍚堝涓?Evaluator 骞惰鎵ц锛屾眹鎬荤粨鏋溿€?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/evaluation/composite_evaluator.py`锛堟柊澧烇級
-  - `tests/unit/test_composite_evaluator.py`锛堟柊澧烇級
-- **瀹炵幇绫?鍑芥暟**锛?
+### H2閿涙ompositeEvaluator 鐎圭偟骞?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`composite_evaluator.py`閿涙氨绮嶉崥鍫濐樋娑?Evaluator 楠炴儼顢戦幍褑顢戦敍灞剧湽閹崵绮ㄩ弸婧库偓?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/evaluation/composite_evaluator.py`閿涘牊鏌婃晶鐑囩礆
+  - `tests/unit/test_composite_evaluator.py`閿涘牊鏌婃晶鐑囩礆
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `CompositeEvaluator.__init__(evaluators: List[BaseEvaluator])`
-  - `CompositeEvaluator.evaluate() -> dict`锛氬苟琛屾墽琛屾墍鏈?evaluator锛屽悎骞?metrics
-  - 閰嶇疆椹卞姩锛歚evaluation.backends: [ragas, custom]` 鈫?宸ュ巶鑷姩缁勫悎
-- **楠屾敹鏍囧噯**锛氶厤缃袱涓?evaluator 鏃讹紝杩斿洖鐨?metrics 鍖呭惈涓よ€呯殑鎸囨爣銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/unit/test_composite_evaluator.py`銆?
+  - `CompositeEvaluator.evaluate() -> dict`閿涙艾鑻熺悰灞惧⒔鐞涘本澧嶉張?evaluator閿涘苯鎮庨獮?metrics
+  - 闁板秶鐤嗘す鍗炲З閿涙瓪evaluation.backends: [ragas, custom]` 閳?瀹搞儱宸堕懛顏勫З缂佸嫬鎮?
+- **妤犲本鏁归弽鍥у櫙**閿涙岸鍘ょ純顔昏⒈娑?evaluator 閺冭绱濇潻鏂挎礀閻?metrics 閸栧懎鎯堟稉銈堚偓鍛畱閹稿洦鐖ｉ妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/unit/test_composite_evaluator.py`閵?
 
-### H3锛欵valRunner + Golden Test Set
-- **鐩爣**锛氬疄鐜?`eval_runner.py`锛氳鍙?`tests/fixtures/golden_test_set.json`锛岃窇 retrieval 骞朵骇鍑?metrics銆?
-- **鍓嶇疆渚濊禆**锛欴5锛圚ybridSearch锛夈€丠1-H2锛堣瘎浼板櫒锛?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/evaluation/eval_runner.py`锛堟柊澧烇級
-  - `tests/fixtures/golden_test_set.json`锛堟柊澧烇細榛勯噾娴嬭瘯闆嗭級
-  - `scripts/evaluate.py`锛堟柊澧烇細璇勪及杩愯鑴氭湰锛?
-- **瀹炵幇绫?鍑芥暟**锛?
+### H3閿涙valRunner + Golden Test Set
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`eval_runner.py`閿涙俺顕伴崣?`tests/fixtures/golden_test_set.json`閿涘矁绐?retrieval 楠炴湹楠囬崙?metrics閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙5閿涘湚ybridSearch閿涘鈧笭1-H2閿涘牐鐦庢导鏉挎珤閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/evaluation/eval_runner.py`閿涘牊鏌婃晶鐑囩礆
+  - `tests/fixtures/golden_test_set.json`閿涘牊鏌婃晶鐑囩窗姒涘嫰鍣惧ù瀣槸闂嗗棴绱?
+  - `scripts/evaluate.py`閿涘牊鏌婃晶鐑囩窗鐠囧嫪鍙婃潻鎰攽閼存碍婀伴敍?
+- **鐎圭偟骞囩猾?閸戣姤鏆?*閿?
   - `EvalRunner.__init__(settings, hybrid_search, evaluator)`
-  - `EvalRunner.run(test_set_path) -> EvalReport`锛氳繍琛岃瘎浼板苟杩斿洖鎶ュ憡
-  - `EvalReport`锛氬寘鍚?hit_rate, mrr, 鍚?query 缁撴灉璇︽儏
-- **golden_test_set.json 鏍煎紡**锛?
+  - `EvalRunner.run(test_set_path) -> EvalReport`閿涙俺绻嶇悰宀冪槑娴兼澘鑻熸潻鏂挎礀閹躲儱鎲?
+  - `EvalReport`閿涙艾瀵橀崥?hit_rate, mrr, 閸?query 缂佹挻鐏夌拠锔藉剰
+- **golden_test_set.json 閺嶇厧绱?*閿?
   ```json
   {
     "test_cases": [
       {
-        "query": "濡備綍閰嶇疆 Azure OpenAI锛?,
+        "query": "婵″倷缍嶉柊宥囩枂 Azure OpenAI閿?,
         "expected_chunk_ids": ["chunk_abc_001", "chunk_abc_002"],
         "expected_sources": ["config_guide.pdf"]
       }
     ]
   }
   ```
-- **楠屾敹鏍囧噯**锛歚python scripts/evaluate.py` 鍙繍琛岋紝杈撳嚭 metrics銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/integration/test_hybrid_search.py` 鎴?`python scripts/evaluate.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙瓪python scripts/evaluate.py` 閸欘垵绻嶇悰宀嬬礉鏉堟挸鍤?metrics閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/integration/test_hybrid_search.py` 閹?`python scripts/evaluate.py`閵?
 
-### H4锛氳瘎浼伴潰鏉块〉闈?
-- **鐩爣**锛氬疄鐜?Dashboard 璇勪及闈㈡澘椤甸潰锛堣繍琛岃瘎浼般€佹煡鐪嬫寚鏍囥€佸巻鍙插姣旓級銆?
-- **鍓嶇疆渚濊禆**锛欻3锛圗valRunner锛夈€丟1锛圖ashboard 鏋舵瀯锛?
-- **淇敼鏂囦欢**锛?
-  - `src/observability/dashboard/pages/evaluation_panel.py`锛堝疄鐜帮細鏇挎崲鍗犱綅鎻愮ず锛?
-- **瀹炵幇瑕佺偣**锛?
-  - 閫夋嫨璇勪及鍚庣涓?golden test set
-  - 鐐瑰嚮杩愯锛屽睍绀鸿瘎浼扮粨鏋滐紙hit_rate銆乵rr銆佸悇 query 鏄庣粏锛?
-  - 鍙€夛細鍘嗗彶璇勪及缁撴灉瀵规瘮鍥?
-- **楠屾敹鏍囧噯**锛氬彲鍦?Dashboard 涓繍琛岃瘎浼板苟鏌ョ湅鎸囨爣銆?
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄩ獙璇併€?
+### H4閿涙俺鐦庢导浼存桨閺夊潡銆夐棃?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?Dashboard 鐠囧嫪鍙婇棃銏℃緲妞ょ敻娼伴敍鍫ｇ箥鐞涘矁鐦庢导鑸偓浣圭叀閻瀵氶弽鍥モ偓浣稿坊閸欐彃顕В鏃撶礆閵?
+- **閸撳秶鐤嗘笟婵婄**閿涙3閿涘湕valRunner閿涘鈧笩1閿涘湒ashboard 閺嬭埖鐎敍?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `src/observability/dashboard/pages/evaluation_panel.py`閿涘牆鐤勯悳甯窗閺囨寧宕查崡鐘辩秴閹绘劗銇氶敍?
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 闁瀚ㄧ拠鍕強閸氬海顏稉?golden test set
+  - 閻愮懓鍤潻鎰攽閿涘苯鐫嶇粈楦跨槑娴兼壆绮ㄩ弸婊愮礄hit_rate閵嗕沟rr閵嗕礁鎮?query 閺勫海绮忛敍?
+  - 閸欘垶鈧绱伴崢鍡楀蕉鐠囧嫪鍙婄紒鎾寸亯鐎佃鐦崶?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾褰查崷?Dashboard 娑擃叀绻嶇悰宀冪槑娴兼澘鑻熼弻銉ф箙閹稿洦鐖ｉ妴?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊╃崣鐠囦降鈧?
 
-### H5锛歊ecall 鍥炲綊娴嬭瘯锛圗2E锛?
-- **鐩爣**锛氬疄鐜?`tests/e2e/test_recall.py`锛氬熀浜?golden set 鍋氭渶灏忓彫鍥為槇鍊硷紙渚嬪 hit@k锛夈€?
-- **鍓嶇疆渚濊禆**锛欻3锛圗valRunner + golden_test_set锛?
-- **淇敼鏂囦欢**锛?
-  - `tests/e2e/test_recall.py`锛堟柊澧烇級
-  - `tests/fixtures/golden_test_set.json`锛堣ˉ榻愯嫢骞叉潯锛?
-- **楠屾敹鏍囧噯**锛歨it@k 杈惧埌闃堝€硷紙闃堝€煎啓姝诲湪娴嬭瘯閲岋紝渚夸簬鍥炲綊锛夈€?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/e2e/test_recall.py`銆?
+### H5閿涙瓓ecall 閸ョ偛缍婂ù瀣槸閿涘湕2E閿?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`tests/e2e/test_recall.py`閿涙艾鐔€娴?golden set 閸嬫碍娓剁亸蹇撳将閸ョ偤妲囬崐纭风礄娓氬顩?hit@k閿涘鈧?
+- **閸撳秶鐤嗘笟婵婄**閿涙3閿涘湕valRunner + golden_test_set閿?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `tests/e2e/test_recall.py`閿涘牊鏌婃晶鐑囩礆
+  - `tests/fixtures/golden_test_set.json`閿涘牐藟姒绘劘瀚㈤獮鍙夋蒋閿?
+- **妤犲本鏁归弽鍥у櫙**閿涙it@k 鏉堟儳鍩岄梼鍫濃偓纭风礄闂冨牆鈧厧鍟撳璇叉躬濞村鐦柌宀嬬礉娓氬じ绨崶鐐茬秺閿涘鈧?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/e2e/test_recall.py`閵?
 
 ---
 
-## 闃舵 I锛氱鍒扮楠屾敹涓庢枃妗ｆ敹鍙ｏ紙鐩爣锛氬紑绠卞嵆鐢ㄧ殑"鍙鐜?宸ョ▼锛?
+## 闂冭埖顔?I閿涙氨顏崚鎵伂妤犲本鏁规稉搴㈡瀮濡楋絾鏁归崣锝忕礄閻╊喗鐖ｉ敍姘磻缁犲崬宓嗛悽銊ф畱"閸欘垰顦查悳?瀹搞儳鈻奸敍?
 
-### I1锛欵2E锛歁CP Client 渚ц皟鐢ㄦā鎷?
-- **鐩爣**锛氬疄鐜?`tests/e2e/test_mcp_client.py`锛氫互瀛愯繘绋嬪惎鍔?server锛屾ā鎷?tools/list + tools/call銆?
-- **淇敼鏂囦欢**锛?
+### I1閿涙2E閿涙瓉CP Client 娓氀嗙殶閻劍膩閹?
+- **閻╊喗鐖?*閿涙艾鐤勯悳?`tests/e2e/test_mcp_client.py`閿涙矮浜掔€涙劘绻樼粙瀣儙閸?server閿涘本膩閹?tools/list + tools/call閵?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `tests/e2e/test_mcp_client.py`
-- **楠屾敹鏍囧噯**锛氬畬鏁磋蛋閫?query_knowledge_hub 骞惰繑鍥?citations銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/e2e/test_mcp_client.py`銆?
+- **妤犲本鏁归弽鍥у櫙**閿涙艾鐣弫纾嬭泲闁?query_knowledge_hub 楠炴儼绻戦崶?citations閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/e2e/test_mcp_client.py`閵?
 
-### I2锛欵2E锛欴ashboard 鍐掔儫娴嬭瘯
-- **鐩爣**锛氶獙璇?Dashboard 鍚勯〉闈㈠湪鏈夋暟鎹椂鍙甯告覆鏌撱€佹棤 Python 寮傚父銆?
-- **淇敼鏂囦欢**锛?
-  - `tests/e2e/test_dashboard_smoke.py`锛堟柊澧烇級
-- **瀹炵幇瑕佺偣**锛?
-  - 浣跨敤 Streamlit 鐨?`AppTest` 妗嗘灦杩涜鑷姩鍖栧啋鐑熸祴璇?
-  - 楠岃瘉 6 涓〉闈㈠潎鍙姞杞姐€佷笉鎶涘紓甯?
-- **楠屾敹鏍囧噯**锛氭墍鏈夐〉闈㈠啋鐑熸祴璇曢€氳繃銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q tests/e2e/test_dashboard_smoke.py`銆?
+### I2閿涙2E閿涙ashboard 閸愭帞鍎ù瀣槸
+- **閻╊喗鐖?*閿涙岸鐛欑拠?Dashboard 閸氬嫰銆夐棃銏犳躬閺堝鏆熼幑顔芥閸欘垱顒滅敮鍛婅閺屾挶鈧焦妫?Python 瀵倸鐖堕妴?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `tests/e2e/test_dashboard_smoke.py`閿涘牊鏌婃晶鐑囩礆
+- **鐎圭偟骞囩憰浣哄仯**閿?
+  - 娴ｈ法鏁?Streamlit 閻?`AppTest` 濡楀棙鐏︽潻娑滎攽閼奉亜濮╅崠鏍у晪閻戠喐绁寸拠?
+  - 妤犲矁鐦?6 娑擃亪銆夐棃銏犳綆閸欘垰濮炴潪濮愨偓浣风瑝閹舵稑绱撶敮?
+- **妤犲本鏁归弽鍥у櫙**閿涙碍澧嶉張澶愩€夐棃銏犲晪閻戠喐绁寸拠鏇⑩偓姘崇箖閵?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q tests/e2e/test_dashboard_smoke.py`閵?
 
-### I3锛氬畬鍠?README锛堣繍琛岃鏄?+ 娴嬭瘯璇存槑 + MCP 閰嶇疆 + Dashboard 浣跨敤锛?
-- **鐩爣**锛氳鏂扮敤鎴疯兘鍦?10 鍒嗛挓鍐呰窇閫?ingest + query + dashboard + tests锛屽苟鑳藉湪 Copilot/Claude 涓娇鐢ㄣ€?
-- **淇敼鏂囦欢**锛?
+### I3閿涙艾鐣崰?README閿涘牐绻嶇悰宀冾嚛閺?+ 濞村鐦拠瀛樻 + MCP 闁板秶鐤?+ Dashboard 娴ｈ法鏁ら敍?
+- **閻╊喗鐖?*閿涙俺顔€閺傛壆鏁ら幋鐤厴閸?10 閸掑棝鎸撻崘鍛扮獓闁?ingest + query + dashboard + tests閿涘苯鑻熼懗钘夋躬 Copilot/Claude 娑擃厺濞囬悽銊ｂ偓?
+- **娣囶喗鏁奸弬鍥︽**閿?
   - `README.md`
-- **楠屾敹鏍囧噯**锛歊EADME 鍖呭惈浠ヤ笅绔犺妭锛?
-  - **蹇€熷紑濮?*锛氬畨瑁呬緷璧栥€侀厤缃?API Key銆佽繍琛岄娆℃憚鍙?
-  - **閰嶇疆璇存槑**锛歚settings.yaml` 鍚勫瓧娈靛惈涔?
-  - **MCP 閰嶇疆绀轰緥**锛欸itHub Copilot `mcp.json` 涓?Claude Desktop `claude_desktop_config.json`
-  - **Dashboard 浣跨敤鎸囧崡**锛氬惎鍔ㄥ懡浠ゃ€佸悇椤甸潰鍔熻兘璇存槑銆佹埅鍥剧ず渚?
-  - **杩愯娴嬭瘯**锛氬崟鍏冩祴璇曘€侀泦鎴愭祴璇曘€丒2E 娴嬭瘯鍛戒护
-  - **甯歌闂**锛欰PI Key 閰嶇疆銆佷緷璧栧畨瑁呫€佽繛鎺ラ棶棰樻帓鏌?
-- **娴嬭瘯鏂规硶**锛氭寜 README 鎵嬪姩璧颁竴閬嶃€?
+- **妤犲本鏁归弽鍥у櫙**閿涙瓓EADME 閸栧懎鎯堟禒銉ょ瑓缁旂姾濡敍?
+  - **韫囶偊鈧喎绱戞慨?*閿涙艾鐣ㄧ憗鍛贩鐠ф牓鈧線鍘ょ純?API Key閵嗕浇绻嶇悰宀勵浕濞嗏剝鎲氶崣?
+  - **闁板秶鐤嗙拠瀛樻**閿涙瓪settings.yaml` 閸氬嫬鐡у▓闈涙儓娑?
+  - **MCP 闁板秶鐤嗙粈杞扮伐**閿涙itHub Copilot `mcp.json` 娑?Claude Desktop `claude_desktop_config.json`
+  - **Dashboard 娴ｈ法鏁ら幐鍥у础**閿涙艾鎯庨崝銊ユ嚒娴犮們鈧礁鎮囨い鐢告桨閸旂喕鍏樼拠瀛樻閵嗕焦鍩呴崶鍓с仛娓?
+  - **鏉╂劘顢戝ù瀣槸**閿涙艾宕熼崗鍐╃ゴ鐠囨洏鈧線娉﹂幋鎰ゴ鐠囨洏鈧笒2E 濞村鐦崨鎴掓姢
+  - **鐢瓕顫嗛梻顕€顣?*閿涙PI Key 闁板秶鐤嗛妴浣风贩鐠ф牕鐣ㄧ憗鍛偓浣界箾閹恒儵妫舵０妯诲笓閺?
+- **濞村鐦弬瑙勭《**閿涙碍瀵?README 閹靛濮╃挧棰佺闁秲鈧?
 
-### I4锛氭竻鐞嗘帴鍙ｄ竴鑷存€э紙濂戠害娴嬭瘯琛ラ綈锛?
-- **鐩爣**锛氫负鍏抽敭鎶借薄锛圴ectorStore / Reranker / Evaluator / DocumentManager锛夎ˉ榻愬绾︽祴璇曘€?
-- **淇敼鏂囦欢**锛?
-  - `tests/unit/test_vector_store_contract.py`锛堣ˉ榻?delete_by_metadata 杈圭晫锛?
-  - `tests/unit/test_reranker_factory.py`锛堣ˉ榻愯竟鐣岋級
-  - `tests/unit/test_custom_evaluator.py`锛堣ˉ榻愯竟鐣岋級
-- **楠屾敹鏍囧噯**锛歚pytest -q` 鍏ㄧ豢锛屼笖 contract tests 瑕嗙洊涓昏杈撳叆杈撳嚭褰㈢姸銆?
-- **娴嬭瘯鏂规硶**锛歚pytest -q`銆?
+### I4閿涙碍绔婚悶鍡樺复閸欙絼绔撮懛瀛樷偓褝绱欐總鎴犲濞村鐦悰銉╃秷閿?
+- **閻╊喗鐖?*閿涙矮璐熼崗鎶芥暛閹跺€熻杽閿涘湸ectorStore / Reranker / Evaluator / DocumentManager閿涘藟姒绘劕顨栫痪锔界ゴ鐠囨洏鈧?
+- **娣囶喗鏁奸弬鍥︽**閿?
+  - `tests/unit/test_vector_store_contract.py`閿涘牐藟姒?delete_by_metadata 鏉堝湱鏅敍?
+  - `tests/unit/test_reranker_factory.py`閿涘牐藟姒绘劘绔熼悾宀嬬礆
+  - `tests/unit/test_custom_evaluator.py`閿涘牐藟姒绘劘绔熼悾宀嬬礆
+- **妤犲本鏁归弽鍥у櫙**閿涙瓪pytest -q` 閸忋劎璞㈤敍灞肩瑬 contract tests 鐟曞棛娲婃稉鏄忣洣鏉堟挸鍙嗘潏鎾冲毉瑜般垻濮搁妴?
+- **濞村鐦弬瑙勭《**閿涙瓪pytest -q`閵?
 
-### I5锛氬叏閾捐矾 E2E 楠屾敹
-- **鐩爣**锛氭墽琛屽畬鏁寸殑绔埌绔獙鏀舵祦绋嬶細ingest 鈫?query via MCP 鈫?Dashboard 鍙鍖?鈫?evaluate銆?
-- **淇敼鏂囦欢**锛氭棤鏂版枃浠讹紝楠屾敹宸叉湁鍔熻兘
-- **楠屾敹鏍囧噯**锛?
-  - `python scripts/ingest.py --path tests/fixtures/sample_documents/ --collection test` 鎴愬姛
-  - `python scripts/query.py --query "娴嬭瘯鏌ヨ" --verbose` 杩斿洖缁撴灉
-  - Dashboard 鍙睍绀烘憚鍙栦笌鏌ヨ杩借釜
-  - `python scripts/evaluate.py` 杈撳嚭璇勪及鎸囨爣
-- **娴嬭瘯鏂规硶**锛氭墜鍔ㄥ叏閾捐矾璧伴€?+ `pytest -q` 鍏ㄩ噺娴嬭瘯銆?
+### I5閿涙艾鍙忛柧鎹愮熅 E2E 妤犲本鏁?
+- **閻╊喗鐖?*閿涙碍澧界悰灞界暚閺佸娈戠粩顖氬煂缁旑垶鐛欓弨鑸电ウ缁嬪绱癷ngest 閳?query via MCP 閳?Dashboard 閸欘垵顫嬮崠?閳?evaluate閵?
+- **娣囶喗鏁奸弬鍥︽**閿涙碍妫ら弬鐗堟瀮娴犺绱濇灞炬暪瀹稿弶婀侀崝鐔诲厴
+- **妤犲本鏁归弽鍥у櫙**閿?
+  - `python scripts/ingest.py --path tests/fixtures/sample_documents/ --collection test` 閹存劕濮?
+  - `python scripts/query.py --query "濞村鐦弻銉嚄" --verbose` 鏉╂柨娲栫紒鎾寸亯
+  - Dashboard 閸欘垰鐫嶇粈鐑樻啔閸欐牔绗岄弻銉嚄鏉╁€熼嚋
+  - `python scripts/evaluate.py` 鏉堟挸鍤拠鍕強閹稿洦鐖?
+- **濞村鐦弬瑙勭《**閿涙碍澧滈崝銊ュ弿闁炬崘鐭剧挧浼粹偓?+ `pytest -q` 閸忋劑鍣哄ù瀣槸閵?
 
 ---
 
-### 浜や粯閲岀▼纰戯紙寤鸿锛?
+### 娴溿倓绮柌宀€鈻肩喊鎴礄瀵ら缚顔呴敍?
 
-- **M1锛堝畬鎴愰樁娈?A+B锛?*锛氬伐绋嬪彲娴?+ 鍙彃鎷旀娊璞″眰灏辩华锛屽悗缁疄鐜板彲骞惰鎺ㄨ繘銆?
-- **M2锛堝畬鎴愰樁娈?C锛?*锛氱绾挎憚鍙栭摼璺彲鐢紝鑳芥瀯寤烘湰鍦扮储寮曘€?
-- **M3锛堝畬鎴愰樁娈?D+E锛?*锛氬湪绾挎煡璇?+ MCP tools 鍙敤锛屽彲鍦?Copilot/Claude 涓皟鐢ㄣ€?
-- **M4锛堝畬鎴愰樁娈?F锛?*锛欼ngestion + Query 鍙岄摼璺彲杩借釜锛孞SON Lines 鎸佷箙鍖栥€?
-- **M5锛堝畬鎴愰樁娈?G锛?*锛氬叚椤甸潰鍙鍖栫鐞嗗钩鍙板氨缁紙璇勪及闈㈡澘涓哄崰浣嶏級锛屾暟鎹彲娴忚銆佸彲绠＄悊銆侀摼璺彲杩借釜銆?
-- **M6锛堝畬鎴愰樁娈?H+I锛?*锛氳瘎浼颁綋绯诲畬鏁?+ E2E 楠屾敹閫氳繃 + 鏂囨。瀹屽杽锛屽舰鎴?闈㈣瘯/鏁欏/婕旂ず"鍙鐜伴」鐩€?
+- **M1閿涘牆鐣幋鎰版▉濞?A+B閿?*閿涙艾浼愮粙瀣讲濞?+ 閸欘垱褰冮幏鏃€濞婄挒鈥崇湴鐏忚京鍗庨敍灞芥倵缂侇厼鐤勯悳鏉垮讲楠炴儼顢戦幒銊ㄧ箻閵?
+- **M2閿涘牆鐣幋鎰版▉濞?C閿?*閿涙氨顬囩痪鎸庢啔閸欐牠鎽肩捄顖氬讲閻㈩煉绱濋懗鑺ョ€鐑樻拱閸︽壆鍌ㄥ鏇樷偓?
+- **M3閿涘牆鐣幋鎰版▉濞?D+E閿?*閿涙艾婀痪鎸庣叀鐠?+ MCP tools 閸欘垳鏁ら敍灞藉讲閸?Copilot/Claude 娑擃叀鐨熼悽銊ｂ偓?
+- **M4閿涘牆鐣幋鎰版▉濞?F閿?*閿涙ngestion + Query 閸欏矂鎽肩捄顖氬讲鏉╁€熼嚋閿涘瓰SON Lines 閹镐椒绠欓崠鏍モ偓?
+- **M5閿涘牆鐣幋鎰版▉濞?G閿?*閿涙艾鍙氭い鐢告桨閸欘垵顫嬮崠鏍吀閻炲棗閽╅崣鏉挎皑缂侇亷绱欑拠鍕強闂堛垺婢樻稉鍝勫窗娴ｅ稄绱氶敍灞炬殶閹诡喖褰插ù蹇氼潔閵嗕礁褰茬粻锛勬倞閵嗕線鎽肩捄顖氬讲鏉╁€熼嚋閵?
+- **M6閿涘牆鐣幋鎰版▉濞?H+I閿?*閿涙俺鐦庢导棰佺秼缁鐣弫?+ E2E 妤犲本鏁归柅姘崇箖 + 閺傚洦銆傜€瑰苯鏉介敍灞借埌閹?闂堛垼鐦?閺佹瑥顒?濠曟梻銇?閸欘垰顦查悳浼淬€嶉惄顔衡偓?
 
 
 

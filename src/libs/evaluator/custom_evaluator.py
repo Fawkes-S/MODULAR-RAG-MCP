@@ -48,9 +48,21 @@ class CustomEvaluator(BaseEvaluator):
                 raise ValueError(f"sample[{index}] missing required keys: retrieved_ids/golden_ids")
 
             retrieved_ids = sample.get("retrieved_ids") or []
-            golden_ids = set(sample.get("golden_ids") or [])
             if not isinstance(retrieved_ids, list):
                 raise ValueError(f"sample[{index}].retrieved_ids must be list")
+            golden_ids_raw = sample.get("golden_ids") or []
+            if not isinstance(golden_ids_raw, list):
+                raise ValueError(f"sample[{index}].golden_ids must be list")
+
+            # 这里显式要求字符串列表，避免把 `"chunk_1"` 误当成可迭代对象拆成字符集合。
+            golden_ids = set()
+            for golden_index, golden_id in enumerate(golden_ids_raw):
+                if not isinstance(golden_id, str):
+                    raise ValueError(
+                        f"sample[{index}].golden_ids[{golden_index}] must be string"
+                    )
+                if golden_id:
+                    golden_ids.add(golden_id)
 
             first_match_rank = self._first_match_rank(retrieved_ids, golden_ids)
             hit = first_match_rank is not None

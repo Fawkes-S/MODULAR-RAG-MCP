@@ -103,3 +103,20 @@ def test_factory_unknown_provider_raises(isolated_registry: dict[str, object]) -
     """验证未知 provider 会明确报错，避免误用非预期评估后端。"""
     with pytest.raises(ValueError, match="Unknown evaluation provider: mystery"):
         EvaluatorFactory.create({"evaluation": {"provider": "mystery"}})
+
+
+def test_custom_evaluator_rejects_non_list_golden_ids(isolated_registry: dict[str, object]) -> None:
+    """
+    Given:
+        一个样本把 `golden_ids` 错写成字符串，而不是 `list[str]`。
+    When:
+        调用 `CustomEvaluator.evaluate()`。
+    Then:
+        评估器应显式报错，避免把字符串拆成字符集合后得到错误的命中结果。
+    """
+    evaluator = CustomEvaluator()
+
+    with pytest.raises(ValueError, match="golden_ids must be list"):
+        evaluator.evaluate(
+            [{"query": "q", "retrieved_ids": ["chunk_1"], "golden_ids": "chunk_1"}]
+        )

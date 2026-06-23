@@ -90,7 +90,12 @@ class EvaluatorFactory:
         if key not in cls._registry:
             available = ", ".join(sorted(cls._registry)) or "<none>"
             raise ValueError(f"Unknown evaluation provider: {provider}. Available: {available}")
-        return cls._registry[key](settings=settings)
+        builder = cls._registry[key]
+        try:
+            return builder(settings=settings)
+        except TypeError:
+            # 与 Reranker/VectorStore 工厂保持一致：兼容历史无参测试桩或极简实现。
+            return builder()
 
     @staticmethod
     def _extract_backends(settings: Any) -> list[str]:

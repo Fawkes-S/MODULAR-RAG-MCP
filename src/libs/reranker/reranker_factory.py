@@ -73,24 +73,44 @@ class RerankerFactory:
 
     @staticmethod
     def _extract_provider(settings: Any) -> str:
-        """提取 `rerank.provider`（兼容 `rerank.backend`）并给出可读错误。"""
+        """提取 `rerank.provider`（兼容 `rerank.backend`）并给出可读错误。
+
+        为什么这里要把 provider/backend 当作“两个候选字段”依次尝试：
+        - 旧配置里很多地方仍然写 `backend`，新配置逐步迁移到 `provider`；
+        - 如果调用方传了空字符串 provider，但 backend 里有有效值，
+          这里应该继续回退，而不是把空字符串当成“已经提供了配置”。
+        """
         if isinstance(settings, dict):
             rerank_cfg = settings.get("rerank")
             if isinstance(rerank_cfg, dict):
-                provider = rerank_cfg.get("provider")
-                backend = rerank_cfg.get("backend")
-                value = provider if provider is not None else backend
-                if isinstance(value, str) and value.strip():
+                value = RerankerFactory._first_non_empty_string(
+                    rerank_cfg.get("provider"),
+                    rerank_cfg.get("backend"),
+                )
+                if value is not None:
                     return value
             raise ValueError("Missing required setting: rerank.provider (or rerank.backend)")
 
         rerank_obj = getattr(settings, "rerank", None)
-        provider = getattr(rerank_obj, "provider", None)
-        backend = getattr(rerank_obj, "backend", None)
-        value = provider if provider is not None else backend
-        if isinstance(value, str) and value.strip():
+        value = RerankerFactory._first_non_empty_string(
+            getattr(rerank_obj, "provider", None),
+            getattr(rerank_obj, "backend", None),
+        )
+        if value is not None:
             return value
         raise ValueError("Missing required setting: rerank.provider (or rerank.backend)")
+
+    @staticmethod
+    def _first_non_empty_string(*values: Any) -> str | None:
+        """返回第一个非空字符串配置值。
+
+        这个小工具把“兼容旧字段 + 忽略空字符串”的规则集中到一处，
+        避免 provider/backend 别名处理在多个分支里出现细微不一致。
+        """
+        for value in values:
+            if isinstance(value, str) and value.strip():
+                return value
+        return None
 
     @staticmethod
     def _extract_rerank_kwargs(settings: Any) -> dict[str, Any]:

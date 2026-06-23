@@ -90,6 +90,26 @@ class _FakeVectorStore(BaseVectorStore):
             )
         return results
 
+    def delete_by_metadata(self, filters: dict[str, Any], trace: Any | None = None) -> int:
+        """按 metadata 精确匹配删除，并返回删除数量。"""
+        _ = trace
+        if not isinstance(filters, dict):
+            raise ValueError("filters must be dict")
+
+        normalized = {str(key): value for key, value in filters.items() if str(key).strip()}
+        if not normalized:
+            # 删除接口强制要求非空过滤条件，避免测试桩和真实后端在误删风险上产生偏差。
+            raise ValueError("filters must be non-empty dict")
+
+        matched_ids = [
+            item_id
+            for item_id, item in self._records.items()
+            if all(item["metadata"].get(key) == value for key, value in normalized.items())
+        ]
+        for item_id in matched_ids:
+            self._records.pop(item_id, None)
+        return len(matched_ids)
+
 
 @pytest.fixture()
 def isolated_registry() -> dict[str, object]:
@@ -155,3 +175,45 @@ def test_factory_unknown_provider_raises(isolated_registry: dict[str, object]) -
     """验证未知 provider 会显式报错，防止工厂错误分流。"""
     with pytest.raises(ValueError, match="Unknown vector_store provider: unknown"):
         VectorStoreFactory.create({"vector_store": {"provider": "unknown"}})
+
+
+def test_delete_by_metadata_rejects_empty_filters(isolated_registry: dict[str, object]) -> None:
+    """
+    Given:
+        一个已写入数据的向量库实例，但删除时传入空过滤条件 `{}`。
+    When:
+        调用 `delete_by_metadata({})`。
+    Then:
+        应显式拒绝该操作，避免把“删某个文档”误执行成“清空整库”。
+    """
+    VectorStoreFactory.register("fake", lambda persist_dir="": _FakeVectorStore(persist_dir=persist_dir))
+    store = VectorStoreFactory.create({"vector_store": {"provider": "fake"}})
+    store.upsert([{"id": "c1", "vector": [0.1], "metadata": {"source_path": "a.pdf"}}])
+
+    with pytest.raises(ValueError, match="non-empty dict"):
+        store.delete_by_metadata({})
+
+
+def test_delete_by_metadata_removes_only_matching_records(isolated_registry: dict[str, object]) -> None:
+    """
+    Given:
+        向量库中同时存在两个不同 source_path 的 chunk 记录。
+    When:
+        按 `source_path=a.pdf` 执行批量删除。
+    Then:
+        只应删除匹配文档的记录，并返回实际删除数量。
+    """
+    VectorStoreFactory.register("fake", lambda persist_dir="": _FakeVectorStore(persist_dir=persist_dir))
+    store = VectorStoreFactory.create({"vector_store": {"provider": "fake"}})
+    store.upsert(
+        [
+            {"id": "c1", "vector": [0.1], "metadata": {"source_path": "a.pdf", "doc_type": "pdf"}},
+            {"id": "c2", "vector": [0.2], "metadata": {"source_path": "a.pdf", "doc_type": "pdf"}},
+            {"id": "c3", "vector": [0.3], "metadata": {"source_path": "b.pdf", "doc_type": "pdf"}},
+        ]
+    )
+
+    removed = store.delete_by_metadata({"source_path": "a.pdf"})
+
+    assert removed == 2
+    assert [item["id"] for item in store.get_by_ids(["c1", "c2", "c3"])] == ["c3"]

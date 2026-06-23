@@ -83,3 +83,19 @@ def test_factory_missing_backend_path_raises_readable_error(isolated_registry: d
     """验证缺少 provider/backend 时错误信息可直接指向配置字段。"""
     with pytest.raises(ValueError, match="rerank.provider"):
         RerankerFactory.create({"rerank": {}})
+
+
+def test_factory_falls_back_to_backend_when_provider_is_blank(
+    isolated_registry: dict[str, object],
+) -> None:
+    """
+    Given:
+        新字段 `provider` 被配置成空字符串，但兼容字段 `backend` 仍然提供了有效值 `none`。
+    When:
+        调用 `RerankerFactory.create()` 解析配置。
+    Then:
+        工厂应继续回退到 `backend`，而不是把空字符串当成有效 provider。
+    """
+    reranker = RerankerFactory.create({"rerank": {"provider": "   ", "backend": "none"}})
+
+    assert isinstance(reranker, NoneReranker)
