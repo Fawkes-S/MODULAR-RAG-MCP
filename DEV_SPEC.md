@@ -2056,7 +2056,7 @@ dashboard:
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | I1 | E2E：MCP Client 侧调用模拟 | [x] | 2026-06-23 | tests/e2e/test_mcp_client.py + real ingest + stdio MCP client flow passed |
-| I2 | E2E：Dashboard 冒烟测试 | [ ] | | |
+| I2 | E2E：Dashboard 冒烟测试 | [x] | 2026-06-23 | tests/e2e/test_dashboard_smoke.py + Streamlit AppTest 六页面真实数据冒烟通过 |
 | I3 | 完善 README（运行说明 + MCP + Dashboard） | [ ] | | |
 | I4 | 清理接口一致性（契约测试补齐） | [ ] | | |
 | I5 | 全链路 E2E 验收 | [ ] | | |
