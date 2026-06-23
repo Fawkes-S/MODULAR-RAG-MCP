@@ -1,4 +1,4 @@
-﻿## 6. 椤圭洰鎺掓湡
+## 6. 椤圭洰鎺掓湡
 
 > **鎺掓湡鍘熷垯锛堜弗鏍煎榻愭湰 DEV_SPEC 鐨勬灦鏋勫垎灞備笌鐩綍缁撴瀯锛?*
 > 
@@ -147,7 +147,7 @@
 |---------|---------|------|---------|------|
 | I1 | E2E锛歁CP Client 渚ц皟鐢ㄦā鎷?| [x] | 2026-06-23 | tests/e2e/test_mcp_client.py + real ingest + stdio MCP client flow passed |
 | I2 | E2E锛欴ashboard 鍐掔儫娴嬭瘯 | [x] | 2026-06-23 | tests/e2e/test_dashboard_smoke.py + Streamlit AppTest six-page smoke passed |
-| I3 | 瀹屽杽 README锛堣繍琛岃鏄?+ MCP + Dashboard锛?| [ ] | | |
+| I3 | 瀹屽杽 README锛堣繍琛岃鏄?+ MCP + Dashboard锛?| [x] | 2026-06-23 | README rewritten as runnable guide for quick start, settings, MCP, Dashboard, evaluation, tests, troubleshooting |
 | I4 | 娓呯悊鎺ュ彛涓€鑷存€э紙濂戠害娴嬭瘯琛ラ綈锛?| [ ] | | |
 | I5 | 鍏ㄩ摼璺?E2E 楠屾敹 | [ ] | | |
 
