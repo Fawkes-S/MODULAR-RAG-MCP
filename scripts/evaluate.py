@@ -34,6 +34,17 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="以 JSON 形式输出完整报告，便于后续脚本或 Dashboard 复用。",
     )
+    parser.add_argument(
+        "--backend",
+        choices=("auto", "custom", "ragas"),
+        default="auto",
+        help=(
+            "选择评估后端："
+            "auto=沿用 settings.yaml；"
+            "custom=只跑本地 hit_rate/MRR；"
+            "ragas=只跑真实 Ragas 语义打分。"
+        ),
+    )
     return parser
 
 
@@ -41,15 +52,50 @@ def main(argv: list[str] | None = None) -> int:
     """脚本主入口：加载配置 -> 构建组件 -> 运行评估 -> 输出结果。"""
     args = _build_parser().parse_args(argv)
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
+    effective_settings = settings
 
-    test_set_path = args.test_set.strip() or settings.evaluation.golden_test_set
-    hybrid_search = HybridSearch(settings=settings)
-    evaluator = EvaluatorFactory.create(settings)
+    if args.backend == "custom":
+        from dataclasses import replace
+
+        # 自定义后端只依赖检索结果，不需要真实 LLM 打分。
+        # 这个模式适合先验证 golden set、集合过滤和召回链路是否正常。
+        effective_settings = replace(
+            settings,
+            evaluation=replace(
+                settings.evaluation,
+                provider="custom",
+                backends=("custom",),
+            ),
+        )
+    elif args.backend == "ragas":
+        from dataclasses import replace
+
+        effective_settings = replace(
+            settings,
+            evaluation=replace(
+                settings.evaluation,
+                provider="ragas",
+                backends=("ragas",),
+            ),
+        )
+
+    test_set_path = args.test_set.strip() or effective_settings.evaluation.golden_test_set
+    print(f"[EVAL] loading test set: {test_set_path}")
+    print(
+        "[EVAL] backend mode: "
+        f"{args.backend} "
+        f"(provider={effective_settings.evaluation.provider}, "
+        f"backends={list(effective_settings.evaluation.backends)})"
+    )
+
+    hybrid_search = HybridSearch(settings=effective_settings)
+    evaluator = EvaluatorFactory.create(effective_settings)
     runner = EvalRunner(
-        settings=settings,
+        settings=effective_settings,
         hybrid_search=hybrid_search,
         evaluator=evaluator,
     )
+    print("[EVAL] running retrieval + evaluation, this may take longer when Ragas is enabled...")
     report = runner.run(test_set_path)
 
     if args.json:

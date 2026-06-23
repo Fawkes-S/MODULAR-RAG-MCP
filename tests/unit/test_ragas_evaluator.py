@@ -17,6 +17,7 @@ if str(SRC_PATH) not in sys.path:
 from libs.evaluator.evaluator_factory import EvaluatorFactory
 from core.settings import Settings, load_settings
 from observability.evaluation.ragas_evaluator import (
+    _ProjectRagasLLM,
     RagasEvaluator,
     _RagasEmbeddingCompat,
     _extract_json_object,
@@ -55,6 +56,18 @@ def _make_test_settings() -> Settings:
             profiles=profiles,
         ),
     )
+
+
+def _resolve_expected_ragas_llm(settings: Settings) -> Any:
+    """解析当前配置下 Ragas 实际会选中的 LLM 配置。
+
+    这个辅助函数专门给测试使用，目的不是重复业务逻辑，而是把断言目标
+    明确绑定到 `settings.yaml -> evaluation.ragas.llm_profile` 的当前选择。
+    这样当项目把评估模型从 `deepseek_chat` 切到 `deepseek`、`openai`
+    或其他 OpenAI-compatible profile 时，测试只需要验证“解析结果被正确使用”，
+    而不是被旧的写死字符串误伤。
+    """
+    return RagasEvaluator._resolve_ragas_llm_settings(settings)
 
 
 def _make_fake_ragas_loader(result_payload: dict[str, float]):
@@ -145,8 +158,9 @@ def test_ragas_evaluator_returns_standardized_metrics() -> None:
             "context_precision": 0.89,
         }
     )
+    settings = _make_test_settings()
     evaluator = RagasEvaluator(
-        settings=_make_test_settings(),
+        settings=settings,
         ragas_loader=fake_loader,
     )
 
@@ -174,9 +188,32 @@ def test_ragas_evaluator_returns_standardized_metrics() -> None:
     assert fake_loader.calls["evaluate_kwargs"]["raise_exceptions"] is True  # type: ignore[attr-defined]
     assert fake_loader.calls["evaluate_kwargs"]["show_progress"] is False  # type: ignore[attr-defined]
     llm = fake_loader.calls["evaluate_kwargs"]["llm"]  # type: ignore[attr-defined]
-    assert llm["model"] == "deepseek-chat"
-    assert fake_loader.calls["llm_kwargs"]["max_tokens"] == 4096  # type: ignore[attr-defined]
+    expected_llm = _resolve_expected_ragas_llm(settings)
+    # 这里既兼容“官方 Ragas llm_factory 返回 dict”的路径，
+    # 也兼容“项目自带包装器对象”的路径。
+    if isinstance(llm, dict):
+        assert llm["model"] == expected_llm.model
+        assert fake_loader.calls["llm_kwargs"]["max_tokens"] == 1536  # type: ignore[attr-defined]
+    else:
+        assert getattr(llm, "model", None) == expected_llm.model
+        assert getattr(llm, "max_tokens", None) == 1536
     assert fake_loader.calls["embedding_kwargs"]["provider"] == "huggingface"  # type: ignore[attr-defined]
+
+
+def test_ragas_evaluator_prefers_project_wrapper_for_deepseek_like_profiles() -> None:
+    """
+    Given:
+        当前评估 profile 使用 DeepSeek 这类 OpenAI-compatible 但行为差异较大的模型。
+    When:
+        判断 Ragas LLM 路由策略。
+    Then:
+        应优先走项目自带包装器，而不是直接走 Ragas 官方 instructor 路径，
+        从而降低真实评估时的结构化重试和超时放大风险。
+    """
+    settings = _make_test_settings()
+    resolved = _resolve_expected_ragas_llm(settings)
+
+    assert RagasEvaluator._should_use_project_llm_wrapper(resolved) is True
 
 
 def test_ragas_evaluator_reports_missing_dependency_clearly() -> None:
@@ -264,7 +301,13 @@ def test_ragas_evaluator_requires_real_llm_api_key() -> None:
     """
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
     profiles = {name: dict(value) for name, value in settings.llm.profiles.items()}
-    profiles["deepseek_chat"]["api_key"] = ""
+    selected_profile = settings.evaluation.ragas.llm_profile
+    if not selected_profile:
+        selected_profile = settings.llm.profile
+    profiles.setdefault(selected_profile, {})
+    # 这里必须清空“当前评估实际选中的 profile”，否则测试会误清空一个未被使用的历史 profile，
+    # 导致 Ragas 仍然能读到真实 key，进而错误地跑到外部后端。
+    profiles[selected_profile]["api_key"] = ""
     evaluator = RagasEvaluator(
         settings=replace(settings, llm=replace(settings.llm, api_key="", profiles=profiles))
     )
@@ -326,6 +369,47 @@ def test_ragas_embedding_compat_adds_legacy_embed_query() -> None:
 
     assert compat.embed_query("abc") == [3.0]
     assert compat.embed_documents(["a", "abcd"]) == [[1.0], [4.0]]
+
+
+def test_project_ragas_llm_reports_truncated_empty_content_clearly() -> None:
+    """
+    Given:
+        一个 OpenAI-compatible completion 返回空 content，且 `finish_reason=length`，
+        表示模型在结构化输出完成前就被截断了。
+    When:
+        调用 `_complete(...)`。
+    Then:
+        应抛出带 “truncated” 语义的可读错误，
+        让上层第二轮修复提示能够针对“输出被截断”而不是“普通空响应”做补救。
+    """
+
+    class _FakeCompletions:
+        def create(self, **kwargs: Any) -> Any:
+            _ = kwargs
+            choice = type(
+                "_Choice",
+                (),
+                {
+                    "message": type("_Message", (), {"content": ""})(),
+                    "finish_reason": "length",
+                },
+            )()
+            return type("_Completion", (), {"choices": [choice]})()
+
+    class _FakeChat:
+        def __init__(self) -> None:
+            self.completions = _FakeCompletions()
+
+    fake_client = type("_Client", (), {"chat": _FakeChat()})()
+    llm = _ProjectRagasLLM(
+        instructor_base_cls=_FakeInstructorBase,
+        client=fake_client,
+        model="deepseek-v4-flash",
+        max_tokens=1536,
+    )
+
+    with pytest.raises(ValueError, match="truncated"):
+        llm._complete([{"role": "user", "content": "q"}])
 
 
 def test_ragas_evaluator_normalizes_evaluation_result_repr_dict() -> None:

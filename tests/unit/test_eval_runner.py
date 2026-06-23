@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 from typing import Any
 
@@ -72,6 +73,37 @@ def _make_result(chunk_id: str, source_path: str, text: str, score: float = 1.0)
     )
 
 
+def _write_temp_golden_set(tmp_path: Path) -> Path:
+    """为单测生成隔离黄金集，避免依赖共享 fixture 被其他任务改动后漂移。
+
+    为什么这样做：
+    - H3 单测的目标是验证 `EvalRunner` 的指标计算与样本适配逻辑；
+    - 如果直接依赖仓库里的共享 `golden_test_set.json`，一旦 H5 或人工调优改了 fixture，
+      这里就会出现“实现没坏、测试先坏”的脆弱耦合。
+    """
+    payload = {
+        "test_cases": [
+            {
+                "query": "如何配置 Azure OpenAI？",
+                "expected_chunk_ids": ["chunk_config_001"],
+                "expected_sources": ["config_guide.pdf"],
+                "filters": {"collection": "default"},
+                "ground_truth": "配置 Azure OpenAI 时，需要提供 endpoint、deployment name 和 api key。",
+            },
+            {
+                "query": "RRF 融合是做什么的？",
+                "expected_chunk_ids": ["chunk_retrieval_001"],
+                "expected_sources": ["retrieval_design.pdf"],
+                "filters": {"collection": "default"},
+                "ground_truth": "RRF 会把 dense 和 sparse 两路召回结果按排名倒数融合，得到统一排序。",
+            },
+        ]
+    }
+    golden_path = tmp_path / "golden_test_set.json"
+    golden_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return golden_path
+
+
 @pytest.fixture()
 def settings():
     """加载项目真实 Settings，保证 H3 配置映射可被测试覆盖。"""
@@ -107,7 +139,33 @@ def test_golden_test_case_normalizes_json_payload() -> None:
     assert case.ground_truth == "gt"
 
 
-def test_eval_runner_calculates_hit_rate_and_mrr_and_builds_evaluator_samples(settings) -> None:
+def test_golden_test_case_accepts_reference_answer_alias() -> None:
+    """
+    Given:
+        一条黄金测试集条目没有填写 `ground_truth`，
+        但填写了用户更常写的 `reference_answer` 字段。
+    When:
+        调用 `GoldenTestCase.from_dict()`。
+    Then:
+        评估集解析层应把 `reference_answer` 兼容映射到 `ground_truth`，
+        避免答案已经写进 JSON，但 Ragas 实际拿到的却是空标准答案。
+    """
+    case = GoldenTestCase.from_dict(
+        {
+            "query": "What is Modular RAG?",
+            "expected_chunk_ids": [],
+            "expected_sources": ["modular_rag_overview.pdf"],
+            "reference_answer": "Modular RAG is a pluggable retrieval-augmented generation system.",
+        }
+    )
+
+    assert case.ground_truth == "Modular RAG is a pluggable retrieval-augmented generation system."
+
+
+def test_eval_runner_calculates_hit_rate_and_mrr_and_builds_evaluator_samples(
+    settings,
+    tmp_path: Path,
+) -> None:
     """
     Given:
         两条黄金测试用例：
@@ -137,7 +195,8 @@ def test_eval_runner_calculates_hit_rate_and_mrr_and_builds_evaluator_samples(se
     evaluator = _CapturingEvaluator({"faithfulness": 0.88, "answer_relevancy": 0.77})
     runner = EvalRunner(settings=settings, hybrid_search=hybrid_search, evaluator=evaluator)
 
-    report = runner.run(str(PROJECT_ROOT / "tests" / "fixtures" / "golden_test_set.json"))
+    golden_path = _write_temp_golden_set(tmp_path)
+    report = runner.run(str(golden_path))
 
     assert report.total == 2
     assert report.hit_rate == pytest.approx(1.0)
@@ -156,7 +215,10 @@ def test_eval_runner_calculates_hit_rate_and_mrr_and_builds_evaluator_samples(se
     assert first_sample["ground_truth"]
 
 
-def test_eval_runner_keeps_running_when_single_query_retrieval_fails(settings) -> None:
+def test_eval_runner_keeps_running_when_single_query_retrieval_fails(
+    settings,
+    tmp_path: Path,
+) -> None:
     """
     Given:
         黄金测试集中的一条 query 检索正常，另一条 query 在 HybridSearch 阶段抛出 RuntimeError。
@@ -179,7 +241,8 @@ def test_eval_runner_keeps_running_when_single_query_retrieval_fails(settings) -
     evaluator = _CapturingEvaluator({"hit_rate": 0.5})
     runner = EvalRunner(settings=settings, hybrid_search=hybrid_search, evaluator=evaluator)
 
-    report = runner.run(str(PROJECT_ROOT / "tests" / "fixtures" / "golden_test_set.json"))
+    golden_path = _write_temp_golden_set(tmp_path)
+    report = runner.run(str(golden_path))
 
     assert report.total == 2
     assert report.hit_rate == pytest.approx(0.5)

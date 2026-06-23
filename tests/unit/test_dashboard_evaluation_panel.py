@@ -228,7 +228,7 @@ def test_evaluation_panel_service_builds_snapshot_from_settings(settings: Settin
     )
     assert "<config>" in snapshot.backend_options
     assert "custom" in snapshot.backend_options
-    assert snapshot.ragas_llm_profile == "deepseek_chat"
+    assert snapshot.ragas_llm_profile == settings.evaluation.ragas.llm_profile
 
 
 def test_evaluation_panel_service_runs_eval_with_selected_backend(settings: Settings) -> None:

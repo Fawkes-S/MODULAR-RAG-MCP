@@ -81,8 +81,8 @@ def test_load_settings_success() -> None:
     assert settings.retrieval.top_k > 0
 
     # 确保 llm 扩展字段可读取。
-    assert settings.llm.profile == "minimax"
-    assert settings.llm.provider == "openai"
+    assert settings.llm.profile == "deepseek"
+    assert settings.llm.provider == "deepseek"
     assert settings.llm.model
     assert settings.llm.base_url.startswith("https://")
     assert settings.llm.max_retries >= 0

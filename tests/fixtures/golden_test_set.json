@@ -1,30 +1,18 @@
 {
+  "description": "Golden test set for Modular RAG MCP Server evaluation. Contains test queries with expected chunk IDs for IR metrics and optional reference answers for LLM-as-Judge metrics.",
+  "version": "1.0",
   "test_cases": [
     {
-      "query": "如何配置 Azure OpenAI？",
-      "expected_chunk_ids": [
-        "chunk_config_001"
-      ],
-      "expected_sources": [
-        "config_guide.pdf"
-      ],
-      "filters": {
-        "collection": "default"
-      },
-      "ground_truth": "配置 Azure OpenAI 时，需要提供 endpoint、deployment name 和 api key。"
+      "query": "What is Modular RAG?",
+      "expected_chunk_ids": ["chunk_bd156168c73077972023797a"],
+      "expected_sources": ["complex_technical_doc.pdf"],
+      "reference_answer": "Modular RAG is a Retrieval-Augmented Generation system built with modular, pluggable components that can be configured and swapped independently."
     },
     {
-      "query": "RRF 融合是做什么的？",
-      "expected_chunk_ids": [
-        "chunk_retrieval_001"
-      ],
-      "expected_sources": [
-        "retrieval_design.pdf"
-      ],
-      "filters": {
-        "collection": "default"
-      },
-      "ground_truth": "RRF 会把 dense 和 sparse 两路召回结果按排名倒数融合，得到统一排序。"
+      "query": "How to configure Azure OpenAI?",
+      "expected_chunk_ids": [],
+      "expected_sources": [],
+      "reference_answer": "Configure Azure OpenAI by setting the provider to 'azure' in settings.yaml, along with the deployment_name, azure_endpoint, api_version, and api_key fields."
     }
   ]
 }

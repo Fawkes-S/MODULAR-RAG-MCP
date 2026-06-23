@@ -80,9 +80,20 @@ class GoldenTestCase:
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "GoldenTestCase":
-        """从 JSON 条目构建单条黄金测试用例。"""
+        """从 JSON 条目构建单条黄金测试用例。
+
+        兼容策略：
+        - 早期 H3 设计里使用 `ground_truth` 作为标准答案字段；
+        - 但很多人更自然会写成 `reference_answer`；
+        - 这里显式兼容两者，避免“测试集已经写了答案，但评估实际上没用上”的隐性问题。
+        """
         if not isinstance(payload, dict):
             raise ValueError("golden test case must be dict")
+
+        ground_truth = payload.get("ground_truth", "")
+        if not str(ground_truth).strip():
+            # `reference_answer` 是对外更直观的命名，优先作为 `ground_truth` 的兼容别名。
+            ground_truth = payload.get("reference_answer", "")
 
         return cls(
             query=str(payload.get("query", "")),
@@ -90,7 +101,7 @@ class GoldenTestCase:
             expected_sources=_normalize_string_list(payload.get("expected_sources")),
             filters=_normalize_filters(payload.get("filters")),
             generated_answer=str(payload.get("generated_answer", "")),
-            ground_truth=str(payload.get("ground_truth", "")),
+            ground_truth=str(ground_truth),
         )
 
 

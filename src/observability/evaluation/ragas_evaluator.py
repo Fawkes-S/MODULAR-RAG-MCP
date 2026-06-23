@@ -17,10 +17,11 @@ from libs.evaluator.base_evaluator import BaseEvaluator
 
 RagasLoader = Callable[[], tuple[Any, Any, Any, Any, Any, Any]]
 
-_MAX_CONTEXT_CHARS = 2000
-_MAX_ANSWER_CHARS = 2000
-_MAX_GROUND_TRUTH_CHARS = 1200
-_MAX_CONTEXTS_FOR_RAGAS = 3
+_MAX_CONTEXT_CHARS = 800
+_MAX_ANSWER_CHARS = 900
+_MAX_GROUND_TRUTH_CHARS = 600
+_MAX_CONTEXTS_FOR_RAGAS = 2
+_RAGAS_MAX_TOKENS = 1536
 
 
 class RagasEvaluator(BaseEvaluator):
@@ -257,21 +258,21 @@ class RagasEvaluator(BaseEvaluator):
             client_kwargs["http_client"] = httpx.Client(proxy=llm_settings.proxy.strip())
 
         client = OpenAI(**client_kwargs)
-        if "minimax" not in llm_settings.profile.lower() and "minimax" not in llm_settings.model.lower():
+        if not self._should_use_project_llm_wrapper(llm_settings):
             # 非 reasoning/非 <think> 模型优先走 Ragas 官方 instructor 适配器；
             # 这是最接近上游的真实 Ragas 调用路径，兼容性通常最好。
             return llm_factory(
                 model=llm_settings.model,
                 provider="openai",
                 client=client,
-                max_tokens=4096,
+                max_tokens=_RAGAS_MAX_TOKENS,
             )
 
         return _ProjectRagasLLM(
             instructor_base_cls=instructor_base_cls,
             client=client,
             model=llm_settings.model,
-            max_tokens=4096,
+            max_tokens=_RAGAS_MAX_TOKENS,
         )
 
     @staticmethod
@@ -309,6 +310,22 @@ class RagasEvaluator(BaseEvaluator):
             deployment_name=str(selected.get("deployment_name", settings.llm.deployment_name)),
             api_version=str(selected.get("api_version", settings.llm.api_version)),
         )
+
+    @staticmethod
+    def _should_use_project_llm_wrapper(llm_settings: Any) -> bool:
+        """判断是否应强制走项目自带的轻量 JSON 包装器。
+
+        DeepSeek / MiniMax / Qwen 这类后端虽然兼容 OpenAI 协议，
+        但在结构化输出、额外解释文本和超时行为上往往更“个性化”。
+        对这些模型直接走项目包装器，可以把调用路径收缩成：
+        单次 chat completion -> 本地 JSON 提取 -> Pydantic 校验，
+        避免 Ragas 官方 instructor 的重试链路把超时问题继续放大。
+        """
+        provider = str(getattr(llm_settings, "provider", "")).strip().lower()
+        profile = str(getattr(llm_settings, "profile", "")).strip().lower()
+        model = str(getattr(llm_settings, "model", "")).strip().lower()
+        signature = " ".join(part for part in (provider, profile, model) if part)
+        return any(keyword in signature for keyword in ("deepseek", "minimax", "qwen"))
 
     def _build_ragas_embeddings(self, embedding_factory: Any) -> Any:
         """根据项目 `embedding` 配置创建真实 Ragas Embedding。
@@ -511,6 +528,15 @@ class _ProjectRagasLLM:
         content = str(completion.choices[0].message.content or "").strip()
         if not content:
             finish_reason = getattr(completion.choices[0], "finish_reason", "<unknown>")
+            if finish_reason == "length":
+                # 这里不能把它当成“模型完全没返回内容”的普通空响应。
+                # `finish_reason=length` 说明本次结构化输出被截断了，
+                # 调用方会把这个异常带入第二轮“只返回合法 JSON”修复提示，
+                # 比直接吞掉更容易让模型在下一轮收缩输出。
+                raise ValueError(
+                    "Ragas LLM response was truncated before emitting a complete JSON object "
+                    "(finish_reason=length)"
+                )
             raise ValueError(f"Ragas LLM returned empty content (finish_reason={finish_reason})")
         return content
 

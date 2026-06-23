@@ -6,7 +6,7 @@
 llm:
   # 只需修改这里的 profile 名称即可切换文本 LLM。
   # 可选：minimax / qwen / deepseek / openai
-  profile: minimax
+  profile: deepseek
   timeout: 45
   max_retries: 2
   retry_backoff_seconds: 0.25
@@ -26,6 +26,12 @@ llm:
     deepseek:
       provider: deepseek
       model: deepseek-v4-pro
+      base_url: ${DEEPSEEK_LLM_BASE_URL:-https://api.deepseek.com/v1}
+      api_key: ${DEEPSEEK_LLM_API_KEY:-}
+      proxy: ${DEEPSEEK_LLM_PROXY:-}
+    deepseek_flash:
+      provider: deepseek
+      model: deepseek-v4-flash
       base_url: ${DEEPSEEK_LLM_BASE_URL:-https://api.deepseek.com/v1}
       api_key: ${DEEPSEEK_LLM_API_KEY:-}
       proxy: ${DEEPSEEK_LLM_PROXY:-}
