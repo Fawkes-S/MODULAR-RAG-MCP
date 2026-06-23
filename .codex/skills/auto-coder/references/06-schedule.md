@@ -149,7 +149,7 @@
 | I2 | E2E閿涙ashboard 閸愭帞鍎ù瀣槸 | [x] | 2026-06-23 | tests/e2e/test_dashboard_smoke.py + Streamlit AppTest six-page smoke passed |
 | I3 | 鐎瑰苯鏉?README閿涘牐绻嶇悰宀冾嚛閺?+ MCP + Dashboard閿?| [x] | 2026-06-23 | README rewritten as runnable guide for quick start, settings, MCP, Dashboard, evaluation, tests, troubleshooting |
 | I4 | 娓呯悊鎺ュ彛涓€鑷存€э紙濂戠害娴嬭瘯琛ラ綈锛?| [x] | 2026-06-23 | contract tests covered delete/filter/provider edges and evaluator input validation |
-| I5 | 閸忋劑鎽肩捄?E2E 妤犲本鏁?| [ ] | | |
+| I5 | 閸忋劑鎽肩捄?E2E 妤犲本鏁?| [x] | 2026-06-23 | full pytest green + ingest/query/evaluate manual chain verified |
 
 ---
 

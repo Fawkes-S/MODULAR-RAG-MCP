@@ -85,6 +85,57 @@ def test_llm_reranker_invalid_schema_raises_readable_error() -> None:
         reranker.rerank(query="q", candidates=[{"id": "c1", "text": "t"}])
 
 
+def test_llm_reranker_accepts_json_wrapped_by_think_block() -> None:
+    """
+    Given:
+        FakeLLM 先输出 `<think>...</think>`，随后再输出合法 JSON。
+
+    When:
+        调用 `LLMReranker.rerank()`。
+
+    Then:
+        解析器应能跳过 think 包裹内容，继续提取后续 JSON 并完成重排。
+    """
+    fake_llm = _FakeLLM(response='<think>先分析一下</think>\n{"ranked_ids": ["c2", "c1"]}')
+    reranker = LLMReranker(llm=fake_llm, prompt_template="x")
+
+    result = reranker.rerank(
+        query="q",
+        candidates=[
+            {"id": "c1", "text": "t1"},
+            {"id": "c2", "text": "t2"},
+        ],
+    )
+
+    assert [item["id"] for item in result] == ["c2", "c1"]
+
+
+def test_llm_reranker_accepts_embedded_json_inside_extra_text() -> None:
+    """
+    Given:
+        FakeLLM 返回“说明文字 + JSON 对象 + 尾部文字”的真实脏输出。
+
+    When:
+        调用 `LLMReranker.rerank()`。
+
+    Then:
+        解析器应能提取其中首个有效 JSON 对象并完成重排。
+    """
+    fake_llm = _FakeLLM(response='结果如下：{"ranked_ids": ["c3", "c1"]}\n已完成')
+    reranker = LLMReranker(llm=fake_llm, prompt_template="x")
+
+    result = reranker.rerank(
+        query="q",
+        candidates=[
+            {"id": "c1", "text": "t1"},
+            {"id": "c2", "text": "t2"},
+            {"id": "c3", "text": "t3"},
+        ],
+    )
+
+    assert [item["id"] for item in result] == ["c3", "c1", "c2"]
+
+
 def test_llm_reranker_failure_raises_fallback_signal() -> None:
     """
     Given:

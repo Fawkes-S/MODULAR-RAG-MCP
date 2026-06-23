@@ -46,6 +46,7 @@ class OpenAILLM(BaseLLM):
         model: str = "",
         api_key: str = "",
         base_url: str = "https://api.openai.com/v1",
+        proxy: str = "",
         timeout: float = 30.0,
         transport: TransportFn | None = None,
         retry_policy: RetryPolicy | None = None,
@@ -57,6 +58,7 @@ class OpenAILLM(BaseLLM):
         self.model = model
         self.api_key = api_key
         self.base_url = base_url
+        self.proxy = proxy
         self.timeout = float(timeout)
         self._transport = transport or self._default_transport
 
@@ -92,6 +94,9 @@ class OpenAILLM(BaseLLM):
         if self.api_key:
             # 只在 header 写入 Bearer token；避免把 key 拼进 URL 或错误信息。
             headers["Authorization"] = f"Bearer {self.api_key}"
+        if self.proxy:
+            # 仅在 transport 内部消费，不会实际发到远端。
+            headers["__proxy__"] = self.proxy
 
         url = f"{self.base_url.rstrip('/')}/chat/completions"
 
@@ -150,8 +155,25 @@ class OpenAILLM(BaseLLM):
         timeout: float,
     ) -> dict[str, Any]:
         """默认 HTTP 传输实现（生产环境可用，测试可替换）。"""
+        proxy = headers.pop("__proxy__", "")
         body = json.dumps(payload).encode("utf-8")
         req = request.Request(url=url, data=body, headers=headers, method="POST")
-        with request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+        opener = OpenAILLM._build_url_opener(proxy)
+        with opener.open(req, timeout=timeout) as resp:  # noqa: S310
             raw = resp.read().decode("utf-8")
         return json.loads(raw)
+
+    @staticmethod
+    def _build_url_opener(proxy: str):
+        """按需构造 urllib opener，支持为 OpenAI-compatible 请求显式指定代理。"""
+        proxy_value = str(proxy or "").strip()
+        if not proxy_value:
+            return request.build_opener()
+
+        handler = request.ProxyHandler(
+            {
+                "http": proxy_value,
+                "https": proxy_value,
+            }
+        )
+        return request.build_opener(handler)

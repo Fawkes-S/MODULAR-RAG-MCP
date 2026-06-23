@@ -17,6 +17,7 @@ from core.settings import load_settings
 from libs.llm.base_vision_llm import BaseVisionLLM, ChatResponse
 from libs.llm.dashscope_vision_llm import DashScopeVisionLLM
 from libs.llm.llm_factory import LLMFactory
+from libs.llm.openai_vision_llm import OpenAIVisionLLM
 
 
 class _FakeVisionLLM(BaseVisionLLM):
@@ -158,14 +159,67 @@ def test_factory_can_create_vision_llm_from_loaded_settings_object() -> None:
         调用 `LLMFactory.create_vision_llm(settings)`。
 
     Then:
-        工厂能从 Settings.vision_llm 读取 provider/model/base_url/api_key 并创建 DashScopeVisionLLM。
+        工厂能从 Settings.vision_llm 读取 provider/model/base_url/api_key，
+        并创建与当前 profile 对应的 Vision 客户端实现。
     """
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
 
     client = LLMFactory.create_vision_llm(settings)
 
-    assert isinstance(client, DashScopeVisionLLM)
-    assert client.provider_name == "dashscope"
+    if settings.vision_llm.provider == "dashscope":
+        assert isinstance(client, DashScopeVisionLLM)
+    elif settings.vision_llm.provider == "openai":
+        assert isinstance(client, OpenAIVisionLLM)
+    else:
+        pytest.fail(f"unexpected vision provider in config/settings.yaml: {settings.vision_llm.provider}")
+
+    assert client.provider_name == settings.vision_llm.provider
     assert client.model == settings.vision_llm.model
     assert client.base_url == settings.vision_llm.base_url
     assert client.api_key == settings.vision_llm.api_key
+
+
+def test_factory_can_create_openai_compatible_vision_llm() -> None:
+    """
+    Given:
+        `vision_llm.provider=openai` 的配置，base_url 指向 OpenAI-compatible 多模态端点。
+
+    When:
+        调用 `LLMFactory.create_vision_llm(settings)`。
+
+    Then:
+        返回 `OpenAIVisionLLM`，证明 Gemini 这类 OpenAI-compatible Vision 端点可复用同一实现。
+    """
+    settings = {
+        "vision_llm": {
+            "provider": "openai",
+            "model": "gemini-2.5-flash",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+            "api_key": "gemini-key",
+        }
+    }
+
+    client = LLMFactory.create_vision_llm(settings)
+
+    assert isinstance(client, OpenAIVisionLLM)
+    assert client.provider_name == "openai"
+    assert client.model == "gemini-2.5-flash"
+    assert client.base_url == "https://generativelanguage.googleapis.com/v1beta/openai"
+
+
+def test_factory_passes_proxy_to_openai_compatible_vision_llm() -> None:
+    """当 `vision_llm.proxy` 存在时，工厂应把代理地址透传到 Vision 客户端实例。"""
+    settings = {
+        "vision_llm": {
+            "provider": "openai",
+            "model": "gemini-2.5-flash",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+            "api_key": "gemini-key",
+            "proxy": "http://127.0.0.1:10809",
+        }
+    }
+
+    client = LLMFactory.create_vision_llm(settings)
+
+    assert isinstance(client, OpenAIVisionLLM)
+    assert client.proxy == "http://127.0.0.1:10809"

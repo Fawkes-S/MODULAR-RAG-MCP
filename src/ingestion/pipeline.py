@@ -826,15 +826,10 @@ class IngestionPipeline:
             }
 
         if stage_name == "store.images":
-            return {
-                "stage_name": "upsert",
-                "method": "image_storage_save",
-                "provider": type(self.image_storage).__name__,
-                "details": {
-                    "image_count": summary.get("image_count", 0),
-                    **summary,
-                },
-            }
+            # F4 统一阶段里的 `upsert` 只保留“主写入动作”这个语义。
+            # 图片落盘仍会记录在 pipeline 细粒度 trace 中，但不再映射成同名 F4 阶段，
+            # 否则按 stage_name 抓第一个 `upsert` 时会把图片存储误判为主 upsert。
+            return None
 
         if stage_name == "store.vector_upsert":
             return {
@@ -849,16 +844,9 @@ class IngestionPipeline:
             }
 
         if stage_name == "store.bm25":
-            return {
-                "stage_name": "upsert",
-                "method": "bm25_build",
-                "provider": type(self.bm25_indexer).__name__,
-                "details": {
-                    "bm25_terms": summary.get("terms", 0),
-                    "bm25_doc_count": summary.get("doc_count", 0),
-                    **summary,
-                },
-            }
+            # BM25 建索引属于 upsert 收尾阶段里的子动作，不单独占用 F4 主阶段名。
+            # 这样统一视图只会出现一个 `upsert`，契约和页面都更稳定。
+            return None
 
         return None
 

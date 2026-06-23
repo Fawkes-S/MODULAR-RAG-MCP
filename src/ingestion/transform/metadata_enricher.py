@@ -40,6 +40,7 @@ class MetadataEnricher(BaseTransform):
 
     _JSON_BLOCK_PATTERN = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
     _JSON_OBJECT_PATTERN = re.compile(r"\{[\s\S]*\}")
+    _THINK_TAG_PATTERN = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
     _EN_WORD_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9_-]{2,}")
     _ZH_WORD_PATTERN = re.compile(r"[\u4e00-\u9fff]{2,8}")
     _STOPWORDS = {
@@ -422,12 +423,16 @@ class MetadataEnricher(BaseTransform):
         if not isinstance(response, str) or not response.strip():
             return None
 
-        candidates: list[str] = [response.strip()]
-        block_match = self._JSON_BLOCK_PATTERN.search(response)
+        sanitized = self._sanitize_llm_output(response)
+        if not sanitized:
+            return None
+
+        candidates: list[str] = [sanitized]
+        block_match = self._JSON_BLOCK_PATTERN.search(sanitized)
         if block_match:
             candidates.insert(0, block_match.group(1).strip())
 
-        object_match = self._JSON_OBJECT_PATTERN.search(response)
+        object_match = self._JSON_OBJECT_PATTERN.search(sanitized)
         if object_match:
             candidates.append(object_match.group(0).strip())
 
@@ -440,6 +445,15 @@ class MetadataEnricher(BaseTransform):
                 return dict(payload)
 
         return None
+
+    def _sanitize_llm_output(self, response: str) -> str:
+        """清洗 LLM 输出中的推理痕迹与无关包装层。"""
+        text = str(response or "").strip()
+        if not text:
+            return ""
+
+        text = self._THINK_TAG_PATTERN.sub("", text).strip()
+        return text
 
     @staticmethod
     def _truncate(text: str, max_length: int) -> str:

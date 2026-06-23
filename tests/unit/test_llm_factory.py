@@ -101,14 +101,34 @@ def test_factory_can_create_openai_llm_from_loaded_settings_object() -> None:
         调用 `LLMFactory.create(settings)`。
 
     Then:
-        工厂能从 Settings.llm 读取 provider/model/base_url/api_key 并创建 OpenAI-compatible 客户端。
+        工厂能从 Settings.llm 读取 provider/model/base_url/api_key，
+        并按当前配置创建对应的 OpenAI-compatible 客户端。
     """
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
 
     client = LLMFactory.create(settings)
 
     assert isinstance(client, OpenAILLM)
-    assert client.provider_name == "openai"
+    # 这里验证“工厂遵守配置文件”，而不是把 provider 写死成某个值。
+    assert client.provider_name == settings.llm.provider
     assert client.model == settings.llm.model
     assert client.base_url == settings.llm.base_url
     assert client.api_key == settings.llm.api_key
+
+
+def test_factory_passes_proxy_to_openai_compatible_llm(isolated_registry: dict[str, object]) -> None:
+    """当 `llm.proxy` 存在时，工厂应把代理地址透传到客户端实例。"""
+    settings = {
+        "llm": {
+            "provider": "openai",
+            "model": "gpt-4o-mini",
+            "base_url": "https://api.openai.com/v1",
+            "api_key": "k",
+            "proxy": "http://127.0.0.1:10809",
+        }
+    }
+
+    client = LLMFactory.create(settings)
+
+    assert isinstance(client, OpenAILLM)
+    assert client.proxy == "http://127.0.0.1:10809"

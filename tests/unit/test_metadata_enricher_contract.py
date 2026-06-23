@@ -145,6 +145,33 @@ def test_llm_mode_uses_llm_output_when_json_is_valid() -> None:
     assert fake_llm.calls
 
 
+def test_llm_mode_parses_json_when_think_tags_wrap_response() -> None:
+    """
+    Given:
+        `use_llm=true` 且 LLM 在最终 JSON 前输出 `<think>...</think>` 推理内容。
+
+    When:
+        执行 metadata 增强。
+
+    Then:
+        组件应先清洗推理痕迹，再正确解析 JSON，而不是误判为 parse error。
+    """
+    fake_llm = _FakeLLM(
+        response=(
+            "<think>internal reasoning</think>\n"
+            '{"title":"架构概览","summary":"说明模块边界。","tags":["架构","模块"]}'
+        )
+    )
+    enricher = MetadataEnricher(settings=_make_settings(use_llm=True), llm=fake_llm)
+
+    out = enricher.transform([_make_chunk("c3", "raw text")])[0]
+
+    assert out.metadata["enriched_by"] == "llm"
+    assert out.metadata["title"] == "架构概览"
+    assert out.metadata["summary"] == "说明模块边界。"
+    assert out.metadata["tags"] == ["架构", "模块"]
+
+
 def test_llm_mode_falls_back_when_response_is_not_json() -> None:
     """
     Given:

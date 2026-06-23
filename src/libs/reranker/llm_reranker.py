@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from core.prompt_loader import load_prompt_template
@@ -37,10 +38,17 @@ class LLMReranker(BaseReranker):
     provider_name = "llm"
 
     DEFAULT_PROMPT_TEMPLATE = (
-        "你是候选重排助手。请根据 Query 对 Candidates 进行相关性排序。\n"
-        "只返回 JSON 对象：{{\"ranked_ids\": [\"id1\", \"id2\"]}}\n"
+        "你是检索候选精排助手。请根据 Query 对 Candidates 做相关性重排。\n"
+        "目标：把最能直接回答 Query 的候选排在最前面。\n"
+        "硬性要求：\n"
+        "1. 只能返回一个 JSON 对象，禁止输出解释、思考过程、Markdown、代码块。\n"
+        "2. JSON 结构必须是：{{\"ranked_ids\": [\"id1\", \"id2\", \"id3\"]}}\n"
+        "3. `ranked_ids` 中必须只使用 Candidates 里已经出现过的 id。\n"
+        "4. 如果无法完全判断，也必须给出你认为最合理的排序结果。\n\n"
         "Query:\n{query}\n\nCandidates(JSON):\n{candidates}"
     )
+
+    _THINK_TAG_PATTERN = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
 
     def __init__(
         self,
@@ -173,7 +181,17 @@ class LLMReranker(BaseReranker):
         if not isinstance(raw, str) or not raw.strip():
             raise ValueError("[llm_reranker] ResponseSchemaError: empty response")
 
-        text = raw.strip()
+        text = self._normalize_raw_response(raw)
+        payload = self._try_parse_embedded_json_object(text)
+
+        if not isinstance(payload, dict):
+            raise ValueError("[llm_reranker] ResponseSchemaError: response JSON must be object")
+        return payload
+
+    def _normalize_raw_response(self, raw: str) -> str:
+        """清洗常见模型包裹内容，尽量把正文 JSON 暴露出来。"""
+        text = self._THINK_TAG_PATTERN.sub("", raw).strip()
+
         if text.startswith("```"):
             lines = text.splitlines()
             if len(lines) >= 3 and lines[-1].strip() == "```":
@@ -181,14 +199,29 @@ class LLMReranker(BaseReranker):
             if text.lower().startswith("json"):
                 text = text[4:].strip()
 
+        return text.strip()
+
+    def _try_parse_embedded_json_object(self, text: str) -> dict[str, Any]:
+        """尝试从原始文本或其包裹内容中提取首个 JSON 对象。"""
         try:
             payload = json.loads(text)
-        except json.JSONDecodeError as exc:
-            raise ValueError("[llm_reranker] ResponseSchemaError: response is not valid JSON") from exc
+            if isinstance(payload, dict):
+                return payload
+        except json.JSONDecodeError:
+            pass
 
-        if not isinstance(payload, dict):
-            raise ValueError("[llm_reranker] ResponseSchemaError: response JSON must be object")
-        return payload
+        decoder = json.JSONDecoder()
+        for idx, char in enumerate(text):
+            if char != "{":
+                continue
+            try:
+                payload, _ = decoder.raw_decode(text[idx:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, dict):
+                return payload
+
+        raise ValueError("[llm_reranker] ResponseSchemaError: response is not valid JSON")
 
     @staticmethod
     def _reorder_candidates(

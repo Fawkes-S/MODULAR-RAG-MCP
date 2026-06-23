@@ -91,12 +91,14 @@ class LLMFactory:
     @classmethod
     def _ensure_builtin_vision_providers(cls) -> None:
         """延迟注册内置 Vision LLM provider。"""
-        if cls._vision_builtin_loaded and "dashscope" in cls._vision_registry:
+        if cls._vision_builtin_loaded and {"openai", "dashscope"}.issubset(cls._vision_registry):
             return
 
         from libs.llm.azure_vision_llm import AzureVisionLLM
         from libs.llm.dashscope_vision_llm import DashScopeVisionLLM
+        from libs.llm.openai_vision_llm import OpenAIVisionLLM
 
+        cls._vision_registry.setdefault("openai", lambda **kwargs: OpenAIVisionLLM(**kwargs))
         cls._vision_registry.setdefault("azure", lambda **kwargs: AzureVisionLLM(**kwargs))
         cls._vision_registry.setdefault("dashscope", lambda **kwargs: DashScopeVisionLLM(**kwargs))
         cls._vision_builtin_loaded = True
@@ -156,6 +158,7 @@ class LLMFactory:
             "model",
             "api_key",
             "base_url",
+            "proxy",
             "endpoint",
             "deployment_name",
             "api_version",
@@ -191,6 +194,7 @@ class LLMFactory:
             "model",
             "api_key",
             "base_url",
+            "proxy",
             "endpoint",
             "azure_endpoint",
             "deployment_name",
@@ -218,8 +222,8 @@ class LLMFactory:
         }
 
         allowed_by_provider: dict[str, set[str]] = {
-            "openai": {"model", "api_key", "base_url", "timeout", "transport", *retry_keys},
-            "deepseek": {"model", "api_key", "base_url", "timeout", "transport", *retry_keys},
+            "openai": {"model", "api_key", "base_url", "proxy", "timeout", "transport", *retry_keys},
+            "deepseek": {"model", "api_key", "base_url", "proxy", "timeout", "transport", *retry_keys},
             "azure": {
                 "model",
                 "api_key",
@@ -249,6 +253,16 @@ class LLMFactory:
         }
 
         allowed_by_provider: dict[str, set[str]] = {
+            "openai": {
+                "model",
+                "api_key",
+                "base_url",
+                "proxy",
+                "max_image_size",
+                "timeout",
+                "transport",
+                *retry_keys,
+            },
             "dashscope": {
                 "model",
                 "api_key",

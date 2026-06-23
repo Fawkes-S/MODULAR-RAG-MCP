@@ -2059,7 +2059,7 @@ dashboard:
 | I2 | E2E：Dashboard 冒烟测试 | [x] | 2026-06-23 | tests/e2e/test_dashboard_smoke.py + Streamlit AppTest 六页面真实数据冒烟通过 |
 | I3 | 完善 README（运行说明 + MCP + Dashboard） | [x] | 2026-06-23 | README 重写为 quick start / settings / MCP / Dashboard / evaluate / tests / troubleshooting 实操文档 |
 | I4 | 清理接口一致性（契约测试补齐） | [x] | 2026-06-23 | contract tests补齐delete/filter/provider边界，工厂与评估输入校验已收口 |
-| I5 | 全链路 E2E 验收 | [ ] | | |
+| I5 | 全链路 E2E 验收 | [x] | 2026-06-23 | full pytest green + ingest/query/evaluate manual chain verified |
 
 ---
 

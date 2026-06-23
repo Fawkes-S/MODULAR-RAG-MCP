@@ -255,6 +255,46 @@ def test_transform_uses_llm_when_enabled_and_available() -> None:
     assert llm.calls
 
 
+def test_transform_strips_think_tags_from_llm_output() -> None:
+    """
+    Given:
+        开启 LLM，且模型返回 `<think>...</think>` 加最终正文的混合输出。
+
+    When:
+        执行 `transform()`。
+
+    Then:
+        最终写回的 chunk.text 只应保留清洗后的正文，不应包含任何推理痕迹。
+    """
+    llm = _FakeLLM(response="<think>internal reasoning</think>\n最终正文")
+    refiner = ChunkRefiner(settings=_make_settings(use_llm=True), llm=llm)
+
+    out = refiner.transform([_make_chunk("c1", "raw text")])
+
+    assert out[0].text == "最终正文"
+    assert "<think>" not in out[0].text
+
+
+def test_transform_unwraps_fenced_markdown_from_llm_output() -> None:
+    """
+    Given:
+        开启 LLM，且模型把最终正文包在 ```markdown``` 代码块中返回。
+
+    When:
+        执行 `transform()`。
+
+    Then:
+        组件应移除代码块包装，仅保留正文内容写回 chunk.text。
+    """
+    llm = _FakeLLM(response="```markdown\n# Clean Title\n\nBody\n```")
+    refiner = ChunkRefiner(settings=_make_settings(use_llm=True), llm=llm)
+
+    out = refiner.transform([_make_chunk("c1", "raw text")])
+
+    assert out[0].text == "# Clean Title\n\nBody"
+    assert "```" not in out[0].text
+
+
 def test_transform_falls_back_when_llm_returns_empty() -> None:
     """
     Given:

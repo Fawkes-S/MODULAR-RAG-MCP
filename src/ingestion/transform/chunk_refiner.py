@@ -58,6 +58,8 @@ class ChunkRefiner(BaseTransform):
     )
 
     _CODE_BLOCK_PATTERN = re.compile(r"(```[\s\S]*?```)", re.MULTILINE)
+    _THINK_TAG_PATTERN = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
+    _FENCED_BLOCK_PATTERN = re.compile(r"```(?:text|markdown|md)?\s*([\s\S]*?)```", re.IGNORECASE)
     _HTML_COMMENT_PATTERN = re.compile(r"<!--([\s\S]*?)-->", re.MULTILINE)
     _HTML_TAG_PATTERN = re.compile(r"</?[A-Za-z][^>]*>")
 
@@ -285,8 +287,13 @@ class ChunkRefiner(BaseTransform):
             self._last_fallback_reason = "llm_empty_response"
             return None
 
+        cleaned = self._sanitize_llm_output(response)
+        if not cleaned:
+            self._last_fallback_reason = "llm_empty_response"
+            return None
+
         self._last_fallback_reason = None
-        return response.strip()
+        return cleaned
 
     @staticmethod
     def _summarize_exception(exc: Exception, max_len: int = 80) -> str:
@@ -328,6 +335,32 @@ class ChunkRefiner(BaseTransform):
         cleaned = "\n".join(cleaned_lines)
         cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
         return cleaned
+
+    def _sanitize_llm_output(self, response: str) -> str:
+        """清洗 LLM 原始输出，移除推理痕迹与包装层。
+
+        设计目标：
+        - 不把 `<think>...</think>` 这类推理内容写回最终 chunk 正文；
+        - 兼容模型把最终正文包在 ```markdown``` / ```text``` 代码块中的情况；
+        - 尽量只做“去包装”，不擅自改写正文内容。
+        """
+        text = str(response or "").strip()
+        if not text:
+            return ""
+
+        text = self._THINK_TAG_PATTERN.sub("", text).strip()
+
+        fence_match = self._FENCED_BLOCK_PATTERN.fullmatch(text)
+        if fence_match:
+            text = fence_match.group(1).strip()
+
+        lines = text.splitlines()
+        while lines and not lines[0].strip():
+            lines.pop(0)
+        while lines and not lines[-1].strip():
+            lines.pop()
+
+        return "\n".join(lines).strip()
 
     def _is_noise_line(self, line: str) -> bool:
         """判断单行是否属于可安全移除的格式噪声。"""

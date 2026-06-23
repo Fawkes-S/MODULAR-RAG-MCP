@@ -7,11 +7,6 @@ import sys
 from typing import Any, TextIO
 
 from mcp_server.protocol_handler import ProtocolHandler
-from mcp_server.tools import (
-    create_get_document_summary_tool,
-    create_list_collections_tool,
-    create_query_knowledge_hub_tool,
-)
 from observability.logger import get_logger
 
 LOGGER = get_logger("mcp_server.server")
@@ -28,6 +23,14 @@ def build_default_protocol_handler() -> ProtocolHandler:
     - 这样后续 E4/E5/E6 追加 tool 时，只需要扩展这里；
     - 测试也可以直接替换成自定义 handler，避免和默认依赖硬绑定。
     """
+    # 关键点：把 tool 构造相关 import 放到函数内部，避免 `python server.py`
+    # 在还没处理第一条 initialize 消息前，就被检索链路的重依赖拖慢冷启动。
+    from mcp_server.tools import (
+        create_get_document_summary_tool,
+        create_list_collections_tool,
+        create_query_knowledge_hub_tool,
+    )
+
     handler = ProtocolHandler()
     handler.register_tool(create_query_knowledge_hub_tool())
     handler.register_tool(create_list_collections_tool())
@@ -68,7 +71,12 @@ class MCPServer:
     def serve_forever(self) -> int:
         """启动主循环，直到 `stdin` 关闭。"""
         LOGGER.info("MCP stdio server started")
-        for raw_line in self.stdin:
+        while True:
+            # Windows 管道下显式 `readline()` + EOF 判断比直接迭代 stdin 更稳定，
+            # 能避免 initialize 已经处理完但子进程仍卡住不退出。
+            raw_line = self.stdin.readline()
+            if raw_line == "":
+                break
             line = raw_line.strip()
             if not line:
                 continue

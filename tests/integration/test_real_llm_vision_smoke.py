@@ -3,6 +3,8 @@
 执行门槛：
 - 仅当环境变量 `RUN_REAL_LLM_TESTS=1` 时运行；
 - 需要 `config/settings.yaml` 内配置真实可用的 API key/base_url/model。
+- 若使用 Gemini 这类外网 OpenAI-compatible 端点，可在 `.env` 中配置
+  `GEMINI_VISION_PROXY=http://127.0.0.1:10809` 之类的代理地址。
 
 用途：
 - 验证“配置 -> load_settings -> LLMFactory -> 实际远端调用”链路可打通。
@@ -55,6 +57,9 @@ def test_real_text_llm_chat_smoke() -> None:
     Then:
         返回非空字符串，说明真实调用链路可用。
     """
+    # 真实外部 LLM 冒烟测试不应默认混入日常 `pytest -q`，
+    # 否则本地网络、代理或配额波动都会把“代码回归”误报成失败。
+    # 只有显式声明要跑真实链路时，才进入后续真实调用。
     _require_real_tests_enabled()
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
 
@@ -85,6 +90,8 @@ def test_real_vision_llm_chat_with_image_smoke() -> None:
     Then:
         返回非空文本，说明 Vision 真实调用链路可用。
     """
+    # Vision 真实冒烟同样只在显式开启时运行。
+    # 一旦启用，本测试仍保持严格失败策略：真实请求出错会直接 fail，不会被 skip 吞掉。
     _require_real_tests_enabled()
     settings = load_settings(str(PROJECT_ROOT / "config" / "settings.yaml"))
 
@@ -102,7 +109,7 @@ def test_real_vision_llm_chat_with_image_smoke() -> None:
         text="请用一句话描述这张图片的主要内容。",
         image_path=str(image_path),
     )
-    pprint(" response: " + response.content.strip())
+    pprint("\n response: " + response.content.strip())
 
     assert isinstance(response.content, str)
     assert response.content.strip()
