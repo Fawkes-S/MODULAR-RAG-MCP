@@ -12,7 +12,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from observability.dashboard import app
-from observability.dashboard.pages import data_browser, ingestion_manager, ingestion_traces, query_traces
+from observability.dashboard.pages import data_browser, evaluation_panel, ingestion_manager, ingestion_traces, query_traces
 
 
 class _FakeNavigation:
@@ -26,7 +26,7 @@ class _FakeNavigation:
 
 
 class _FakeStreamlit:
-    """最小 fake streamlit，只覆盖 G1 入口用到的 API。"""
+    """最小 fake Streamlit，只覆盖 Dashboard 入口用到的 API。"""
 
     def __init__(self) -> None:
         self.page_config: dict[str, Any] = {}
@@ -47,16 +47,14 @@ class _FakeStreamlit:
 def test_dashboard_app_registers_overview_and_management_pages() -> None:
     """
     Given:
-        一个只实现 `Page/navigation/set_page_config` 的假 Streamlit 对象。
-
+        一个只实现 `Page/navigation/set_page_config` 的 fake Streamlit 对象。
     When:
         调用 `app.main(st_module=fake_streamlit)` 启动 Dashboard 入口。
-
     Then:
         - 页面配置应被设置；
         - `st.navigation()` 应注册 6 个页面；
-        - Overview、数据浏览器、Ingestion 管理、Ingestion 追踪与 Query 追踪页都应接入真实页面；
-        - 其余未完成页面仍可先保留占位实现；
+        - 数据浏览器、Ingestion 管理、Ingestion 追踪、Query 追踪和评估面板都应接入真实页面；
+        - 每个页面的 url_path 应唯一；
         - 最终会调用 `navigation.run()`。
     """
     fake_streamlit = _FakeStreamlit()
@@ -79,4 +77,5 @@ def test_dashboard_app_registers_overview_and_management_pages() -> None:
     assert fake_streamlit.page_groups["管理"][1]["render"] is ingestion_manager.render
     assert fake_streamlit.page_groups["追踪"][0]["render"] is ingestion_traces.render
     assert fake_streamlit.page_groups["追踪"][1]["render"] is query_traces.render
+    assert fake_streamlit.page_groups["评估"][0]["render"] is evaluation_panel.render
     assert fake_streamlit.navigation_ran is True

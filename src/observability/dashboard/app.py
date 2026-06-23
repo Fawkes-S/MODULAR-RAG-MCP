@@ -1,4 +1,8 @@
-"""Streamlit Dashboard 多页面入口（G1）。"""
+"""Streamlit Dashboard 多页面入口。
+
+该模块只负责注册页面和启动导航，不放具体业务逻辑。
+各页面自己的数据读取、异常降级和渲染细节放在 `pages/` 与 `services/` 下。
+"""
 
 from __future__ import annotations
 
@@ -11,48 +15,32 @@ SRC_PATH = Path(__file__).resolve().parents[2]
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from observability.dashboard.pages import data_browser, ingestion_manager, ingestion_traces, overview, query_traces
-
-
-def _slugify_path(value: str) -> str:
-    """把标题转换成稳定、唯一、可读的 URL path 片段。"""
-    normalized = []
-    for char in value.lower():
-        if char.isascii() and char.isalnum():
-            normalized.append(char)
-        elif char in {" ", "-", "_"}:
-            normalized.append("-")
-    slug = "".join(normalized).strip("-")
-    return slug or "page"
-
-
-def _make_placeholder_page(title: str, task_id: str, description: str):
-    """生成一个占位页面函数，供未完成页面先接入导航骨架。
-
-    关键点：
-    - `st.navigation()` 默认会从 callable 名称推导 URL pathname；
-    - 如果所有占位页都复用同一个内部函数名，就会触发“pathname 重复”异常；
-    - 因此这里显式为每个页面生成唯一函数名，确保导航系统能稳定区分页面。
-    """
-
-    def _render_placeholder() -> None:
-        import streamlit as st
-
-        st.title(title)
-        st.info(f"{task_id} 尚未实现，当前阶段先保留导航入口。")
-        st.caption(description)
-
-    _render_placeholder.__name__ = f"placeholder_{task_id.lower()}_{_slugify_path(title).replace('-', '_')}"
-    return _render_placeholder
+from observability.dashboard.pages import (  # noqa: E402
+    data_browser,
+    evaluation_panel,
+    ingestion_manager,
+    ingestion_traces,
+    overview,
+    query_traces,
+)
 
 
 def build_page_groups(st: Any) -> dict[str, list[Any]]:
-    """构建 `st.navigation()` 需要的页面分组。
+    """构建 `st.navigation()` 使用的页面分组。
 
     做什么：
-    - 注册 G1 已完成的 Overview 页面；
-    - 把 G2-G6 先接成占位页，满足六页面导航架构验收；
-    - 返回纯页面定义，便于单元测试直接断言导航结构。
+    - 注册 Dashboard 的六个主页面；
+    - 为每个页面设置稳定、唯一的 `url_path`；
+    - 返回纯页面定义，方便单元测试直接断言导航结构。
+
+    为什么：
+    - Streamlit 会根据页面 callable/title 推导 URL；显式指定 `url_path` 可以避免乱码标题、
+      重名函数或占位页造成路径冲突；
+    - 页面注册集中在入口文件，后续新增/替换页面时只需要改一处。
+
+    关键权衡：
+    - 入口层不捕获页面异常。页面内部应自行处理可降级错误；
+    - 配置读取、数据查询、评估运行等重逻辑不放这里，避免启动入口变成业务编排层。
     """
     return {
         "总览": [
@@ -84,7 +72,7 @@ def build_page_groups(st: Any) -> dict[str, list[Any]]:
         ],
         "评估": [
             st.Page(
-                _make_placeholder_page("评估面板", "H4", "后续阶段会接入自动化评估与趋势对比。"),
+                evaluation_panel.render,
                 title="评估面板",
                 url_path="evaluation-panel",
             ),
@@ -93,7 +81,7 @@ def build_page_groups(st: Any) -> dict[str, list[Any]]:
 
 
 def main(st_module: Any | None = None) -> None:
-    """启动 Streamlit 多页面应用。"""
+    """启动 Streamlit 多页面 Dashboard。"""
     st = st_module or importlib.import_module("streamlit")
     st.set_page_config(page_title="Modular RAG Dashboard", page_icon=":material/dashboard:", layout="wide")
 
